@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System; // DateTime.Now kullanımı için
 using System.Linq; // Select, ToList kullanımı için
@@ -8,8 +7,6 @@ using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
 
 
-[Authorize(Roles = "Admin")] // <<< Bu satır eklenecek
-public class CategoryController : Controller // veya NewsController : Controller
 
 namespace YildizHaberPortali.Controllers
 {

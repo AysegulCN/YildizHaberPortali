@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// Controllers/CategoryController.cs
+
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
-using Microsoft.AspNetCore.Authorization; // [Authorize] niteliği için bu using gereklidir
+using Microsoft.AspNetCore.Authorization; // <<< YETKİLENDİRME İÇİN KRİTİK USING
 
 namespace YildizHaberPortali.Controllers
 {
-    // [Authorize] niteliği, sınıf tanımının hemen üstünde yer almalıdır.
-    // Bu, sadece "Admin" rolüne sahip kullanıcıların bu Controller'a erişebileceği anlamına gelir.
+    // Yetkilendirme Nitelikleri buraya gelmeli
     [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
@@ -18,18 +19,12 @@ namespace YildizHaberPortali.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        // ---------------------------------------------------------------------
-        // R - Read (Oku) İşlemi: Index
-        // ---------------------------------------------------------------------
         public async Task<IActionResult> Index()
         {
             var categories = await _categoryRepository.GetAllAsync();
             return View(categories);
         }
 
-        // ---------------------------------------------------------------------
-        // C - Create (Oluştur) İşlemleri
-        // ---------------------------------------------------------------------
         public IActionResult Create()
         {
             return View();
@@ -39,13 +34,12 @@ namespace YildizHaberPortali.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Category category)
         {
-            // Model Validasyonu kontrol edilir (Örn: Name alanı boş mu?)
             if (!ModelState.IsValid)
             {
                 return View(category);
             }
 
-            // Slug oluşturma (Türkçe karakterleri temizleyerek)
+            // Slug oluşturma
             category.Slug = category.Name
                 .ToLower()
                 .Replace(" ", "-")
@@ -56,14 +50,10 @@ namespace YildizHaberPortali.Controllers
                 .Replace("ö", "o")
                 .Replace("ç", "c");
 
-            // Kayıt işlemi (ICategoryRepository'nin AddAsync metodu çağrılır)
             await _categoryRepository.AddAsync(category);
-
-            // Başarılı olursa Index sayfasına yönlendir
             return RedirectToAction(nameof(Index));
         }
 
-        // DİKKAT: Edit ve Delete metotları da bu sınıfın içine eklenmelidir (Daha önce size vermiştim).
-        // Şu an sadece Create metotlarını koruduk.
+        // Edit ve Delete metotları da burada olmalıdır.
     }
 }

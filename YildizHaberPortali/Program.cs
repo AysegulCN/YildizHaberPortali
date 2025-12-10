@@ -6,46 +6,30 @@ using YildizHaberPortali.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ----------------------------------------------------
-// 1. Connection String
-// ----------------------------------------------------
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// ----------------------------------------------------
-// 2. SERVÝSLERÝ EKLE (Dependency Injection)
-// ----------------------------------------------------
 
-// Db Context (Sadece bir kez tanýmlanmalý)
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Identity Servisini Kurma (Sadece bir kez tanýmlanmalý)
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-    // Login sayfamýz Account/Login'de olacak (Login View ve Controller'ý oluþturduðumuzu varsayýyoruz)
-    options.AccessDeniedPath = "/Account/AccessDenied"; // <<< Geri getirdik
-    options.LoginPath = "/Account/Login";
+   
 })
-    .AddRoles<IdentityRole>() // Rol Yönetimi için
+    .AddRoles<IdentityRole>() 
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
-// Repository Kayýtlarý
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 
-// Controller ve View'lar
 builder.Services.AddControllersWithViews();
-
-// ----------------------------------------------------
-// 3. MIDDLEWARE PIPELINE'I OLUÞTUR
-// ----------------------------------------------------
 
 var app = builder.Build();
 
-// Seed Data Ýþlemi (Admin ve Roller)
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
@@ -69,7 +53,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// SIRA KRÝTÝKTÝR: UseAuthentication önce, UseAuthorization sonra gelir.
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -81,9 +64,7 @@ app.MapControllerRoute(
 app.Run();
 
 
-// --------------------------------------------------------------------------------
-// YENÝ METOT: Seed Data (SeedData metodu uygulamanýn dýþýnda, dosyanýn alt kýsmýnda kalmalý)
-// --------------------------------------------------------------------------------
+
 
 async Task SeedData(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
 {
