@@ -1,99 +1,113 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using YildizHaberPortali.Contracts; 
+using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Data;
-using YildizHaberPortali.Repositories; 
-
+using YildizHaberPortali.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ----------------------------------------------------
+// 1. Connection String
+// ----------------------------------------------------
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddRoles<IdentityRole>() 
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// ----------------------------------------------------
+// 2. SERVÝSLERÝ EKLE (Dependency Injection)
+// ----------------------------------------------------
 
-
+// Db Context (Sadece bir kez tanýmlanmalý)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-
+// Identity Servisini Kurma (Sadece bir kez tanýmlanmalý)
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    // Login sayfamýz Account/Login'de olacak (Login View ve Controller'ý oluþturduðumuzu varsayýyoruz)
+    options.AccessDeniedPath = "/Account/AccessDenied"; // <<< Geri getirdik
     options.LoginPath = "/Account/Login";
 })
-    .AddRoles<IdentityRole>()
+    .AddRoles<IdentityRole>() // Rol Yönetimi için
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
-
-
+// Repository Kayýtlarý
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 
-
-
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
+// Controller ve View'lar
 builder.Services.AddControllersWithViews();
 
+// ----------------------------------------------------
+// 3. MIDDLEWARE PIPELINE'I OLUÞTUR
+// ----------------------------------------------------
 
 var app = builder.Build();
 
+// Seed Data Ýþlemi (Admin ve Roller)
 if (app.Environment.IsDevelopment())
 {
-    // Scopes (kapsamlar) oluþturulmalý, çünkü Identity servisleri scope'ludur.
     using (var scope = app.Services.CreateScope())
+    {
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+        SeedData(roleManager, userManager).Wait();
+    }
+}
+
+
+if (!app.Environment.IsDevelopment())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-
-    // Rolleri ve Admin kullanýcýyý oluþtur
-    SeedData(roleManager, userManager).Wait();
-}
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
-// Configure the HTTP request pipeline.
-// ... (app.UseExceptionHandler, app.UseHttpsRedirection, vs.) ...
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-app.Run(); // Uygulamanýn en son satýrý
+app.UseRouting();
+
+// SIRA KRÝTÝKTÝR: UseAuthentication önce, UseAuthorization sonra gelir.
+app.UseAuthentication();
+app.UseAuthorization();
+
+// En son Routing
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+
 
 // --------------------------------------------------------------------------------
-// YENÝ METOT: Seed Data
+// YENÝ METOT: Seed Data (SeedData metodu uygulamanýn dýþýnda, dosyanýn alt kýsmýnda kalmalý)
 // --------------------------------------------------------------------------------
 
 async Task SeedData(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
 {
-    // 1. "Admin" Rolünü Kontrol Et ve Oluþtur
     if (!await roleManager.RoleExistsAsync("Admin"))
     {
         await roleManager.CreateAsync(new IdentityRole("Admin"));
     }
 
-    // 2. "Editor" Rolünü Kontrol Et ve Oluþtur (Opsiyonel)
     if (!await roleManager.RoleExistsAsync("Editor"))
     {
         await roleManager.CreateAsync(new IdentityRole("Editor"));
     }
 
-    // 3. Ýlk Admin Kullanýcýsýný Oluþtur
     if (await userManager.FindByEmailAsync("admin@yildizhaber.com") == null)
     {
         var adminUser = new IdentityUser
         {
             UserName = "admin@yildizhaber.com",
             Email = "admin@yildizhaber.com",
-            EmailConfirmed = true // Email onayýný atla
+            EmailConfirmed = true
         };
 
-        // Kullanýcýyý oluþtur
-        var result = await userManager.CreateAsync(adminUser, "P@ssword123"); // Güvenli bir þifre belirleyin!
+        var result = await userManager.CreateAsync(adminUser, "P@ssword123");
 
-        // Kullanýcýya Admin Rolünü Ata
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(adminUser, "Admin");
