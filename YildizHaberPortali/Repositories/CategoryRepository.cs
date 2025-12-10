@@ -1,6 +1,9 @@
-﻿using YildizHaberPortali.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Data;
 using YildizHaberPortali.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace YildizHaberPortali.Repositories
 {
@@ -8,48 +11,41 @@ namespace YildizHaberPortali.Repositories
     {
         private readonly ApplicationDbContext _context;
 
-        // Dependency Injection (Bağımlılık Enjeksiyonu) ile DbContext'i alıyoruz
         public CategoryRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public ICollection<Category> GetAll()
+        public async Task<ICollection<Category>> GetAllAsync()
         {
-            // Tüm kategorileri veri tabanından getir
-            return _context.Categories.ToList();
+            return await _context.Categories.ToListAsync();
         }
 
-        public Category GetById(int id)
+        public async Task<Category> GetByIdAsync(int id)
         {
-            // Belirli bir kategoriyi ID'ye göre getir
-            return _context.Categories.FirstOrDefault(q => q.Id == id);
+            return await _context.Categories.FindAsync(id);
         }
 
-        public bool Add(Category entity)
+        public async Task AddAsync(Category category)
         {
-            _context.Categories.Add(entity);
-            return Save(); // Değişiklikleri kaydetmeyi deniyoruz
+            await _context.Categories.AddAsync(category);
+            await _context.SaveChangesAsync();
         }
 
-        public bool Update(Category entity)
+        public async Task UpdateAsync(Category category)
         {
-            _context.Categories.Update(entity);
-            return Save();
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
         }
 
-        public bool Delete(Category entity)
+        public async Task DeleteAsync(int id)
         {
-            _context.Categories.Remove(entity);
-            return Save();
-        }
-
-        // Kaydetme işlemi
-        public bool Save()
-        {
-            // Kaydedilen kayıt sayısının 0'dan büyük olup olmadığını kontrol et
-            var changes = _context.SaveChanges();
-            return changes > 0;
+            var category = await _context.Categories.FindAsync(id);
+            if (category != null)
+            {
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

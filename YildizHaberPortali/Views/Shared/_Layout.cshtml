@@ -1,49 +1,97 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - YildizHaberPortali</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/YildizHaberPortali.styles.css" asp-append-version="true" />
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Yıldız Haber Portalı Ana Sayfa">
+    <meta name="author" content="">
+
+    <title>YILDIZ HABER | @ViewData["Title"]</title>
+
+    @* Statik dosya yollarında (wwwroot) Admin klasörünü kullanıyorsanız, burayı da düzeltmeniz gerekebilir.
+       Ancak önceki konuşmalarda "wwwroot/admin" kullanmaya karar vermiştik. Eğer dosyaları direkt wwwroot'a attıysanız, bu yollar doğru çalışacaktır. *@
+    <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+          rel="stylesheet">
+
+    <link href="~/css/sb-admin-2.min.css" rel="stylesheet">
+
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">YildizHaberPortali</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+
+<body id="page-top">
+
+    <div id="wrapper">
+
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="" asp-controller="Home" asp-action="Index">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">Yıldız Haber</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item active">
+                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <div id="content">
+
+                @* Topbar içeriği çok uzun olduğu için burada kısaltılmıştır. *@
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    @* ... Topbar kodları (Bildirimler, Kullanıcı Bilgileri) buraya gelecek ... *@
+                </nav>
+                <div class="container-fluid">
+
+                    @* HATA ÇÖZÜMÜ BURADA! Sayfanın asıl içeriği buraya render edilecek. *@
+                    @RenderBody()
+
+                    @* Şablonda bulunan tüm DASHBOARD KARTLARI ve GRAFİK kodları burası dışına taşınmış veya silinmelidir. *@
+
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - YildizHaberPortali - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Yıldız Haber Portalı @DateTime.Now.Year</span>
+                    </div>
+                </div>
+            </footer>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    </div>
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    @* ... Logout Modal kodları buraya gelecek ... *@
+
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <script src="~/js/sb-admin-2.min.js"></script>
+
+    @* Sayfaya özel JS dosyalarını eklemek için RenderSection kullanın *@
+    @RenderSection("Scripts", required: false)
+
+    @* Grafiklere ait JS dosyaları (chart-area-demo.js, chart-pie-demo.js) KULLANICI LAYOUT'UNDA GENELLİKLE SİLİNİR *@
+
 </body>
+
 </html>

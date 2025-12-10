@@ -4,24 +4,25 @@ using YildizHaberPortali.Models;
 
 namespace YildizHaberPortali.Contracts
 {
+    // Artık tüm metotlar asenkron (Async) dönecek
     public interface ICategoryRepository
     {
-        // Tüm kategorileri getir
-        ICollection<Category> GetAll();
+        // Tüm kategorileri getirir (Asenkron)
+        Task<ICollection<Category>> GetAllAsync();
 
-        // Belirli bir ID'ye göre kategoriyi getir
-        Category GetById(int id);
+        // Belirli bir ID'ye göre getirir (Asenkron)
+        Task<Category> GetByIdAsync(int id);
 
-        // Yeni bir kategori ekle
-        bool Add(Category entity);
+        // Yeni bir kategori ekler (Asenkron)
+        Task AddAsync(Category entity);
 
-        // Kategoriyi güncelle
-        bool Update(Category entity);
+        // Kategoriyi günceller (Asenkron)
+        Task UpdateAsync(Category entity);
 
-        // Kategoriyi sil
-        bool Delete(Category entity);
+        // Kategoriyi siler (Asenkron, ID üzerinden)
+        Task DeleteAsync(int id);
 
-        // Değişiklikleri kaydet (Genellikle Generic Repository'de bulunur, burada da kullanalım)
-        bool Save();
+        // Değişiklikleri kaydeder (Bu metot genellikle gereksizdi, ancak arkadaşınızın kodunu 
+        // taklit etmek yerine daha modern bir yolu kullanacağız: Kayıt işlemi Add/Update/Delete içinde olacak)
     }
 }

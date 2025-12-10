@@ -1,32 +1,52 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using YildizHaberPortali.Models; 
+using YildizHaberPortali.Contracts;
+using YildizHaberPortali.Models;
+using System.Threading.Tasks;
+
 namespace YildizHaberPortali.Controllers
 {
     public class CategoryController : Controller
     {
-        // CRUD işlemlerinde kullanılacak olan DbContext veya Repository buraya eklenecek
-        // private readonly ApplicationDbContext _context;
+        private readonly ICategoryRepository _categoryRepository;
 
-        // Geçici olarak sizin istediğiniz kategorileri listelemek için kullanacağız
-        private List<Category> GetSampleCategories()
+        public CategoryController(ICategoryRepository categoryRepository)
         {
-            return new List<Category>
-            {
-                new Category { Id = 1, Name = "Dünya", Slug = "dunya" },
-                new Category { Id = 2, Name = "Spor", Slug = "spor" },
-                new Category { Id = 3, Name = "Ekonomi", Slug = "ekonomi" },
-                new Category { Id = 4, Name = "Kadın", Slug = "kadin" },
-                new Category { Id = 5, Name = "Teknoloji", Slug = "teknoloji" }
-            };
+            _categoryRepository = categoryRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            // İleride burası _repository.GetAllCategories() olacak
-            var categories = GetSampleCategories();
+            var categories = await _categoryRepository.GetAllAsync();
             return View(categories);
         }
 
-        // Buraya Create, Edit, Delete metotları eklenecek
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Category category)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(category);
+            }
+
+            category.Slug = category.Name
+                .ToLower()
+                .Replace(" ", "-")
+                .Replace("ğ", "g")
+                .Replace("ü", "u")
+                .Replace("ş", "s")
+                .Replace("ı", "i")
+                .Replace("ö", "o")
+                .Replace("ç", "c");
+
+            await _categoryRepository.AddAsync(category);
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

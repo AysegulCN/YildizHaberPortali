@@ -1,12 +1,15 @@
-﻿namespace YildizHaberPortali.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace YildizHaberPortali.Models
 {
     public class Category
     {
-        public int Id { get; set; } // Primary Key
-        public string Name { get; set; } // Kategori Adı
-        public string Slug { get; set; } // SEO Dostu URL için (örn: "teknoloji-haberleri")
+        public int Id { get; set; }
 
-        // Navigation Property: Bu kategoriye ait haberleri tutacak
+        [Required(ErrorMessage = "Kategori Adı zorunludur.")]
+        public string Name { get; set; }
+
+        public string Slug { get; set; }
         public ICollection<News> News { get; set; }
     }
 }
