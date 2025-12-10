@@ -1,0 +1,19 @@
+﻿@model IEnumerable<YildizHaberPortali.Models.Category>
+
+@* Bu kod, sitenin navbar'ında kullanılacaktır. *@
+<ul class="navbar-nav flex-grow-1">
+
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+    </li>
+
+    @foreach (var category in Model)
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="News" asp-action="CategoryNews"
+               asp-route-slug="@category.Slug">
+                @category.Name
+            </a>
+        </li>
+    }
+</ul>

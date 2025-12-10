@@ -1,21 +1,26 @@
-using System.Diagnostics;
+// Controllers/HomeController.cs
+
 using Microsoft.AspNetCore.Mvc;
-using YildizHaberPortali.Models;
+using YildizHaberPortali.Contracts;
+using System.Threading.Tasks;
+using YildizHaberPortali.Models; 
+using System.Diagnostics; 
 
 namespace YildizHaberPortali.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly INewsRepository _newsRepository;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(INewsRepository newsRepository)
         {
-            _logger = logger;
+            _newsRepository = newsRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var newsList = await _newsRepository.GetAllAsync();
+            return View(newsList);
         }
 
         public IActionResult Privacy()

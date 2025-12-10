@@ -1,18 +1,31 @@
-﻿namespace YildizHaberPortali.Models
+﻿// Models/News.cs
+
+using System.ComponentModel.DataAnnotations;
+
+namespace YildizHaberPortali.Models
 {
     public class News
     {
-        public int Id { get; set; } // Primary Key
-        public string Title { get; set; } // Haber Başlığı
-        public string Content { get; set; } // Haber İçeriği
-        public string ImageUrl { get; set; } // Kapak Resmi URL'si
-        public DateTime PublishDate { get; set; } // Yayın Tarihi
-        public string Author { get; set; } // Yazar
+        public int Id { get; set; }
 
-        // Foreign Key
+        [Required]
+        public string Title { get; set; }
+
+        [Required]
+        public string Content { get; set; }
+
+        public string ImageUrl { get; set; } // Boş olabilir
+
+        public DateTime PublishDate { get; set; } // Controller'da otomatik atanıyor
+
+        [Required]
+        public string Author { get; set; }
+
+        // İlişki (Foreign Key)
+        [Required]
         public int CategoryId { get; set; }
 
-        // Navigation Property: Haberin ait olduğu kategori
+        // Navigation Property
         public Category Category { get; set; }
     }
 }

@@ -1,0 +1,36 @@
+﻿@model YildizHaberPortali.Models.LoginViewModel
+
+
+
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 mt-5">
+        <h2 class="text-center my-4">Yönetici Girişi</h2>
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="post" asp-controller="Account" asp-action="Login">
+                    <div class="alert alert-warning">
+                        Seed Data ile oluşturulan Admin bilgileri: <br />
+                        **Email:** admin@yildizhaber.com <br />
+                        **Şifre:** P@ssword123
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="Email" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" name="Password" class="form-control" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block mt-3">Giriş Yap</button>
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-secondary btn-block mt-2">Ana Sayfaya Geri Dön</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

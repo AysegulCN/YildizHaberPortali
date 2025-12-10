@@ -1,8 +1,49 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<YildizHaberPortali.Models.News>
+
+@{
+    ViewData["Title"] = "Anasayfa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row">
+    <div class="col-12">
+        <h1 class="my-4 border-bottom pb-2">Son Haberler</h1>
+    </div>
+</div>
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var newsItem in Model.OrderByDescending(n => n.PublishDate))
+        {
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img class="card-img-top" src="@(string.IsNullOrEmpty(newsItem.ImageUrl) ? "/img/default.jpg" : newsItem.ImageUrl)" alt="@newsItem.Title">
+                    <div class="card-body">
+                        <small class="text-primary font-weight-bold">
+                            <i class="fas fa-tag"></i> @newsItem.Category.Name
+                        </small>
+                        <h4 class="card-title mt-2">
+                            <a href="#" class="text-dark">@newsItem.Title</a>
+                        </h4>
+                        <p class="card-text">
+                            @(newsItem.Content.Length > 150 ? newsItem.Content.Substring(0, 150) + "..." : newsItem.Content)
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> Yazar: @newsItem.Author |
+                            <i class="fas fa-clock"></i> @newsItem.PublishDate.ToShortDateString()
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 alert alert-warning">
+            Henüz hiç haber eklenmemiş. Lütfen Yönetici Panelinden haber ekleyin.
+        </div>
+    }
 </div>

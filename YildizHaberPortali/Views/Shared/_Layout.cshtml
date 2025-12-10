@@ -11,86 +11,71 @@
 
     <title>YILDIZ HABER | @ViewData["Title"]</title>
 
-    @* Statik dosya yollarında (wwwroot) Admin klasörünü kullanıyorsanız, burayı da düzeltmeniz gerekebilir.
-       Ancak önceki konuşmalarda "wwwroot/admin" kullanmaya karar vermiştik. Eğer dosyaları direkt wwwroot'a attıysanız, bu yollar doğru çalışacaktır. *@
     <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
           rel="stylesheet">
 
-    <link href="~/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="~/css/site.css" rel="stylesheet" />
 
 </head>
 
 <body id="page-top">
 
-    <div id="wrapper">
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
 
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            
+            <nav class="navbar navbar-expand-lg navbar-light bg-white topbar mb-4 shadow">
+                <div class="container">
 
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="" asp-controller="Home" asp-action="Index">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="sidebar-brand-text mx-3">Yıldız Haber</div>
-            </a>
-            <hr class="sidebar-divider my-0">
+                    <a class="navbar-brand text-primary font-weight-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-star text-warning"></i> YILDIZ HABER
+                    </a>
 
-            <li class="nav-item active">
-                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-fw fa-home"></i>
-                    <span>Ana Sayfa</span>
-                </a>
-            </li>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-            <hr class="sidebar-divider d-none d-md-block">
+                    <div class="collapse navbar-collapse" id="mainNav">
 
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
-        </ul>
-        <div id="content-wrapper" class="d-flex flex-column">
+                        @await Component.InvokeAsync("CategoryMenu")
 
-            <div id="content">
-
-                @* Topbar içeriği çok uzun olduğu için burada kısaltılmıştır. *@
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                    @* ... Topbar kodları (Bildirimler, Kullanıcı Bilgileri) buraya gelecek ... *@
-                </nav>
-                <div class="container-fluid">
-
-                    @* HATA ÇÖZÜMÜ BURADA! Sayfanın asıl içeriği buraya render edilecek. *@
-                    @RenderBody()
-
-                    @* Şablonda bulunan tüm DASHBOARD KARTLARI ve GRAFİK kodları burası dışına taşınmış veya silinmelidir. *@
-
-                </div>
-            </div>
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Yıldız Haber Portalı @DateTime.Now.Year</span>
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <a class="nav-link text-info" asp-area="" asp-controller="Admin" asp-action="Index">
+                                    <i class="fas fa-user-shield"></i> Yönetici Girişi
+                                </a>
+                            </li>
+                        </ul>
                     </div>
+
                 </div>
-            </footer>
+            </nav>
+
+            <div class="container">
+
+                @RenderBody()
+            </div>
         </div>
+
+        <footer class="sticky-footer bg-white mt-5">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>Copyright &copy; Yıldız Haber Portalı @DateTime.Now.Year</span>
+                </div>
+            </div>
+        </footer>
     </div>
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
 
-    @* ... Logout Modal kodları buraya gelecek ... *@
-
+    
     <script src="~/vendor/jquery/jquery.min.js"></script>
     <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
 
-    <script src="~/js/sb-admin-2.min.js"></script>
-
-    @* Sayfaya özel JS dosyalarını eklemek için RenderSection kullanın *@
     @RenderSection("Scripts", required: false)
-
-    @* Grafiklere ait JS dosyaları (chart-area-demo.js, chart-pie-demo.js) KULLANICI LAYOUT'UNDA GENELLİKLE SİLİNİR *@
 
 </body>
 

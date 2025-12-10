@@ -1,0 +1,29 @@
+﻿@model string
+
+@{
+    ViewData["Title"] = "Yeni Rol Oluştur";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h6>
+    </div>
+    <div class="card-body">
+
+        <form asp-action="Create" method="post">
+            <div class="text-danger">@Html.ValidationSummary(false)</div> @* Hata mesajları için *@
+
+            <div class="form-group">
+                <label for="roleName" class="control-label">Rol Adı</label>
+                <input name="roleName" class="form-control" />
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Rolü Kaydet" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+            </div>
+        </form>
+
+    </div>
+</div>
