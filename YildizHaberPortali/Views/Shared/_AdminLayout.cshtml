@@ -25,62 +25,76 @@
 
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="" asp-controller="Admin" asp-action="Index">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="" asp-controller="Category" asp-action="Index">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-star"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Yıldız Haber</div>
+                <div class="sidebar-brand-text mx-3">YILDIZ HABER ADMIN</div>
             </a>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-fw fa-eye"></i>
+                    <span>Siteyi Görüntüle</span>
+                </a>
+            </li>
 
             <hr class="sidebar-divider my-0">
 
-            <li class="nav-item active">
-                <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">
+            <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-controller="Category" asp-action="Index">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Yönetici Paneli</span>
+                    <span>Dashboard</span>
                 </a>
             </li>
 
             <hr class="sidebar-divider">
 
             <div class="sidebar-heading">
-                İÇERİK YÖNETİMİ (CRUD)
+                İçerik Yönetimi (CRUD)
             </div>
 
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Category" asp-action="Index">
-                    <i class="fas fa-fw fa-tags"></i>
+                <a class="nav-link" asp-area="" asp-controller="Category" asp-action="Index">
+                    <i class="fas fa-fw fa-list-alt"></i>
                     <span>Kategori Yönetimi</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" asp-controller="News" asp-action="Index">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseNews" aria-expanded="true" aria-controls="collapseNews">
                     <i class="fas fa-fw fa-newspaper"></i>
-                    <span>Haber Yönetimi</span>
+                    <span>Haber İşlemleri</span>
                 </a>
+                <div id="collapseNews" class="collapse" aria-labelledby="headingNews" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Yazar/Admin İşlemleri:</h6>
+                        <a class="collapse-item" asp-controller="News" asp-action="Index">Haberleri Yönet</a>
+                        <a class="collapse-item" asp-controller="News" asp-action="Create">Yeni Haber Oluştur</a>
+                        <a class="collapse-item" asp-controller="News" asp-action="StatusManagement">Haber Durum Yönetimi</a>
+                        <a class="collapse-item" asp-controller="Comment" asp-action="Index">Yorumları Oku</a>
+                    </div>
+                </div>
             </li>
 
             <hr class="sidebar-divider">
 
             <div class="sidebar-heading">
-                SİSTEM VE YETKİLENDİRME
+                Sistem ve Yetkilendirme
             </div>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseIdentity"
-                   aria-expanded="true" aria-controls="collapseIdentity">
-                    <i class="fas fa-fw fa-users-cog"></i>
-                    <span>Kullanıcı & Roller</span>
+                <a class="nav-link" asp-area="" asp-controller="User" asp-action="Index">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Kullanıcı Yönetimi</span>
                 </a>
-                <div id="collapseIdentity" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Yetkilendirme:</h6>
-                        <a class="collapse-item" href="#">Rol Yönetimi (Rollere Yetki)</a>
-                        <a class="collapse-item" href="#">Kullanıcı Hesapları</a>
-                        <a class="collapse-item" href="#">SignalR Test (Ödev)</a>
-                    </div>
-                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-controller="Role" asp-action="Index">
+                    <i class="fas fa-fw fa-users-cog"></i>
+                    <span>Rol Yönetimi</span>
+                </a>
             </li>
 
             <hr class="sidebar-divider d-none d-md-block">
@@ -93,41 +107,73 @@
         <div id="content-wrapper" class="d-flex flex-column">
 
             <div id="content">
-
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
+
+                    <ul class="navbar-nav ml-auto">
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item dropdown no-arrow">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                        Hoş Geldiniz, @UserManager.GetUserName(User)
+                                    </span>
+                                    <i class="fas fa-user-circle fa-2x"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+
+                                    <a class="dropdown-item" asp-controller="Category" asp-action="Index">
+                                        <i class="fas fa-fw fa-tachometer-alt fa-sm fa-fw mr-2 text-primary"></i>
+                                        Yönetici Paneli (Dashboard)
+                                    </a>
+
+                                    <div class="dropdown-divider"></div>
+
+                                    @* Çıkış Yap Formu *@
+                                    <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                            Çıkış Yap
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                    </ul>
                 </nav>
                 <div class="container-fluid">
-                    @* BURASI DİNAMİK İÇERİK ALANI *@
                     @RenderBody()
-
                 </div>
             </div>
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Yildiz Haber Portalı @DateTime.Now.Year</span>
-                    </div>
-                </div>
-            </footer>
+            @* ... (Footer ve Scriptler) ... *@
+
+            <script src="~/admin/vendor/jquery/jquery.min.js"></script>
+            <script src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+            <script src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+            <script src="~/admin/js/sb-admin-2.min.js"></script>
+
+            @* SignalR Kodu *@
+            <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+            <script>
+                var connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/newsHub")
+                    .build();
+                connection.start().catch(function (err) {
+                    return console.error(err.toString());
+                });
+                connection.on("ReceiveNotification", function (user, message) {
+                    alert(`Yeni Yönetici Bildirimi: ${message}`);
+                });
+            </script>
+
+            @RenderSection("Scripts", required: false)
         </div>
     </div>
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-
-    <script src="~/admin/vendor/jquery/jquery.min.js"></script>
-    <script src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <script src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <script src="~/admin/js/sb-admin-2.min.js"></script>
-
-    @RenderSection("Scripts", required: false)
-
 </body>
-
 </html>
