@@ -22,5 +22,6 @@ namespace YildizHaberPortali.Contracts
 
         // Haber sil
         Task DeleteAsync(int id);
+        Task<IEnumerable<News>> GetByCategoryIdAsync(int categoryId);
     }
 }

@@ -27,5 +27,8 @@ namespace YildizHaberPortali.Models
 
         // Navigation Property
         public Category Category { get; set; }
+
+        // Models/News.cs
+        public bool IsPublished { get; set; } = true; // Varsayılan olarak true yapın
     }
 }

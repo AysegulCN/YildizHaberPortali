@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System; // DateTime.Now kullanımı için
-using System.Linq; // Select, ToList kullanımı için
+using System; 
+using System.Linq; 
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
@@ -21,13 +21,32 @@ namespace YildizHaberPortali.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? categoryId)
         {
-            var newsList = await _newsRepository.GetAllAsync();
+            IEnumerable<News> newsList;
+
+            ViewBag.Categories = await _categoryRepository.GetAllAsync(); 
+
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                newsList = await _newsRepository.GetByCategoryIdAsync(categoryId.Value);
+                ViewData["Title"] = $"{ViewBag.Categories.FirstOrDefault(c => c.Id == categoryId.Value)?.Name} Haberleri";
+            }
+            else
+            {
+                newsList = await _newsRepository.GetAllAsync();
+                ViewData["Title"] = "Tüm Haberler";
+            }
+
             return View(newsList);
         }
 
+        public async Task<IActionResult> Index()
+        {
+            var newsList = await _newsRepository.GetAllAsync();
 
+            return View(newsList); 
+        }
         public async Task<IActionResult> Create()
         {
             var categoryList = await _categoryRepository.GetAllAsync();
@@ -54,25 +73,25 @@ namespace YildizHaberPortali.Controllers
                 {
                     Title = viewModel.Title,
                     Content = viewModel.Content,
+                    // Buradaki alanların News Model'inizdeki alanlarla eşleştiğinden emin olun
                     ImageUrl = viewModel.ImageUrl,
                     Author = viewModel.Author,
                     CategoryId = viewModel.CategoryId,
                     PublishDate = DateTime.Now,
+                    // Eklediyseniz, IsPublished = true, // varsayılan
                 };
 
+                // HATA OLABİLECEK YER: _newsRepository.AddAsync(news) çağrısı
                 await _newsRepository.AddAsync(news);
-                return RedirectToAction(nameof(Index));
+
+                // SignalR bildirimi (Daha önce eklemiştik)
+                // await _hubContext.Clients.All.SendAsync("ReceiveNotification", "Admin", $"Yeni Haber Eklendi: {news.Title}");
+
+                return RedirectToAction(nameof(Index)); // Kayıt başarılıysa News/Index'e yönlendirir
             }
-
-            var categoryList = await _categoryRepository.GetAllAsync();
-            viewModel.Categories = categoryList.Select(c => new SelectListItem
-            {
-                Value = c.Id.ToString(),
-                Text = c.Name
-            }).ToList();
-
-            ModelState.AddModelError("", "Haber eklenirken bir hata oluştu veya zorunlu alanlar eksik.");
+            // ... (Hata durumunda View'a geri dönme kodu)
             return View(viewModel);
+        }
         }
 
         

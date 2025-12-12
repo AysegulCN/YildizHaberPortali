@@ -1,0 +1,30 @@
+﻿@model IEnumerable<YildizHaberPortali.Models.Comment>
+@{
+    ViewData["Title"] = "Kullanıcı Yorumları";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Tüm Yorumlar Tablosu</h6></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr><th>Haber ID</th><th>Yorum Yapan</th><th>İçerik</th><th>Tarih</th><th>İşlemler</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var comment in Model)
+                    {
+                        <tr>
+                            <td>@comment.NewsId</td>
+                            <td>@comment.AuthorName</td>
+                            <td>@comment.Content.Substring(0, Math.Min(comment.Content.Length, 50))...</td>
+                            <td>@comment.CommentDate.ToShortDateString()</td>
+                            <td><button class="btn btn-danger btn-sm">Sil</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

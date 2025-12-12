@@ -35,10 +35,10 @@ namespace YildizHaberPortali.Repositories
                                  .FirstOrDefaultAsync(n => n.Id == id);
         }
 
-        public async Task AddAsync(News entity)
+        public async Task AddAsync(T entity)
         {
-            await _context.News.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            await _context.Set<T>().AddAsync(entity);
+            await _context.SaveChangesAsync(); // <<< KAYDETME İŞLEMİ BURADA YAPILMALIDIR
         }
 
         public async Task UpdateAsync(News entity)
@@ -55,6 +55,15 @@ namespace YildizHaberPortali.Repositories
                 _context.News.Remove(news);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<News>> GetByCategoryIdAsync(int categoryId)
+        {
+            // News tablosunu CategoryId'ye göre filtrele ve haberin kategorisini de dahil et (Include)
+            return await _context.News
+                .Include(n => n.Category)
+                .Where(n => n.CategoryId == categoryId)
+                .ToListAsync();
         }
     }
 }
