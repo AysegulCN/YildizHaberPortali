@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿// Contracts/IGenericRepository.cs
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace YildizHaberPortali.Contracts
 {
     public interface IGenericRepository<T> where T : class
     {
-        // ...
+        Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> GetAllAsync(); // <<< Task<ICollection<T>> yerine bunu kullanın
-        // ...
+        Task AddAsync(T entity);
+        Task UpdateAsync(T entity);
+        Task DeleteAsync(int id);
     }
 }
