@@ -21,16 +21,23 @@ namespace YildizHaberPortali.Controllers
             _categoryRepository = categoryRepository;
         }
 
+        // Controllers/NewsController.cs (Index metodu)
+
         public async Task<IActionResult> Index(int? categoryId)
         {
             IEnumerable<News> newsList;
 
-            ViewBag.Categories = await _categoryRepository.GetAllAsync(); 
+            // Tüm kategorileri çek
+            ViewBag.Categories = await _categoryRepository.GetAllAsync();
 
             if (categoryId.HasValue && categoryId.Value > 0)
             {
+                // LINQ sorgusu hatasızdır
                 newsList = await _newsRepository.GetByCategoryIdAsync(categoryId.Value);
-                ViewData["Title"] = $"{ViewBag.Categories.FirstOrDefault(c => c.Id == categoryId.Value)?.Name} Haberleri";
+
+                // Kategori adını bulmanın güvenli yolu
+                var category = ViewBag.Categories.FirstOrDefault(c => c.Id == categoryId.Value);
+                ViewData["Title"] = $"{category?.Name} Haberleri";
             }
             else
             {
@@ -92,9 +99,38 @@ namespace YildizHaberPortali.Controllers
             // ... (Hata durumunda View'a geri dönme kodu)
             return View(viewModel);
         }
+
+        // Controllers/NewsController.cs (Index metodu)
+
+        public async Task<IActionResult> Index(int? categoryId)
+        {
+            IEnumerable<News> newsList;
+
+            // Tüm kategorileri çek
+            // Eğer View'a Category'i göndermek için farklı bir yol kullanmıyorsanız bu gereklidir.
+            ViewBag.Categories = await _categoryRepository.GetAllAsync();
+
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                // Category ID'si varsa, o kategoriye ait haberleri getir
+                newsList = await _newsRepository.GetByCategoryIdAsync(categoryId.Value);
+
+                // CS1977 hatasını çözen, doğru LINQ sorgusu ile kategori adını bulma:
+                var category = ViewBag.Categories.FirstOrDefault(c => c.Id == categoryId.Value);
+                ViewData["Title"] = $"{category?.Name} Haberleri";
+            }
+            else
+            {
+                // ID yoksa tüm haberleri getir
+                newsList = await _newsRepository.GetAllAsync();
+                ViewData["Title"] = "Tüm Haberler";
+            }
+
+            return View(newsList);
         }
 
-        
+
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();

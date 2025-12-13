@@ -1,27 +1,13 @@
 ﻿// Contracts/INewsRepository.cs
-
-using YildizHaberPortali.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YildizHaberPortali.Models;
 
 namespace YildizHaberPortali.Contracts
 {
-    public interface INewsRepository
+    public interface INewsRepository : IGenericRepository<News>
     {
-        // Tüm haberleri ve ilişkili kategorilerini getir (Include ile Category'i de çekmek zorundayız)
-        Task<ICollection<News>> GetAllAsync();
-
-        // Belirli bir haberi getir
-        Task<News> GetByIdAsync(int id);
-
-        // Haber ekle
-        Task AddAsync(News entity);
-
-        // Haber güncelle
-        Task UpdateAsync(News entity);
-
-        // Haber sil
-        Task DeleteAsync(int id);
+        // Özel metot (Dönüş tipinin GenericRepository ile uyumlu olması için: IEnumerable<News>)
         Task<IEnumerable<News>> GetByCategoryIdAsync(int categoryId);
     }
 }

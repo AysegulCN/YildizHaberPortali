@@ -20,7 +20,9 @@
                             <td>@comment.AuthorName</td>
                             <td>@comment.Content.Substring(0, Math.Min(comment.Content.Length, 50))...</td>
                             <td>@comment.CommentDate.ToShortDateString()</td>
-                            <td><button class="btn btn-danger btn-sm">Sil</button></td>
+                            <td>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="@comment.Id">Sil</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -28,3 +30,35 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Yorum silme butonuna tıklanma olayını yakala
+            $(".delete-btn").on("click", function () {
+                var commentId = $(this).data("id");
+
+                if (confirm("Bu yorumu silmek istediğinizden emin misiniz?")) {
+
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Comment")',
+                        type: "POST",
+                        data: { id: commentId },
+                        success: function (response) {
+                            if (response.success) {
+                                // Silme başarılıysa, tablo satırını kaldır
+                                $(`button[data-id="${commentId}"]`).closest("tr").remove();
+                                alert(response.message);
+                            } else {
+                                alert("Hata: " + response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Silme işlemi sırasında bir hata oluştu: " + error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

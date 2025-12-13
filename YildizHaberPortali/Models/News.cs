@@ -30,5 +30,6 @@ namespace YildizHaberPortali.Models
 
         // Models/News.cs
         public bool IsPublished { get; set; } = true; // Varsayılan olarak true yapın
+
     }
 }
