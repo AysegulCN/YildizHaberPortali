@@ -26,14 +26,16 @@ public class NewsController : Controller
     {
         IEnumerable<News> newsList;
 
-        ViewBag.Categories = await _categoryRepository.GetAllAsync();
+        // 1️⃣ Kategorileri değişkene al (ViewBag'den ÖNCE)
+        var categories = await _categoryRepository.GetAllAsync();
+        ViewBag.Categories = categories;
 
         if (categoryId.HasValue && categoryId.Value > 0)
         {
             newsList = await _newsRepository.GetByCategoryIdAsync(categoryId.Value);
 
-            // Kategori adını bulmanın güvenli yolu
-            var category = ViewBag.Categories.FirstOrDefault(c => c.Id == categoryId.Value);
+            // 2️⃣ Lambda artık dynamic değil → HATA BİTER
+            var category = categories.FirstOrDefault(c => c.Id == categoryId.Value);
             ViewData["Title"] = $"{category?.Name} Haberleri";
         }
         else
@@ -44,6 +46,7 @@ public class NewsController : Controller
 
         return View(newsList);
     }
+
 
     // GET: Haber Ekleme Formu
     public async Task<IActionResult> Create()
