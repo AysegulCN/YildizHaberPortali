@@ -14,7 +14,10 @@ namespace YildizHaberPortali.Models
         [StringLength(100)]
         public string Name { get; set; }
 
-        // Bu alan zorunlu değilse bile eklenmeli:
+        [Required]
         public string Slug { get; set; }
+
+        // KRİTİK EKLENTİ: DisplayOrder
+        public int DisplayOrder { get; set; }
     }
 }

@@ -35,13 +35,14 @@
                     @* Hata kaynağı olan döngü değişkeni düzeltildi *@
                     @foreach (var item in Model)
                     {
-                        <tr>
-                            <td>@item.Id</td>
-                            <td>@item.Name</td>
-                            <td>@item.Slug</td>
+                        <tr id="row_@category.Id">
+                            <td>@category.Id</td>
+                            <td>@category.Name</td>
+                            <td>@category.Slug</td>
                             <td>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
-                                <button class="btn btn-danger btn-sm delete-btn" data-id="@item.Id">Sil</button>
+                                <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-warning btn-sm">Düzenle</a>
+
+                                <button class="btn btn-danger btn-sm" onclick="deleteItem(@category.Id, 'Category')">Sil</button>
                             </td>
                         </tr>
                     }
@@ -51,5 +52,40 @@
     </div>
 </div>
 
+// Views/Category/Index.cshtml veya Views/News/Index.cshtml dosyalarının en altına
+
 @section Scripts {
+    <script>
+        // Genel Silme Fonksiyonu
+        function deleteItem(id, controllerName) {
+
+            if (confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/" + controllerName + "/DeleteConfirmed", // POST metodunu çağıracağız
+                    data: { id: id },
+                    headers: {
+                        // AJAX POST isteği için Anti-Forgery Token (güvenlik)
+                        "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        // İşlem başarılı olursa
+                        if (response.success) {
+                            alert(response.message);
+
+                            // Sayfadaki silinen satırı DOM'dan kaldır
+                            $('#row_' + id).remove();
+
+                        } else {
+                            alert("Hata: " + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Silme işleminde beklenmeyen bir hata oluştu: " + error);
+                    }
+                });
+            }
+        }
+    </script>
 }

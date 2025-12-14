@@ -27,12 +27,19 @@ namespace YildizHaberPortali.Repositories
                 .ToListAsync();
         }
 
-        
-        public new async Task<IEnumerable<News>> GetAllAsync()
+
+        public async Task<ICollection<News>> GetAllAsync()
         {
-            return await _context.News
-                .Include(n => n.Category)
+           
+            var newsList = await _context.News
+                .Include(n => n.Category) 
                 .ToListAsync();
+
+            return newsList
+                .OrderBy(n => n.Priority)
+                .ThenByDescending(n => n.PublishDate)
+                .ToList();
         }
+        
     }
 }

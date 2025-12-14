@@ -50,12 +50,20 @@
 
                         @await Component.InvokeAsync("CategoryMenu")
 
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Contact">İletişime Geç</a>
+                            </li>
+
+                        </ul>
+
                         <ul class="navbar-nav ml-auto">
                             <li class="nav-item">
                                 <a class="nav-link text-info" asp-area="Identity" asp-controller="Account" asp-action="Login" id="loginLink">
-                                    <i class="fas fa-user-shield"></i> Yönetici Girişi
+                                    <i class="fas fa-user-shield"></i> Giriş Yap
                                 </a>
                             </li>
+
                         </ul>
                     </div>
 

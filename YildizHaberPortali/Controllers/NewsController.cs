@@ -160,4 +160,11 @@ public class NewsController : Controller
         await _newsRepository.DeleteAsync(id);
         return RedirectToAction(nameof(Index));
     }
+
+    [Authorize(Roles = "Admin")] 
+    public async Task<IActionResult> StatusManagement()
+    {
+        return View(); 
+        throw new NotImplementedException(); 
+    }
 }

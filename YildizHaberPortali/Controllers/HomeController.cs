@@ -37,6 +37,15 @@ namespace YildizHaberPortali.Controllers
             return View(newsList);
         }
 
+        // Controllers/HomeController.cs içinde
+
+        public IActionResult Contact()
+        {
+            ViewData["Title"] = "Bize Ulaþýn";
+            return View();
+        }
+
+
 
         public IActionResult Privacy()
         {

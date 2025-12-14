@@ -22,7 +22,11 @@ namespace YildizHaberPortali.Repositories
 
         public async Task<ICollection<Category>> GetAllAsync()
         {
-            return await _context.Categories.ToListAsync();
+            var categoryList = await _context.Categories.ToListAsync();
+
+            return categoryList
+                .OrderBy(c => c.DisplayOrder)
+                .ToList();
         }
 
         public async Task<Category> GetByIdAsync(int id)

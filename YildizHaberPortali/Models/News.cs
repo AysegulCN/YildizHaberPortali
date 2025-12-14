@@ -13,22 +13,22 @@ namespace YildizHaberPortali.Models
 
         [Required]
         public string Content { get; set; }
+        public int Priority { get; set; }
 
-        public string ImageUrl { get; set; } // Boş olabilir
+        public string ImageUrl { get; set; } 
 
-        public DateTime PublishDate { get; set; } // Controller'da otomatik atanıyor
+        public DateTime PublishDate { get; set; } 
 
+        [Required]
+        [StringLength(150)]
         public string Author { get; set; }
 
-        // İlişki (Foreign Key)
         [Required]
         public int CategoryId { get; set; }
 
-        // Navigation Property
         public Category Category { get; set; }
 
-        // Models/News.cs
-        public bool IsPublished { get; set; } = true; // Varsayılan olarak true yapın
+        public bool IsPublished { get; set; } = true; 
 
     }
 }

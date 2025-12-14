@@ -61,16 +61,57 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// En son Routing
+// Program.cs içinde
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=News}/{action=Index}/{id?}");
 
-
 app.Run();
 
-// SeedData Metodu (Bu kýsým zaten doðruydu)
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        await SeedData(roleManager, userManager);
+        await SeedCategories(app.Services);
+    }
+}
+
+
 async Task SeedData(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
 {
-    // ... (SeedData içeriði) ...
+    // ... (Mevcut Rol ve Kullanýcý Ekleme Kodlarý) ...
+
+    // YENÝ EKLEME: Kategorileri Ekleme
+    await SeedCategories(app.Services); // <<< app.Services'i kullanmak için bu metodu Program.cs içinde çaðýrýyoruz.
 }
+
+async Task SeedCategories(IServiceProvider serviceProvider)
+{
+    using (var scope = serviceProvider.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        // Eðer kategori yoksa, ekle
+        if (!context.Categories.Any())
+        {
+            var categories = new List<Category>
+            {
+                new Category { Name = "Gündem", Slug = "gundem" },
+                new Category { Name = "Ekonomi", Slug = "ekonomi" },
+                new Category { Name = "Spor", Slug = "spor" },
+                new Category { Name = "Teknoloji", Slug = "teknoloji" },
+                new Category { Name = "Dünya", Slug = "dunya" },
+                new Category { Name = "Son Dakika", Slug = "son-dakika" },
+                new Category { Name = "Kadýn", Slug = "kadin" }
+            };
+
+            await context.Categories.AddRangeAsync(categories);
+            await context.SaveChangesAsync();
+        }
+    }
+}
+
+ 
