@@ -1,13 +1,14 @@
 // Controllers/HomeController.cs
 
 using Microsoft.AspNetCore.Mvc;
-using YildizHaberPortali.Contracts;
-using System.Threading.Tasks;
-using YildizHaberPortali.Models; 
 using System.Diagnostics; 
+using System.Threading.Tasks;
+using YildizHaberPortali.Contracts;
+using YildizHaberPortali.Models; 
 
 namespace YildizHaberPortali.Controllers
 {
+  
     public class HomeController : Controller
     {
         private readonly INewsRepository _newsRepository;
@@ -19,9 +20,23 @@ namespace YildizHaberPortali.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var newsList = await _newsRepository.GetAllAsync();
+            IEnumerable<News> newsList;
+
+            if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            {
+                // Yetkililer her þeyi görür
+                newsList = await _newsRepository.GetAllAsync();
+            }
+            else
+            {
+                // Normal kullanýcý sadece yayýnlananlarý görür
+                newsList = (await _newsRepository.GetAllAsync())
+                            .Where(n => n.IsPublished);
+            }
+
             return View(newsList);
         }
+
 
         public IActionResult Privacy()
         {

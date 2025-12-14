@@ -1,9 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using YildizHaberPortali.Contracts;
-using YildizHaberPortali.Data;
 using YildizHaberPortali.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YildizHaberPortali.Data;
+
+
+
+
 
 namespace YildizHaberPortali.Repositories
 {

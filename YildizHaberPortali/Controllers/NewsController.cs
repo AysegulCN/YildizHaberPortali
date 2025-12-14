@@ -8,10 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 
-// Haber işlemleri hem Admin hem de Yazar (Editor) tarafından yapılabilir.
-[Authorize(Roles = "Admin, Editor")]
 public class NewsController : Controller
 {
+
     private readonly INewsRepository _newsRepository;
     private readonly ICategoryRepository _categoryRepository;
 
@@ -21,20 +20,17 @@ public class NewsController : Controller
         _categoryRepository = categoryRepository;
     }
 
-    // Haberleri Listeleme ve Kategoriye Göre Filtreleme Metodu (TEK INDEX)
+    [AllowAnonymous]
     public async Task<IActionResult> Index(int? categoryId)
     {
         IEnumerable<News> newsList;
 
-        // 1️⃣ Kategorileri değişkene al (ViewBag'den ÖNCE)
         var categories = await _categoryRepository.GetAllAsync();
         ViewBag.Categories = categories;
 
         if (categoryId.HasValue && categoryId.Value > 0)
         {
             newsList = await _newsRepository.GetByCategoryIdAsync(categoryId.Value);
-
-            // 2️⃣ Lambda artık dynamic değil → HATA BİTER
             var category = categories.FirstOrDefault(c => c.Id == categoryId.Value);
             ViewData["Title"] = $"{category?.Name} Haberleri";
         }
@@ -47,10 +43,9 @@ public class NewsController : Controller
         return View(newsList);
     }
 
-
-    // GET: Haber Ekleme Formu
+    [Authorize(Roles = "Admin,Editor")]
     public async Task<IActionResult> Create()
-    {
+    { 
         var categoryList = await _categoryRepository.GetAllAsync();
 
         var viewModel = new NewsCreateViewModel
@@ -64,9 +59,8 @@ public class NewsController : Controller
         return View(viewModel);
     }
 
-    // POST: Haber Ekleme İşlemi
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(NewsCreateViewModel viewModel)
     {
         var categoryList = await _categoryRepository.GetAllAsync();
@@ -90,7 +84,7 @@ public class NewsController : Controller
         return View(viewModel);
     }
 
-    // GET: Haber Düzenleme Formu
+    [Authorize(Roles = "Admin,Editor")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -119,10 +113,10 @@ public class NewsController : Controller
         return View(viewModel);
     }
 
-    // POST: Haber Düzenleme İşlemi
+    [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(NewsCreateViewModel viewModel)
+
     {
         var categoryList = await _categoryRepository.GetAllAsync();
         viewModel.Categories = categoryList.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();

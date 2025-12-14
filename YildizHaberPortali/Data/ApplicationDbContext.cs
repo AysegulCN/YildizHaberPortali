@@ -1,28 +1,20 @@
-﻿// Data/ApplicationDbContext.cs
-
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // GEREKLİ
 using Microsoft.EntityFrameworkCore;
 using YildizHaberPortali.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity; 
+
+
 namespace YildizHaberPortali.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
+    //!!! IdentityDbContext'ten miras almalı !!!
+    public class ApplicationDbContext : IdentityDbContext 
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
-
-        public DbSet<News> News { get; set; }
+        // DbSet'ler de burada olmalı (Category, News, Comment)
         public DbSet<Category> Categories { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Category>()
-                .HasIndex(c => c.Slug)
-                .IsUnique();
-        }
+        public DbSet<News> News { get; set; }
+        public DbSet<Comment> Comments { get; set; }
     }
 }

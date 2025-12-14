@@ -1,28 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
-
-namespace YildizHaberPortali.Migrations
+namespace YildizHaberPortali.Data.Migrations
 {
-    /// <inheritdoc />
-    public partial class AddIsPublishedToNews : Migration
+    public partial class AddAuthorToNews : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsPublished",
+            // Haber tablosuna Author sütununu ekle
+            migrationBuilder.AddColumn<string>(
+                name: "Author",
                 table: "News",
-                type: "bit",
+                maxLength: 150,
                 nullable: false,
-                defaultValue: false);
+                defaultValue: "");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsPublished",
+                name: "Author",
                 table: "News");
         }
     }

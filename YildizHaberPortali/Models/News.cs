@@ -18,7 +18,6 @@ namespace YildizHaberPortali.Models
 
         public DateTime PublishDate { get; set; } // Controller'da otomatik atanıyor
 
-        [Required]
         public string Author { get; set; }
 
         // İlişki (Foreign Key)
