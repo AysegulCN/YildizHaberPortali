@@ -1,14 +1,12 @@
-﻿// Controllers/CategoryController.cs
-
+﻿
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
-using Microsoft.AspNetCore.Authorization; // <<< YETKİLENDİRME İÇİN KRİTİK USING
+using Microsoft.AspNetCore.Authorization; 
 
 namespace YildizHaberPortali.Controllers
 {
-    // Yetkilendirme Nitelikleri buraya gelmeli
     [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
@@ -36,14 +34,12 @@ namespace YildizHaberPortali.Controllers
         {
             if (ModelState.IsValid)
             {
-                // 1. Kategori adına göre URL dostu slug oluşturma
-                // System.Text.RegularExpressions ve System.Globalization usingleri gerektirir
+                
                 category.Slug = GenerateSlug(category.Name);
 
-                // 2. Kategori ekleme işlemi
+                
                 await _categoryRepository.AddAsync(category);
 
-                // 3. Admin panelindeki Kategori Listesi sayfasına yönlendir.
                 return RedirectToAction(nameof(Index));
             }
 
@@ -53,20 +49,57 @@ namespace YildizHaberPortali.Controllers
         {
             string str = phrase.ToLower();
 
-            // Geçersiz karakterleri temizle
             str = System.Text.RegularExpressions.Regex.Replace(str, @"[^a-z0-9\s-]", "");
 
-            // Boşlukları tire ile değiştir
             str = System.Text.RegularExpressions.Regex.Replace(str, @"\s", "-").Trim();
 
-            // Ardışık tireleri tek tire ile değiştir
             str = System.Text.RegularExpressions.Regex.Replace(str, @"-+", "-");
 
             return str.Length > 45 ? str.Substring(0, 45) : str;
         }
 
 
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                await _categoryRepository.DeleteAsync(id);
 
-        // Edit ve Delete metotları da burada olmalıdır.
+                return Json(new { success = true, message = "Kategori başarıyla silindi." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Silme işleminde hata oluştu." });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var category = await _categoryRepository.GetByIdAsync(id);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            return View(category);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                await _categoryRepository.UpdateAsync(category);
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(category);
+        }
     }
 }

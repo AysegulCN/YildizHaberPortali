@@ -12,18 +12,46 @@
     <div class="row">
         @foreach (var news in Model)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    @if (!string.IsNullOrEmpty(news.ImageUrl))
-                    {
-                        <img src="@news.ImageUrl" class="card-img-top" alt="@news.Title">
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@news.Title</h5>
-                        <p class="card-text"><small class="text-muted">@news.PublishDate.ToShortDateString() - @news.Category?.Name</small></p>
-                        <a asp-controller="News" asp-action="Details" asp-route-id="@news.Id" class="btn btn-sm btn-outline-primary">Haberi Oku</a>
+            <div class="row">
+                @foreach (var item in Model)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm border-0">
+
+                            <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
+                                @if (string.IsNullOrEmpty(item.Image))
+                                {
+                                    <img src="~/img/no-news.jpg" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="Haber Görseli Yok">
+                                }
+                                else
+                                {
+                                    <img src="~/uploads/@item.Image" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="@item.Title">
+                                }
+                            </div>
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title font-weight-bold text-dark">
+                                    @if (item.Title != null && item.Title.Length > 50)
+                                    {
+                                        @item.Title.Substring(0, 50) <text>...</text>
+                                    }
+                                    else
+                                    {
+                                        @item.Title
+                                    }
+                                </h5>
+
+                                <p class="card-text text-muted small mb-3">
+                                    <i class="far fa-calendar-alt mr-1"></i> @item.CreatedDate.ToString("dd.MM.yyyy")
+                                </p>
+
+                                <a asp-controller="News" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm mt-auto font-weight-bold">
+                                    Haberi Oku <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         }
     </div>

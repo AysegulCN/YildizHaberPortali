@@ -4,7 +4,7 @@ namespace YildizHaberPortali.Models
 {
     public class CreateRoleViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Lütfen bir rol adı giriniz.")]
         [Display(Name = "Rol Adı")]
         public string RoleName { get; set; }
     }

@@ -1,0 +1,139 @@
+﻿@page
+@model YildizHaberPortali.Areas.Identity.Pages.Account.LoginModel
+
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewData["Title"] - Yıldız Haber</title>
+
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
+
+    <link href="https://startbootstrap.github.io/startbootstrap-sb-admin-2/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #1c1e21 0%, #29323c 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-login {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            background-color: #f6c23e; 
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            color: white;
+            font-size: 35px;
+            box-shadow: 0 4px 10px rgba(246, 194, 62, 0.5);
+        }
+
+        .form-control-user {
+            border-radius: 50px;
+            padding: 1.5rem 1.5rem;
+        }
+
+        .btn-login {
+            border-radius: 50px;
+            padding: 0.75rem 1rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: #f6c23e;
+            border-color: #f6c23e;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-5 col-lg-6 col-md-8">
+                <div class="card card-login o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <div class="p-5">
+
+                            <div class="text-center">
+                                <div class="logo-circle">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <h1 class="h4 text-gray-900 mb-4 font-weight-bold">Tekrar Hoş Geldiniz!</h1>
+                            </div>
+
+                            <form class="user" id="account" method="post">
+
+                                <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-3"></div>
+
+                                <div class="form-group">
+                                    <input asp-for="Input.Email" class="form-control form-control-user" placeholder="E-posta Adresi" aria-required="true">
+                                    <span asp-validation-for="Input.Email" class="text-danger ml-3 small"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <input asp-for="Input.Password" class="form-control form-control-user" placeholder="Şifre" aria-required="true">
+                                    <span asp-validation-for="Input.Password" class="text-danger ml-3 small"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox small ml-3">
+                                        <input asp-for="Input.RememberMe" class="custom-control-input">
+                                        <label class="custom-control-label" asp-for="Input.RememberMe">Beni Hatırla</label>
+                                    </div>
+                                </div>
+
+                                <button id="login-submit" type="submit" class="btn btn-warning btn-user btn-block btn-login text-white">
+                                    GİRİŞ YAP
+                                </button>
+                            </form>
+
+                            <hr>
+
+                            <div class="text-center mt-3">
+                                <a class="small font-weight-bold text-secondary" asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">
+                                    Hesabın yok mu? <span class="text-warning" style="font-size: 1.1em;">Hemen Kayıt Ol!</span>
+                                </a>
+                            </div>
+                            <div class="text-center mt-2">
+                                <a class="small text-gray-500" asp-area="" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-arrow-left"></i> Siteye Geri Dön
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+
+    <partial name="_ValidationScriptsPartial" />
+
+</body>
+</html>

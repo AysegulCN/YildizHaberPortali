@@ -1,0 +1,28 @@
+﻿@model IEnumerable<YildizHaberPortali.Models.Category>
+
+<li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCategories"
+       aria-expanded="true" aria-controls="collapseCategories">
+        <i class="fas fa-fw fa-list"></i>
+        <span>Haberleri Filtrele</span>
+    </a>
+
+    <div id="collapseCategories" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Kategoriler:</h6>
+
+            <a class="collapse-item" asp-controller="News" asp-action="Index" asp-route-categoryId="">
+                <i class="fas fa-asterisk mr-1"></i> Tüm Haberler
+            </a>
+
+            <div class="dropdown-divider"></div>
+
+            @foreach (var category in Model)
+            {
+                <a class="collapse-item" asp-controller="News" asp-action="Index" asp-route-categoryId="@category.Id">
+                    <i class="fas fa-angle-right mr-1"></i> @category.Name
+                </a>
+            }
+        </div>
+    </div>
+</li>

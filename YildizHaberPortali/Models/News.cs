@@ -11,6 +11,12 @@ namespace YildizHaberPortali.Models
         [Required]
         public string Title { get; set; }
 
+        public string Description { get; set; }
+
+        public string Image { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
         [Required]
         public string Content { get; set; }
         public int Priority { get; set; }
@@ -28,7 +34,9 @@ namespace YildizHaberPortali.Models
 
         public Category Category { get; set; }
 
-        public bool IsPublished { get; set; } = true; 
+        public bool IsPublished { get; set; } = true;
+
+       
 
     }
 }

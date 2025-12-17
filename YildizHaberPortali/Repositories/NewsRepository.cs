@@ -18,7 +18,11 @@ namespace YildizHaberPortali.Repositories
             _context = context;
         }
 
-
+        public async Task<List<News>> GetAllWithCategoryAsync()
+        {
+            // Veritabanından Haberleri + Kategorilerini (Include) alıp liste olarak dönüyoruz
+            return await _context.News.Include(n => n.Category).ToListAsync();
+        }
         public async Task<IEnumerable<News>> GetByCategoryIdAsync(int categoryId)
         {
             return await _context.News

@@ -2,60 +2,78 @@
 
 @{
     ViewData["Title"] = "Yeni Haber Ekle";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; 
 }
 
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Yeni Haber Oluştur</h6>
     </div>
     <div class="card-body">
 
-        <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
 
-            @* Kategori Seçimi (Dropdown) *@
-            <div class="form-group">
-                <label asp-for="CategoryId" class="control-label">Kategori Seçimi</label>
-                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
-                    <option value="">-- Kategori Seçiniz --</option>
-                </select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
-            </div>
+            <div class="row">
+                <div class="col-md-8">
 
-            @* Başlık *@
-            <div class="form-group">
-                <label asp-for="Title" class="control-label">Başlık</label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
 
-            @* İçerik *@
-            <div class="form-group">
-                <label asp-for="Content" class="control-label">İçerik</label>
-                <textarea asp-for="Content" class="form-control" rows="8"></textarea>
-                <span asp-validation-for="Content" class="text-danger"></span>
-            </div>
+                    <div class="form-group">
+                        <label asp-for="CategoryId" class="control-label font-weight-bold">Kategori</label>
+                        <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories">
+                            <option value="">-- Bir Kategori Seçiniz --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
 
-            @* Yazar *@
-            <div class="form-group">
-                <label asp-for="Author" class="control-label">Yazar</label>
-                <input asp-for="Author" class="form-control" />
-                <span asp-validation-for="Author" class="text-danger"></span>
-            </div>
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label font-weight-bold">Haber Başlığı</label>
+                        <input asp-for="Title" class="form-control" placeholder="Haberin başlığını giriniz..." />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
 
-            @* Resim URL'si (İleride dosya yükleme eklenecek) *@
-            <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label">Görsel URL (Şimdilik)</label>
-                <input asp-for="ImageUrl" class="form-control" />
-            </div>
 
-            <div class="form-group mt-3">
-                <input type="submit" value="Haber Ekle" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+                    <div class="form-group">
+                        <label asp-for="Content" class="control-label font-weight-bold">Haber İçeriği</label>
+                        <textarea asp-for="Content" class="form-control summernote" rows="8"></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body text-center">
+                            <label asp-for="ImageFile" class="font-weight-bold">Haber Görseli</label>
+
+                            <div class="mb-3">
+                                <i class="fas fa-image fa-3x text-gray-300"></i>
+                            </div>
+
+                            <input asp-for="ImageFile" type="file" class="form-control-file border p-1" />
+                            <small class="text-muted d-block mt-2">Desteklenen formatlar: JPG, PNG</small>
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Author" class="control-label font-weight-bold">Yazar</label>
+                        <input asp-for="Author" class="form-control" placeholder="Admin" />
+                        <span asp-validation-for="Author" class="text-danger"></span>
+                    </div>
+
+                    <hr />
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fas fa-save"></i> Haberi Kaydet
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-secondary btn-block">
+                        <i class="fas fa-arrow-left"></i> Listeye Dön
+                    </a>
+
+                </div>
             </div>
         </form>
-
     </div>
 </div>
 

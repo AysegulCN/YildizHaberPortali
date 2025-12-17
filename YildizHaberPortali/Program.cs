@@ -11,30 +11,32 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// 1. Veritabaný Baðlantýsý ve Identity
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Identity Servisleri
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
+    // Hesap doðrulama zorunluluðunu kaldýrýyoruz (Hýzlý giriþ için)
     options.SignIn.RequireConfirmedAccount = false;
-})
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 2. Repository/Servis Tanýmlamalarý (Tekrar edenleri sildik)
+    // --- ÞÝFRE AYARLARI (Zorunluluklarý Kaldýrma) ---
+    options.Password.RequireDigit = false;           // Sayý zorunluluðu yok
+    options.Password.RequireLowercase = false;       // Küçük harf zorunluluðu yok
+    options.Password.RequireUppercase = false;       // Büyük harf zorunluluðu yok
+    options.Password.RequireNonAlphanumeric = false; // Sembol (!, *, ?) zorunluluðu yok
+    options.Password.RequiredLength = 3;             // En az 3 karakter olsun yeter (Ýstersen 6 yap)
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
-// MVC ve Görünüm Servisleri
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// 3. SeedData Çalýþtýrma (Sadece Development Ortamýnda)
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
@@ -54,6 +56,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStatusCodePagesWithReExecute("/Home/ErrorPage", "?code={0}");
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -61,7 +64,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Program.cs içinde
+app.MapRazorPages();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=News}/{action=Index}/{id?}");

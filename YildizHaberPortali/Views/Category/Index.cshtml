@@ -5,6 +5,9 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+@* AJAX POST İSTEĞİ İÇİN GEREKLİ GÜVENLİK TOKENI *@
+@Html.AntiForgeryToken()
+
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
     <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
@@ -18,7 +21,9 @@
     </div>
     <div class="card-body">
 
-        <div id="undo-container" class="alert alert-warning" style="display:none; position:fixed; bottom:20px; right:20px; z-index:1000;">
+        @* GERİ YÜKLEME MESAJI BURADA GÖRÜNECEK *@
+        <div id="undo-notification-container">
+            @* AJAX kodu buraya mesajı ekleyecek *@
         </div>
 
         <div class="table-responsive">
@@ -32,17 +37,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @* Hata kaynağı olan döngü değişkeni düzeltildi *@
+                    @* HATA DÜZELTİLDİ: Artık 'item' kullanılıyor *@
                     @foreach (var item in Model)
                     {
-                        <tr id="row_@category.Id">
-                            <td>@category.Id</td>
-                            <td>@category.Name</td>
-                            <td>@category.Slug</td>
+                        <tr id="row_@item.Id">
+                            <td>@item.Id</td>
+                            <td>@item.Name</td>
+                            <td>@item.Slug</td>
                             <td>
-                                <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-warning btn-sm">Düzenle</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
 
-                                <button class="btn btn-danger btn-sm" onclick="deleteItem(@category.Id, 'Category')">Sil</button>
+                                @* SİL BUTONUNA YENİ FONKSİYONU BAĞLADIK *@
+                                <button class="btn btn-danger btn-sm" onclick="deleteItem(@item.Id, 'Category')">Sil</button>
                             </td>
                         </tr>
                     }
@@ -52,40 +58,95 @@
     </div>
 </div>
 
-// Views/Category/Index.cshtml veya Views/News/Index.cshtml dosyalarının en altına
-
 @section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <script>
+        // Geri alma işleminde kullanılacak zamanlayıcılar ve silinecek öğenin ID'si
+        var deleteTimeouts = {};
+        var itemToDeleteId = null;
+
         // Genel Silme Fonksiyonu
         function deleteItem(id, controllerName) {
 
             if (confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) {
 
-                $.ajax({
-                    type: "POST",
-                    url: "/" + controllerName + "/DeleteConfirmed", // POST metodunu çağıracağız
-                    data: { id: id },
-                    headers: {
-                        // AJAX POST isteği için Anti-Forgery Token (güvenlik)
-                        "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
-                    },
-                    success: function (response) {
-                        // İşlem başarılı olursa
-                        if (response.success) {
-                            alert(response.message);
+                var rowElement = $('#row_' + id);
+                itemToDeleteId = id; // Geri yükleme için ID'yi global değişkene ata
 
-                            // Sayfadaki silinen satırı DOM'dan kaldır
-                            $('#row_' + id).remove();
+                // 1. Satırı Gizle
+                rowElement.hide();
 
-                        } else {
-                            alert("Hata: " + response.message);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        alert("Silme işleminde beklenmeyen bir hata oluştu: " + error);
+                // 2. Geri Yükle Bildirimini Göster
+                var notificationBar = $('<div id="undo-notification" class="alert alert-info text-center" role="alert" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 400px; padding: 10px;"></div>');
+
+                $('body').append(notificationBar);
+
+                // 3. Geri Sayımı Başlat
+                var countdown = 5;
+                var interval = setInterval(function() {
+                    countdown--;
+                    if (countdown >= 0) {
+                        notificationBar.html('Öğe silindi. <a href="javascript:void(0)" onclick="undoDelete(\'' + controllerName + '\')" style="color: red; text-decoration: underline;">Geri Yükle</a> (' + countdown + ' sn)');
                     }
-                });
+                }, 1000); // Her saniye güncelle
+
+                // 4. Zamanlayıcıyı Ayarla (5 saniye sonra kesin silme)
+                deleteTimeouts[id] = setTimeout(function() {
+                    clearInterval(interval);
+                    finalizeDelete(id, controllerName);
+                }, 5000);
             }
+        }
+
+        // Geri Yükle Butonuna Basıldığında Çalışır
+        function undoDelete(controllerName) {
+            if (itemToDeleteId) {
+
+                // 1. Kesin silme zamanlayıcısını durdur
+                clearTimeout(deleteTimeouts[itemToDeleteId]);
+
+                // 2. Satırı görünür yap
+                $('#row_' + itemToDeleteId).show();
+
+                // 3. Bildirim çubuğunu gizle
+                $('#undo-notification').remove();
+
+                alert("Silme işlemi geri alındı.");
+
+                itemToDeleteId = null; // ID'yi sıfırla
+            }
+        }
+
+        // 5 Saniye Sonunda Sunucuya Silme İsteği Gönderir
+        function finalizeDelete(id, controllerName) {
+
+            // 1. Sunucuya AJAX isteği gönder
+            $.ajax({
+                type: "POST",
+                url: "/" + controllerName + "/DeleteConfirmed",
+                data: { id: id },
+                headers: {
+                    "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Sayfadan tamamen kaldır
+                        $('#row_' + id).remove();
+                    } else {
+                        // Hata olursa satırı geri göster
+                        alert("Kesin silme başarısız oldu. Öğe geri yüklenecektir.");
+                        $('#row_' + id).show();
+                    }
+                },
+                error: function () {
+                    alert("Kesin silme sırasında sunucu hatası. Öğe geri yüklenecektir.");
+                    $('#row_' + id).show();
+                }
+            });
+
+            // Bildirim çubuğunu gizle
+            $('#undo-notification').remove();
         }
     </script>
 }

@@ -8,39 +8,36 @@ using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 
+using Microsoft.AspNetCore.Hosting;
+
 public class NewsController : Controller
 {
-
     private readonly INewsRepository _newsRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IWebHostEnvironment _hostEnvironment; 
 
-    public NewsController(INewsRepository newsRepository, ICategoryRepository categoryRepository)
+    public NewsController(INewsRepository newsRepository, ICategoryRepository categoryRepository, IWebHostEnvironment hostEnvironment)
     {
         _newsRepository = newsRepository;
         _categoryRepository = categoryRepository;
+        _hostEnvironment = hostEnvironment; 
     }
 
-    [AllowAnonymous]
+    [AllowAnonymous] // Eğer admin paneliyse bunu kaldırabilirsin, site tarafıysa kalsın
     public async Task<IActionResult> Index(int? categoryId)
     {
-        IEnumerable<News> newsList;
+        // 1. ADIM: Yeni yazdığımız metotla verileri (Kategorileriyle birlikte) çek
+        var newsList = await _newsRepository.GetAllWithCategoryAsync();
 
-        var categories = await _categoryRepository.GetAllAsync();
-        ViewBag.Categories = categories;
-
-        if (categoryId.HasValue && categoryId.Value > 0)
+        // 2. ADIM: Eğer bir kategori seçildiyse LİSTE ÜZERİNDE filtrele
+        if (categoryId.HasValue)
         {
-            newsList = await _newsRepository.GetByCategoryIdAsync(categoryId.Value);
-            var category = categories.FirstOrDefault(c => c.Id == categoryId.Value);
-            ViewData["Title"] = $"{category?.Name} Haberleri";
-        }
-        else
-        {
-            newsList = await _newsRepository.GetAllAsync();
-            ViewData["Title"] = "Tüm Haberler";
+            newsList = newsList.Where(x => x.CategoryId == categoryId).ToList();
+            ViewBag.CurrentCategory = categoryId;
         }
 
-        return View(newsList);
+        // 3. ADIM: Tarihe göre sırala (Yeniden eskiye) ve sayfaya gönder
+        return View(newsList.OrderByDescending(x => x.CreatedDate).ToList());
     }
 
     [Authorize(Roles = "Admin,Editor")]
@@ -58,29 +55,52 @@ public class NewsController : Controller
         };
         return View(viewModel);
     }
-
     [Authorize(Roles = "Admin,Editor")]
     [HttpPost]
     public async Task<IActionResult> Create(NewsCreateViewModel viewModel)
     {
-        var categoryList = await _categoryRepository.GetAllAsync();
-        viewModel.Categories = categoryList.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
-
         if (ModelState.IsValid)
         {
+            string uniqueFileName = null;
+
+            if (viewModel.ImageFile != null)
+            {
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
+
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await viewModel.ImageFile.CopyToAsync(fileStream);
+                }
+            }
+
             var news = new News
             {
                 Title = viewModel.Title,
                 Content = viewModel.Content,
-                ImageUrl = viewModel.ImageUrl,
-                Author = viewModel.Author,
+                Author = viewModel.Author ?? "Admin", 
                 CategoryId = viewModel.CategoryId,
                 PublishDate = DateTime.Now,
-                IsPublished = true
+                IsPublished = true,
+
+                Image = uniqueFileName,  
+
+                ImageUrl = uniqueFileName
             };
+
             await _newsRepository.AddAsync(news);
             return RedirectToAction(nameof(Index));
         }
+
+        var categoryList = await _categoryRepository.GetAllAsync();
+        viewModel.Categories = categoryList.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
+
         return View(viewModel);
     }
 
@@ -89,7 +109,6 @@ public class NewsController : Controller
     {
         if (id == null) return NotFound();
 
-        // Daha önceki yazım hatası buradan temizlenmiştir.
         var news = await _newsRepository.GetByIdAsync(id.GetValueOrDefault());
         if (news == null) return NotFound();
 
@@ -103,7 +122,6 @@ public class NewsController : Controller
             ImageUrl = news.ImageUrl,
             Author = news.Author,
             CategoryId = news.CategoryId,
-            // IsPublished alanını da eklemeyi unutmayın (ViewModel'de olmalı)
             Categories = categoryList.Select(c => new SelectListItem
             {
                 Value = c.Id.ToString(),
@@ -132,7 +150,6 @@ public class NewsController : Controller
                 Author = viewModel.Author,
                 CategoryId = viewModel.CategoryId,
                 PublishDate = DateTime.Now,
-                // IsPublished'i de modelden almayı unutmayın
             };
             await _newsRepository.UpdateAsync(news);
             return RedirectToAction(nameof(Index));
@@ -141,7 +158,6 @@ public class NewsController : Controller
         return View(viewModel);
     }
 
-    // GET: Haber Silme Onayı (Sadece Admin)
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int? id)
     {
@@ -151,14 +167,44 @@ public class NewsController : Controller
         return View(news);
     }
 
-    // POST: Haber Silme İşlemi (Sadece Admin)
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
+        try
+        {
+            await _newsRepository.DeleteAsync(id);
+
+            return Json(new { success = true, message = "Haber başarıyla silindi." });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = "Silme işleminde hata oluştu." });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var news = await _newsRepository.GetByIdAsync(id);
+        if (news == null)
+        {
+            return Json(new { success = false, message = "Haber bulunamadı." });
+        }
+
+        // Resmi klasörden de silelim ki çöp birikmesin
+        if (!string.IsNullOrEmpty(news.Image))
+        {
+            string imagePath = Path.Combine(_hostEnvironment.WebRootPath, "uploads", news.Image);
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
+        }
+
         await _newsRepository.DeleteAsync(id);
-        return RedirectToAction(nameof(Index));
+        return Json(new { success = true });
     }
 
     [Authorize(Roles = "Admin")] 
@@ -166,5 +212,21 @@ public class NewsController : Controller
     {
         return View(); 
         throw new NotImplementedException(); 
+    }
+    [HttpPost]
+    public async Task<IActionResult> ToggleStatus(int id)
+    {
+        var news = await _newsRepository.GetByIdAsync(id);
+        if (news == null)
+        {
+            return Json(new { success = false, message = "Haber bulunamadı." });
+        }
+
+        // Durumu tersine çevir (Açıksa kapa, kapalıysa aç)
+        news.IsPublished = !news.IsPublished;
+        await _newsRepository.UpdateAsync(news);
+
+        // Yeni durumu geri gönder ki sayfadaki renk değişsin
+        return Json(new { success = true, isPublished = news.IsPublished });
     }
 }

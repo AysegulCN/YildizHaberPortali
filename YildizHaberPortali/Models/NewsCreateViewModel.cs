@@ -24,5 +24,7 @@ namespace YildizHaberPortali.Models
         public int Id { get; set; }
 
         public IEnumerable<SelectListItem> Categories { get; set; }
+
+        public IFormFile ImageFile { get; set; }
     }
 }

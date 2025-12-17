@@ -57,5 +57,15 @@ namespace YildizHaberPortali.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        public IActionResult ErrorPage(int? code)
+        {
+            if (code == 404)
+            {
+                return View("NotFound"); // 404 ise özel tasarýmýmýza git
+            }
+
+            // Diðer hatalar için (500 vs.) standart hata sayfasýna git
+            return View("Error");
+        }
     }
 }

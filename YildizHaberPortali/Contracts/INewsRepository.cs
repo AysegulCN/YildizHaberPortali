@@ -9,5 +9,8 @@ namespace YildizHaberPortali.Contracts
     {
         // Özel metot (Dönüş tipinin GenericRepository ile uyumlu olması için: IEnumerable<News>)
         Task<IEnumerable<News>> GetByCategoryIdAsync(int categoryId);
+
+        Task<List<News>> GetAllWithCategoryAsync();
+
     }
 }
