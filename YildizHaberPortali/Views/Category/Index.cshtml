@@ -1,54 +1,107 @@
 ﻿@model IEnumerable<YildizHaberPortali.Models.Category>
-
 @{
     ViewData["Title"] = "Kategori Yönetimi";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-@* AJAX POST İSTEĞİ İÇİN GEREKLİ GÜVENLİK TOKENI *@
 @Html.AntiForgeryToken()
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
-    <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-        <i class="fas fa-plus fa-sm text-white-50"></i> Yeni Kategori Ekle
-    </a>
+<style>
+    /* Premium Kart ve Tablo Tasarımı */
+    .category-card {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .category-table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+        .category-table tr {
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+            .category-table tr:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            }
+
+        .category-table td, .category-table th {
+            border: none !important;
+            padding: 18px !important;
+            vertical-align: middle !important;
+        }
+
+    /* Modal (Açılır Pencere) Tasarımı */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #eee;
+        background: #f8f9fc;
+        border-radius: 20px 20px 0 0;
+    }
+
+    /* Geri Yükle Paneli */
+    #undo-toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        background: #1a1a1a;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 50px;
+        display: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        align-items: center;
+        gap: 20px;
+    }
+
+    .undo-btn {
+        color: #ff4d4d;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 px-3">
+    <h3 class="font-weight-bold text-gray-800 m-0"><i class="fas fa-layer-group text-primary mr-2"></i>Kategori Yönetimi</h3>
+    <button class="btn btn-primary shadow-sm rounded-pill px-4" data-toggle="modal" data-target="#addCategoryModal">
+        <i class="fas fa-plus mr-2"></i>Yeni Kategori Ekle
+    </button>
 </div>
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Kategoriler Tablosu</h6>
-    </div>
-    <div class="card-body">
-
-        @* GERİ YÜKLEME MESAJI BURADA GÖRÜNECEK *@
-        <div id="undo-notification-container">
-            @* AJAX kodu buraya mesajı ekleyecek *@
-        </div>
-
+<div class="card category-card shadow-sm mx-2">
+    <div class="card-body bg-light" style="border-radius: 20px;">
         <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <table class="table category-table" id="categoryTable">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Adı</th>
-                        <th>Slug (URL Adresi)</th>
-                        <th>İşlemler</th>
+                    <tr class="text-muted small text-uppercase font-weight-bold">
+                        <th style="width: 80px;">ID</th>
+                        <th>Kategori Adı</th>
+                        <th>URL (Slug)</th>
+                        <th class="text-center">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @* HATA DÜZELTİLDİ: Artık 'item' kullanılıyor *@
                     @foreach (var item in Model)
                     {
                         <tr id="row_@item.Id">
-                            <td>@item.Id</td>
-                            <td>@item.Name</td>
-                            <td>@item.Slug</td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
-
-                                @* SİL BUTONUNA YENİ FONKSİYONU BAĞLADIK *@
-                                <button class="btn btn-danger btn-sm" onclick="deleteItem(@item.Id, 'Category')">Sil</button>
+                            <td class="text-muted">#@item.Id</td>
+                            <td><span class="badge badge-light p-2 text-primary shadow-sm">@item.Name</span></td>
+                            <td><code class="text-info">/@item.Slug</code></td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm rounded-circle shadow-sm mx-1"><i class="fas fa-edit"></i></a>
+                                <button onclick="handleDelete(@item.Id)" class="btn btn-danger btn-sm rounded-circle shadow-sm mx-1"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     }
@@ -58,95 +111,96 @@
     </div>
 </div>
 
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title font-weight-bold text-primary">Yeni Kategori Oluştur</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="font-weight-bold">Kategori Adı</label>
+                    <input type="text" id="newCategoryName" class="form-control rounded-pill" placeholder="Örn: Teknoloji" required>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-pill" data-dismiss="modal">Vazgeç</button>
+                <button type="button" onclick="saveCategory()" class="btn btn-primary rounded-pill px-4">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="undo-toast">
+    <span>Kategori silindi... <span id="undo-timer">5</span>s</span>
+    <span class="undo-btn" onclick="undoDelete()">Geri Yükle</span>
+</div>
+
 @section Scripts {
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Geri alma işleminde kullanılacak zamanlayıcılar ve silinecek öğenin ID'si
-        var deleteTimeouts = {};
-        var itemToDeleteId = null;
+        var countdownInterval, pendingDeleteId = null;
 
-        // Genel Silme Fonksiyonu
-        function deleteItem(id, controllerName) {
+        // --- KATEGORİ KAYDETME (AJAX) ---
+        function saveCategory() {
+            var name = $('#newCategoryName').val();
+            if(!name) { Swal.fire('Hata', 'İsim boş olamaz!', 'error'); return; }
 
-            if (confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) {
+            $.post('/Category/CreateAjax', { name: name }, function(res) {
+                if(res.success) {
+                    $('#addCategoryModal').modal('hide');
+                    $('#newCategoryName').val('');
 
-                var rowElement = $('#row_' + id);
-                itemToDeleteId = id; // Geri yükleme için ID'yi global değişkene ata
+                    // Tabloya yeni satırı ekliyoruz (Sayfa yenilemeden!)
+                    var newRow = `<tr id="row_${res.id}" style="display:none;">
+                        <td class="text-muted">#${res.id}</td>
+                        <td><span class="badge badge-light p-2 text-primary shadow-sm">${res.name}</span></td>
+                        <td><code class="text-info">/${res.slug}</code></td>
+                        <td class="text-center">
+                            <a href="/Category/Edit/${res.id}" class="btn btn-warning btn-sm rounded-circle shadow-sm mx-1"><i class="fas fa-edit"></i></a>
+                            <button onclick="handleDelete(${res.id})" class="btn btn-danger btn-sm rounded-circle shadow-sm mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                    $('#categoryTable tbody').prepend(newRow);
+                    $('#row_' + res.id).fadeIn(800);
 
-                // 1. Satırı Gizle
-                rowElement.hide();
-
-                // 2. Geri Yükle Bildirimini Göster
-                var notificationBar = $('<div id="undo-notification" class="alert alert-info text-center" role="alert" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 400px; padding: 10px;"></div>');
-
-                $('body').append(notificationBar);
-
-                // 3. Geri Sayımı Başlat
-                var countdown = 5;
-                var interval = setInterval(function() {
-                    countdown--;
-                    if (countdown >= 0) {
-                        notificationBar.html('Öğe silindi. <a href="javascript:void(0)" onclick="undoDelete(\'' + controllerName + '\')" style="color: red; text-decoration: underline;">Geri Yükle</a> (' + countdown + ' sn)');
-                    }
-                }, 1000); // Her saniye güncelle
-
-                // 4. Zamanlayıcıyı Ayarla (5 saniye sonra kesin silme)
-                deleteTimeouts[id] = setTimeout(function() {
-                    clearInterval(interval);
-                    finalizeDelete(id, controllerName);
-                }, 5000);
-            }
-        }
-
-        // Geri Yükle Butonuna Basıldığında Çalışır
-        function undoDelete(controllerName) {
-            if (itemToDeleteId) {
-
-                // 1. Kesin silme zamanlayıcısını durdur
-                clearTimeout(deleteTimeouts[itemToDeleteId]);
-
-                // 2. Satırı görünür yap
-                $('#row_' + itemToDeleteId).show();
-
-                // 3. Bildirim çubuğunu gizle
-                $('#undo-notification').remove();
-
-                alert("Silme işlemi geri alındı.");
-
-                itemToDeleteId = null; // ID'yi sıfırla
-            }
-        }
-
-        // 5 Saniye Sonunda Sunucuya Silme İsteği Gönderir
-        function finalizeDelete(id, controllerName) {
-
-            // 1. Sunucuya AJAX isteği gönder
-            $.ajax({
-                type: "POST",
-                url: "/" + controllerName + "/DeleteConfirmed",
-                data: { id: id },
-                headers: {
-                    "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
-                },
-                success: function (response) {
-                    if (response.success) {
-                        // Sayfadan tamamen kaldır
-                        $('#row_' + id).remove();
-                    } else {
-                        // Hata olursa satırı geri göster
-                        alert("Kesin silme başarısız oldu. Öğe geri yüklenecektir.");
-                        $('#row_' + id).show();
-                    }
-                },
-                error: function () {
-                    alert("Kesin silme sırasında sunucu hatası. Öğe geri yüklenecektir.");
-                    $('#row_' + id).show();
+                    Swal.fire({ icon: 'success', title: 'Kategori Eklendi!', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
                 }
             });
+        }
 
-            // Bildirim çubuğunu gizle
-            $('#undo-notification').remove();
+        // --- SİLME VE GERİ YÜKLEME (AJAX) ---
+        function handleDelete(id) {
+            if (pendingDeleteId !== null) finalizeDelete(pendingDeleteId);
+            pendingDeleteId = id;
+            $('#row_' + id).css('opacity', '0.5').slideUp(300);
+            var seconds = 5;
+            $('#undo-timer').text(seconds);
+            $('#undo-toast').css('display', 'flex').fadeIn();
+
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(function() {
+                seconds--;
+                $('#undo-timer').text(seconds);
+                if (seconds <= 0) { clearInterval(countdownInterval); finalizeDelete(pendingDeleteId); }
+            }, 1000);
+        }
+
+        function undoDelete() {
+            if (pendingDeleteId !== null) {
+                clearInterval(countdownInterval);
+                $('#row_' + pendingDeleteId).slideDown(300).css('opacity', '1');
+                $('#undo-toast').fadeOut();
+                pendingDeleteId = null;
+            }
+        }
+
+        function finalizeDelete(id) {
+            if (id === null) return;
+            $.post('/Category/DeleteConfirmed', { id: id }, function (res) {
+                if (res.success) { $('#row_' + id).remove(); $('#undo-toast').fadeOut(); pendingDeleteId = null; }
+            });
         }
     </script>
 }

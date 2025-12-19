@@ -1,64 +1,97 @@
-﻿// Controllers/CommentController.cs
-
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using System;
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
+using YildizHaberPortali.Hubs;
 using YildizHaberPortali.Models;
-using System.Linq;
-using System;
 
-// Sadece Admin ve Yazar (Editor) erişebilir
-[Authorize(Roles = "Admin, Editor")]
-public class CommentController : Controller
+namespace YildizHaberPortali.Controllers
 {
-    private readonly ICommentRepository _commentRepository;
-    // Eğer SignalR kullandıysak: private readonly IHubContext<NewsHub> _hubContext;
-
-    public CommentController(ICommentRepository commentRepository)
+    public class CommentController : Controller
     {
-        _commentRepository = commentRepository;
-    }
+        private readonly ICommentRepository _commentRepository;
+        private readonly IHubContext<NewsHub> _hubContext;
 
-    // GET: /Comment/Index (Admin Panelinde Tüm Yorumları Listeleme)
-    public async Task<IActionResult> Index()
-    {
-        var comments = await _commentRepository.GetAllAsync();
-        // Yorumları en yeniden eskiye sıralayalım
-        return View(comments.OrderByDescending(c => c.CommentDate));
-    }
-
-    // POST: /Comment/Delete (AJAX ile Yorum Silme)
-    [HttpPost]
-    [Authorize(Roles = "Admin")] // Sadece Admin silebilir
-    public async Task<IActionResult> Delete(int id)
-    {
-        var comment = await _commentRepository.GetByIdAsync(id);
-        if (comment == null)
+        public CommentController(ICommentRepository commentRepository, IHubContext<NewsHub> hubContext)
         {
-            return Json(new { success = false, message = "Yorum bulunamadı." });
+            _commentRepository = commentRepository;
+            _hubContext = hubContext;
         }
 
-        await _commentRepository.DeleteAsync(id);
-        return Json(new { success = true, message = "Yorum başarıyla silindi." });
-    }
-
-    // --------------- Halka Açık Yorum Ekleme Metodu ----------------
-
-    [HttpPost]
-    [AllowAnonymous] // Herkes yorum ekleyebilir
-    public async Task<IActionResult> AddComment(Comment comment)
-    {
-        if (ModelState.IsValid)
+        public async Task<IActionResult> Index()
         {
-            comment.CommentDate = DateTime.Now;
+            var comments = await _commentRepository.GetAllAsync();
+            return View(comments.OrderByDescending(x => x.CommentDate).ToList());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostComment(int newsId, string name, string content)
+        {
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(content))
+            {
+                return Json(new { success = false, message = "Lütfen adınızı ve yorumunuzu yazın!" });
+            }
+
+            var comment = new Comment
+            {
+                NewsId = newsId,
+                AuthorName = name,      
+                Content = content,
+                CommentDate = DateTime.Now, 
+                IsApproved = false      
+            };
+
             await _commentRepository.AddAsync(comment);
 
-            // Kullanıcıyı, yorum yaptığı haberin detay sayfasına geri yönlendir.
-            return RedirectToAction("Details", "Home", new { id = comment.NewsId });
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", name, "Yeni bir yorum onayınızı bekliyor!");
+
+            return Json(new { success = true, message = "Yorumunuz alındı, onaylandıktan sonra görünecektir." });
+        }
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var comment = await _commentRepository.GetByIdAsync(id);
+            if (comment != null)
+            {
+                comment.IsApproved = true;
+                await _commentRepository.UpdateAsync(comment);
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
         }
 
-        // Model geçerli değilse, detay sayfasına geri dön.
-        return RedirectToAction("Details", "Home", new { id = comment.NewsId });
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _commentRepository.DeleteAsync(id);
+            return Json(new { success = true });
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> AddComment(int newsId, string authorName, string content)
+        {
+            if (string.IsNullOrEmpty(authorName) || string.IsNullOrEmpty(content))
+            {
+                TempData["CommentError"] = "Lütfen tüm alanları doldurun.";
+
+                return RedirectToAction("Details", "News", new { id = newsId });
+            }
+
+            var comment = new Comment
+            {
+                NewsId = newsId,
+                AuthorName = authorName,
+                Content = content,
+                CommentDate = DateTime.Now,
+                IsApproved = false 
+            };
+
+            await _commentRepository.AddAsync(comment);
+
+            TempData["CommentSuccess"] = "Yorumunuz alındı, onaylandıktan sonra görünecektir.";
+            return RedirectToAction("Details", "News", new { id = newsId });
+        }
     }
 }

@@ -1,31 +1,14 @@
-﻿// Models/Comment.cs
-
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace YildizHaberPortali.Models
+﻿namespace YildizHaberPortali.Models
 {
     public class Comment
     {
-        [Key]
         public int Id { get; set; }
-
-        [Required]
-        public int NewsId { get; set; } // Hangi habere ait olduğu
-
-        [Required]
-        [StringLength(100)]
-        public string AuthorName { get; set; } // Yorum yapanın adı
-
-        [Required]
-        public string Content { get; set; } // Yorum içeriği
-
-        [DataType(DataType.DateTime)]
+        public string AuthorName { get; set; } // 'Name' yerine 'AuthorName'
+        public string Content { get; set; }
         public DateTime CommentDate { get; set; } = DateTime.Now;
+        public bool IsApproved { get; set; } = false; // Hata veren yer burasıydı
 
-        // İlişki (Navigation Property)
-        [ForeignKey("NewsId")]
-        public News News { get; set; }
+        public int NewsId { get; set; }
+        public virtual News News { get; set; }
     }
 }

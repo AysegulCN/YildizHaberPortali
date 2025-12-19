@@ -19,6 +19,7 @@ namespace YildizHaberPortali.Models
 
         [Required]
         public string Content { get; set; }
+
         public int Priority { get; set; }
 
         public string ImageUrl { get; set; } 
@@ -36,7 +37,7 @@ namespace YildizHaberPortali.Models
 
         public bool IsPublished { get; set; } = true;
 
-       
+        public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     }
 }

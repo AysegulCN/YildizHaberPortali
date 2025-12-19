@@ -29,6 +29,7 @@ namespace YildizHaberPortali.Repositories
                 .ToList();
         }
 
+
         public async Task<Category> GetByIdAsync(int id)
         {
             return await _context.Categories.FindAsync(id);
@@ -55,5 +56,22 @@ namespace YildizHaberPortali.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<Category>> GetCategoriesWithLatestNewsAsync()
+        {
+            // Include(c => c.News) artık hata vermeyecek
+            return await _context.Categories
+                .Include(c => c.News)
+                .Select(c => new Category
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    // Sadece yayında olan son 4 haberi seç
+                    News = c.News.Where(n => n.IsPublished)
+                                 .OrderByDescending(n => n.CreatedDate)
+                                 .Take(4).ToList()
+                }).ToListAsync();
+        }
+
     }
 }

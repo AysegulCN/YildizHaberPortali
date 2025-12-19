@@ -1,13 +1,7 @@
-﻿// Contracts/ICommentRepository.cs
-
+﻿using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
 
-namespace YildizHaberPortali.Contracts
+public interface ICommentRepository : IGenericRepository<Comment>
 {
-    // Generic Repository'den miras alıyoruz
-    public interface ICommentRepository : IGenericRepository<Comment>
-    {
-        // Yorumlarla ilgili özel metotlar buraya eklenebilir.
-        // Örneğin: Task<IEnumerable<Comment>> GetCommentsByNewsIdAsync(int newsId);
-    }
+    Task<List<Comment>> GetApprovedCommentsByNewsIdAsync(int newsId);
 }

@@ -16,8 +16,7 @@ namespace YildizHaberPortali.Models
 
         [Required]
         public string Slug { get; set; }
-
-        // KRİTİK EKLENTİ: DisplayOrder
+        public virtual ICollection<News> News { get; set; }
         public int DisplayOrder { get; set; }
     }
 }

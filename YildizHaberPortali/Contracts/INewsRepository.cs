@@ -11,6 +11,8 @@ namespace YildizHaberPortali.Contracts
         Task<IEnumerable<News>> GetByCategoryIdAsync(int categoryId);
 
         Task<List<News>> GetAllWithCategoryAsync();
+        Task<List<News>> GetAllWithCommentsAsync();
+
 
     }
 }

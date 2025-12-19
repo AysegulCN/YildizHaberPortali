@@ -1,6 +1,4 @@
-﻿// Models/NewsCreateViewModel.cs
-
-using Microsoft.AspNetCore.Mvc.Rendering; // SelectListItem için
+﻿using Microsoft.AspNetCore.Mvc.Rendering; 
 using System.ComponentModel.DataAnnotations;
 
 namespace YildizHaberPortali.Models
@@ -26,5 +24,7 @@ namespace YildizHaberPortali.Models
         public IEnumerable<SelectListItem> Categories { get; set; }
 
         public IFormFile ImageFile { get; set; }
+        public string? ExistingImagePath { get; set; } 
     }
+
 }

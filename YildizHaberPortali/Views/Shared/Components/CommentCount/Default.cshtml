@@ -1,0 +1,5 @@
+﻿@model int
+@* Sayı 0'dan büyükse rozeti göster, değilse gizli kalsın *@
+<span id="comment-badge" class="badge badge-danger ml-1" style="@(Model == 0 ? "display:none;" : "")">
+    @Model
+</span>

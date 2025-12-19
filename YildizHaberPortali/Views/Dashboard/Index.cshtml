@@ -1,0 +1,234 @@
+﻿@model IEnumerable<YildizHaberPortali.Models.News>
+@{
+    ViewData["Title"] = "Kontrol Paneli";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="row mb-4">
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 border-0" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="letter-spacing: 1px;">Toplam Haber</div>
+                        <div class="h3 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-newspaper fa-2x text-gray-200"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 border-0" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="letter-spacing: 1px;">Yayında Olanlar</div>
+                        <div class="h3 mb-0 font-weight-bold text-gray-800">@ViewBag.ActiveCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-200"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-secondary shadow h-100 py-2 border-0" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1" style="letter-spacing: 1px;">Pasif / Taslak</div>
+                        <div class="h3 mb-0 font-weight-bold text-gray-800">@ViewBag.PassiveCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-pause-circle fa-2x text-gray-200"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Kontrol Paneli</h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Toplam Haber</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-newspaper fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Yayında Olanlar</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.ActiveCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-secondary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Pasif / Taslak</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.PassiveCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-pause-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Son Eklenen Haberler</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Başlık</th>
+                        <th>Tarih</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td>@item.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                @if (item.IsPublished)
+                                {
+                                    <span class="badge badge-success">Yayında</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge badge-secondary">Pasif</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4 border-0" style="border-radius: 15px;">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white" style="border-radius: 15px 15px 0 0;">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-bar mr-2"></i>En Çok Yorum Alan Haberler</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="commentChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4 border-0" style="border-radius: 15px; background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); color: white;">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-comments fa-3x mb-3 text-white-50"></i>
+                <h4 class="font-weight-bold">Etkileşim Analizi</h4>
+                <p class="small px-3">Haberlerine gelen yorumları buradan takip edebilir, hangi konuların daha çok ilgi çektiğini analiz edebilirsin.</p>
+                <a asp-controller="Comment" asp-action="Index" class="btn btn-light btn-sm rounded-pill px-4 font-weight-bold text-primary">Yorumları Yönet</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('commentChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar', // Çubuk grafik
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.ChartLabels)), // Haber Başlıkları
+                datasets: [{
+                    label: 'Yorum Sayısı',
+                    data: @Html.Raw(Json.Serialize(ViewBag.ChartData)), // Yorum Sayıları
+                    backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                    hoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    borderColor: '#4e73df',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+}
+
+<div class="col-xl-4 col-md-6 mb-4">
+    <div class="card shadow h-100 py-2 border-0" style="background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); color:white; border-radius: 15px;">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-uppercase mb-1">Antalya Hava Durumu</div>
+                    <div class="h3 mb-0 font-weight-bold" id="temp">...°C</div>
+                    <div class="text-xs mt-2" id="weather-desc">Yükleniyor...</div>
+                </div>
+                <div class="col-auto">
+                    <i class="fas fa-cloud-sun fa-3x text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Ücretsiz bir API'den canlı çekelim
+    fetch('https://api.openweathermap.org/data/2.5/weather?q=Antalya&units=metric&lang=tr&appid=YOUR_API_KEY')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('temp').innerText = Math.round(data.main.temp) + "°C";
+        document.getElementById('weather-desc').innerText = data.weather[0].description.toUpperCase();
+    });
+</script>

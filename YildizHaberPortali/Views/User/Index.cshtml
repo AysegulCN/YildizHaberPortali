@@ -1,26 +1,46 @@
 ﻿@model IEnumerable<YildizHaberPortali.Models.UserRolesViewModel>
-@using YildizHaberPortali.Models
 @{
     ViewData["Title"] = "Kullanıcı Yönetimi";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Sistemdeki Tüm Kullanıcılar</h6></div>
-    <div class="card-body">
+<div class="card shadow-sm border-0" style="border-radius: 20px;">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="m-0 font-weight-bold text-primary"><i class="fas fa-users-cog mr-2"></i>Kullanıcı Listesi</h5>
+    </div>
+    <div class="card-body bg-light">
         <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <table class="table category-table">
+                @* Kategori stilini burada da kullanıyoruz *@
                 <thead>
-                    <tr><th>Email</th><th>Kullanıcı Adı</th><th>Roller</th><th>İşlemler</th></tr>
+                    <tr class="text-muted small text-uppercase">
+                        <th>Email / Kullanıcı Adı</th>
+                        <th>Tanımlı Roller</th>
+                        <th class="text-center">İşlemler</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var user in Model)
                     {
-                        <tr>
-                            <td>@user.Email</td>
-                            <td>@user.UserName</td>
-                            <td>@string.Join(", ", user.Roles)</td>
-                            <td><a asp-controller="User" asp-action="ManageRoles" asp-route-userId="@user.UserId" class="btn btn-info btn-sm">Rol Ata</a></td>
+                        <tr id="user_@user.UserId">
+                            <td>
+                                <div class="font-weight-bold text-dark">@user.Email</div>
+                                <div class="small text-muted">@user.UserName</div>
+                            </td>
+                            <td>
+                                @foreach (var role in user.Roles)
+                                {
+                                    <span class="badge badge-pill badge-info px-3 shadow-sm mr-1">@role</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="AssignRole" asp-route-id="@user.UserId" class="btn btn-warning btn-sm rounded-pill shadow-sm px-3 mr-2">
+                                    <i class="fas fa-user-tag"></i> Rol Ata
+                                </a>
+                                <button onclick="deleteUser('@user.UserId')" class="btn btn-danger btn-sm rounded-pill shadow-sm px-3">
+                                    <i class="fas fa-trash"></i> Sil
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -28,3 +48,26 @@
         </div>
     </div>
 </div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.btn-delete-user').click(function () {
+                var btn = $(this);
+                var id = btn.data("id");
+                var row = btn.closest("tr");
+
+                if (confirm("Bu kullanıcıyı sistemden tamamen silmek istediğinize emin misiniz?")) {
+                    $.post("/User/Delete/" + id, function (res) {
+                        if (res.success) {
+                            row.fadeOut(500, function() { $(this).remove(); });
+                        } else {
+                            alert(res.message || "Silme işlemi başarısız!");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

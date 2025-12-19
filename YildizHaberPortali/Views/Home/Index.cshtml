@@ -1,64 +1,128 @@
-﻿@model IEnumerable<YildizHaberPortali.Models.News>
-@using YildizHaberPortali.Models
+﻿@model YildizHaberPortali.Models.HomeViewModel
 
 @{
-    ViewData["Title"] = "Son Haberler";
+    ViewData["Title"] = "Yıldız Haber - Gündem";
 }
 
-<h2 class="mb-4">Son Haberler</h2>
+<style>
+    /* Slider Konteynırı: Okların dışarı taşması için yanlardan boşluk bırakıyoruz */
+    #mainSlider {
+        position: relative;
+        padding: 0 70px; /* Oklar için 70px'lik alan açtık */
+        background: transparent;
+    }
 
-@if (Model != null && Model.Any())
-{
+    /* Okları dışarıya, o boşluğa itiyoruz */
+    .carousel-control-prev {
+        left: -10px;
+        width: 50px;
+    }
+
+    .carousel-control-next {
+        right: -10px;
+        width: 50px;
+    }
+
+    /* Okların stili: Belirgin, mavi ve yuvarlak */
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+        background-color: #4e73df;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        background-size: 50%;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Haber görsellerini biraz küçültüp zarifleştiriyoruz */
+    .carousel-item img {
+        border-radius: 20px; /* Senin sevdiğin yuvarlak hatlar */
+        height: 450px;
+        object-fit: cover;
+    }
+</style>
+
+
+<div class="slider-section">
+    <div class="container" style="position: relative;">
+        <div id="mainSlider" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="..." class="d-block w-100" alt="...">
+                    <div class="carousel-caption d-none d-md-block bg-dark-transparent rounded">
+                        <h5>Haber Başlığı</h5>
+                    </div>
+                </div>
+            </div>
+
+            <a class="carousel-control-prev" href="#mainSlider" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </a>
+            <a class="carousel-control-next" href="#mainSlider" role="button" data-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-4">
     <div class="row">
-        @foreach (var news in Model)
-        {
-            <div class="row">
-                @foreach (var item in Model)
-                {
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100 shadow-sm border-0">
-
-                            <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-                                @if (string.IsNullOrEmpty(item.Image))
-                                {
-                                    <img src="~/img/no-news.jpg" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="Haber Görseli Yok">
-                                }
-                                else
-                                {
-                                    <img src="~/uploads/@item.Image" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="@item.Title">
-                                }
+        <div class="col-lg-8">
+            <div id="mainSlider" class="carousel slide shadow rounded overflow-hidden" data-ride="carousel">
+                <div class="carousel-inner">
+                    @for (int i = 0; i < Model.SliderNews.Count; i++)
+                    {
+                        var news = Model.SliderNews[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <img src="~/uploads/@news.Image" class="d-block w-100" style="height: 400px; object-fit: cover;">
+                            <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.6); left:0; right:0; bottom:0; padding: 20px;">
+                                <h4 class="font-weight-bold">@news.Title</h4>
                             </div>
+                        </div>
+                    }
+                </div>
+                <a class="carousel-control-prev" href="#mainSlider" data-slide="prev"><span class="carousel-control-prev-icon"></span></a>
+                <a class="carousel-control-next" href="#mainSlider" data-slide="next"><span class="carousel-control-next-icon"></span></a>
+            </div>
+        </div>
 
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title font-weight-bold text-dark">
-                                    @if (item.Title != null && item.Title.Length > 50)
-                                    {
-                                        @item.Title.Substring(0, 50) <text>...</text>
-                                    }
-                                    else
-                                    {
-                                        @item.Title
-                                    }
-                                </h5>
-
-                                <p class="card-text text-muted small mb-3">
-                                    <i class="far fa-calendar-alt mr-1"></i> @item.CreatedDate.ToString("dd.MM.yyyy")
-                                </p>
-
-                                <a asp-controller="News" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm mt-auto font-weight-bold">
-                                    Haberi Oku <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="row">
+                @foreach (var news in Model.LatestNews)
+                {
+                    <div class="col-12 mb-2">
+                        <div class="card border-0 shadow-sm overflow-hidden" style="height: 93px;">
+                            <div class="row no-gutters h-100">
+                                <div class="col-4"><img src="~/uploads/@news.Image" class="img-fluid h-100" style="object-fit:cover;"></div>
+                                <div class="col-8 p-2 font-weight-bold small">@news.Title</div>
                             </div>
                         </div>
                     </div>
                 }
             </div>
-        }
+        </div>
     </div>
-}
-else
-{
-    <div class="alert alert-warning" role="alert">
-        Henüz hiç haber eklenmemiş. Lütfen Yönetici Panelinden haber ekleyin.
+
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            <h4 class="border-bottom pb-2 mb-4 font-weight-bold text-primary">HABERLER</h4>
+            <div class="alert alert-info">Kategori blokları bir sonraki adımda buraya gelecek.</div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white font-weight-bold">
+                    <i class="fas fa-fire mr-2 text-warning"></i> En Çok Okunanlar
+                </div>
+                <div class="list-group list-group-flush">
+                    @for (int i = 0; i < Model.MostReadNews.Count; i++)
+                    {
+                        <a href="#" class="list-group-item list-group-item-action py-3">
+                            <span class="badge badge-pill badge-primary mr-2">@(i + 1)</span> @Model.MostReadNews[i].Title
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
-}s
+</div>

@@ -1,23 +1,17 @@
-﻿// Repositories/CommentRepository.cs
-
-using YildizHaberPortali.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
 using YildizHaberPortali.Data;
 using YildizHaberPortali.Models;
+using YildizHaberPortali.Repositories;
 
-namespace YildizHaberPortali.Repositories
+public class CommentRepository : GenericRepository<Comment>, ICommentRepository
 {
-    // CommentRepository, ICommentRepository'den miras almalı ve GenericRepository'nin Comment tipindeki versiyonundan miras almalı.
-    public class CommentRepository : GenericRepository<Comment>, ICommentRepository
+    public CommentRepository(ApplicationDbContext context) : base(context) { }
+
+    public async Task<List<Comment>> GetApprovedCommentsByNewsIdAsync(int newsId)
     {
-        private readonly ApplicationDbContext _context;
-
-        // Base class (GenericRepository) constructor'ını çağırıyoruz ve context'i atıyoruz.
-        public CommentRepository(ApplicationDbContext context) : base(context)
-        {
-            _context = context;
-        }
-
-        // ICommentRepository'de özel metotlar tanımlanmadığı sürece (örneğin NewsId'ye göre yorum çekme), 
-        // bu sınıf sadece GenericRepository'deki CRUD metotlarını kullanır.
+        return await _context.Comments
+            .Where(x => x.NewsId == newsId && x.IsApproved)
+            .OrderByDescending(x => x.CommentDate) 
+            .ToListAsync();
     }
 }

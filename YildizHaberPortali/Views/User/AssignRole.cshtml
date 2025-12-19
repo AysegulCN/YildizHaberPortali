@@ -1,0 +1,43 @@
+﻿@model YildizHaberPortali.Models.AssignRoleViewModel
+@{
+    ViewData["Title"] = "Rol Ata";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow mb-4 border-0" style="border-radius: 15px;">
+    <div class="card-header py-3 bg-white">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-user-tag mr-2"></i><b>@Model.UserName</b> Kullanıcısına Rol Ata
+        </h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="AssignRole" method="post">
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="UserName" />
+
+            <div class="row">
+                @for (int i = 0; i < Model.Roles.Count; i++)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="custom-control custom-checkbox p-3 border rounded shadow-sm">
+                            <input type="hidden" asp-for="@Model.Roles[i].RoleId" />
+                            <input type="hidden" asp-for="@Model.Roles[i].RoleName" />
+                            <input type="checkbox" asp-for="@Model.Roles[i].IsSelected" class="custom-control-input" id="role_@i">
+                            <label class="custom-control-label font-weight-bold" for="role_@i">
+                                @Model.Roles[i].RoleName
+                            </label>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <hr />
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-save mr-1"></i> Değişiklikleri Kaydet
+                </button>
+                <a asp-action="Index" class="btn btn-secondary rounded-pill px-4 shadow-sm ml-2">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>

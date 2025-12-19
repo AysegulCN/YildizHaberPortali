@@ -11,11 +11,9 @@ namespace YildizHaberPortali.Repositories
 {
     public class NewsRepository : GenericRepository<News>, INewsRepository
     {
-        private readonly ApplicationDbContext _context;
 
         public NewsRepository(ApplicationDbContext context) : base(context)
         {
-            _context = context;
         }
 
         public async Task<List<News>> GetAllWithCategoryAsync()
@@ -44,6 +42,14 @@ namespace YildizHaberPortali.Repositories
                 .ThenByDescending(n => n.PublishDate)
                 .ToList();
         }
-        
+
+        public async Task<List<News>> GetAllWithCommentsAsync()
+        {
+            // Include(x => x.Comments) diyerek haberleri yorumlarıyla paketliyoruz
+            return await _context.News
+                .Include(x => x.Comments)
+                .ToListAsync();
+        }
+
     }
 }

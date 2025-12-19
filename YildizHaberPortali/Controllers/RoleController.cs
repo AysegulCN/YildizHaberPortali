@@ -12,6 +12,33 @@ public class RoleController : Controller
 {
     private readonly RoleManager<IdentityRole> _roleManager;
 
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateAjax(string roleName)
+    {
+        if (string.IsNullOrEmpty(roleName))
+            return Json(new { success = false, message = "Rol adı boş olamaz!" });
+
+        var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
+        if (result.Succeeded)
+        {
+            var newRole = await _roleManager.FindByNameAsync(roleName);
+            return Json(new { success = true, id = newRole.Id, name = newRole.Name });
+        }
+        return Json(new { success = false, message = "Bu rol zaten mevcut olabilir." });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteAjax(string id)
+    {
+        var role = await _roleManager.FindByIdAsync(id);
+        if (role == null) return Json(new { success = false });
+
+        var result = await _roleManager.DeleteAsync(role);
+        return Json(new { success = result.Succeeded });
+    }
+
     public RoleController(RoleManager<IdentityRole> roleManager)
     {
         _roleManager = roleManager;

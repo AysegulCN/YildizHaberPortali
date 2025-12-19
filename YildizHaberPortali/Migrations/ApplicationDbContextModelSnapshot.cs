@@ -258,16 +258,16 @@ namespace YildizHaberPortali.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AuthorName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CommentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
 
                     b.Property<int>("NewsId")
                         .HasColumnType("int");
@@ -385,7 +385,7 @@ namespace YildizHaberPortali.Migrations
             modelBuilder.Entity("YildizHaberPortali.Models.Comment", b =>
                 {
                     b.HasOne("YildizHaberPortali.Models.News", "News")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("NewsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -396,12 +396,22 @@ namespace YildizHaberPortali.Migrations
             modelBuilder.Entity("YildizHaberPortali.Models.News", b =>
                 {
                     b.HasOne("YildizHaberPortali.Models.Category", "Category")
-                        .WithMany()
+                        .WithMany("News")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("YildizHaberPortali.Models.Category", b =>
+                {
+                    b.Navigation("News");
+                });
+
+            modelBuilder.Entity("YildizHaberPortali.Models.News", b =>
+                {
+                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

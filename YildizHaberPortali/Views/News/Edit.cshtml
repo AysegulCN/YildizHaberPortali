@@ -14,31 +14,26 @@
         <form asp-action="Edit" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            @* HABER ID'SİNİ GİZLİ ALANDA TAŞIYORUZ (Güncelleme için zorunlu) *@
             <input type="hidden" asp-for="Id" />
 
-            @* Kategori Seçimi (Dropdown) *@
             <div class="form-group">
                 <label asp-for="CategoryId" class="control-label">Kategori Seçimi</label>
-                @* asp-items ile Controller'dan gelen listeyi yüklüyoruz *@
                 <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
                     <option value="">-- Kategori Seçiniz --</option>
                 </select>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
 
-            @* Başlık *@
             <div class="form-group">
                 <label asp-for="Title" class="control-label">Başlık</label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
-            @* İçerik *@
             <div class="form-group">
                 <label asp-for="Content" class="control-label">İçerik</label>
-                <textarea asp-for="Content" class="form-control" rows="8"></textarea>
-                <span asp-validation-for="Content" class="text-danger"></span>
+                    <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                    <span asp-validation-for="Content" class="text-danger"></span>
             </div>
 
             @* Yazar *@

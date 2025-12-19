@@ -1,232 +1,172 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using System;
+using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
-using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Collections.Generic;
 
-using Microsoft.AspNetCore.Hosting;
-
-public class NewsController : Controller
+namespace YildizHaberPortali.Controllers
 {
-    private readonly INewsRepository _newsRepository;
-    private readonly ICategoryRepository _categoryRepository;
-    private readonly IWebHostEnvironment _hostEnvironment; 
-
-    public NewsController(INewsRepository newsRepository, ICategoryRepository categoryRepository, IWebHostEnvironment hostEnvironment)
+    public class NewsController : Controller
     {
-        _newsRepository = newsRepository;
-        _categoryRepository = categoryRepository;
-        _hostEnvironment = hostEnvironment; 
-    }
+        private readonly INewsRepository _newsRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-    [AllowAnonymous] // Eğer admin paneliyse bunu kaldırabilirsin, site tarafıysa kalsın
-    public async Task<IActionResult> Index(int? categoryId)
-    {
-        // 1. ADIM: Yeni yazdığımız metotla verileri (Kategorileriyle birlikte) çek
-        var newsList = await _newsRepository.GetAllWithCategoryAsync();
-
-        // 2. ADIM: Eğer bir kategori seçildiyse LİSTE ÜZERİNDE filtrele
-        if (categoryId.HasValue)
+        public NewsController(INewsRepository newsRepository, ICategoryRepository categoryRepository, IWebHostEnvironment hostEnvironment)
         {
-            newsList = newsList.Where(x => x.CategoryId == categoryId).ToList();
-            ViewBag.CurrentCategory = categoryId;
+            _newsRepository = newsRepository;
+            _categoryRepository = categoryRepository;
+            _hostEnvironment = hostEnvironment;
         }
 
-        // 3. ADIM: Tarihe göre sırala (Yeniden eskiye) ve sayfaya gönder
-        return View(newsList.OrderByDescending(x => x.CreatedDate).ToList());
-    }
-
-    [Authorize(Roles = "Admin,Editor")]
-    public async Task<IActionResult> Create()
-    { 
-        var categoryList = await _categoryRepository.GetAllAsync();
-
-        var viewModel = new NewsCreateViewModel
+        // 1. HABER LİSTELEME
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(int? categoryId, string status)
         {
-            Categories = categoryList.Select(c => new SelectListItem
+            var newsList = await _newsRepository.GetAllWithCategoryAsync();
+
+            if (categoryId.HasValue)
+                newsList = newsList.Where(x => x.CategoryId == categoryId).ToList();
+
+            if (!string.IsNullOrEmpty(status))
             {
-                Value = c.Id.ToString(),
-                Text = c.Name
-            }).ToList()
-        };
-        return View(viewModel);
-    }
-    [Authorize(Roles = "Admin,Editor")]
-    [HttpPost]
-    public async Task<IActionResult> Create(NewsCreateViewModel viewModel)
-    {
-        if (ModelState.IsValid)
+                if (status == "active") newsList = newsList.Where(x => x.IsPublished).ToList();
+                else if (status == "passive") newsList = newsList.Where(x => !x.IsPublished).ToList();
+            }
+
+            return View(newsList.OrderByDescending(x => x.CreatedDate).ToList());
+        }
+
+        // 2. YENİ HABER EKLEME (GET)
+        [Authorize(Roles = "Admin,Editor")]
+        public async Task<IActionResult> Create()
         {
-            string uniqueFileName = null;
-
-            if (viewModel.ImageFile != null)
+            var categories = await _categoryRepository.GetAllAsync();
+            var viewModel = new NewsCreateViewModel
             {
-                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
+                Categories = categories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList()
+            };
+            return View(viewModel);
+        }
 
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
-
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+        // 3. YENİ HABER EKLEME (POST)
+        [HttpPost]
+        [Authorize(Roles = "Admin,Editor")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(NewsCreateViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                string uniqueFileName = "no-image.png";
+                if (viewModel.ImageFile != null)
                 {
-                    await viewModel.ImageFile.CopyToAsync(fileStream);
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
+                    string path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", uniqueFileName);
+                    using (var stream = new FileStream(path, FileMode.Create)) { await viewModel.ImageFile.CopyToAsync(stream); }
                 }
+
+                var news = new News
+                {
+                    Title = viewModel.Title,
+                    Content = viewModel.Content,
+                    Author = User.Identity.Name ?? "Admin",
+                    CategoryId = viewModel.CategoryId,
+                    CreatedDate = DateTime.Now,
+                    IsPublished = true,
+                    Image = uniqueFileName
+                };
+
+                await _newsRepository.AddAsync(news);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(viewModel);
+        }
+
+        // 4. HABER DÜZENLEME (GET) - [Düzeltilen Kritik Hata: ViewModel Uyuşmazlığı]
+        [Authorize(Roles = "Admin,Editor")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var news = await _newsRepository.GetByIdAsync(id);
+            if (news == null) return NotFound();
+
+            var vm = new NewsCreateViewModel
+            {
+                Id = news.Id,
+                Title = news.Title,
+                Content = news.Content,
+                CategoryId = news.CategoryId,
+                ExistingImagePath = news.Image //
+            };
+
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = categories.ToList();
+            return View(vm);
+        }
+
+        // 5. HABER DÜZENLEME (POST)
+        [HttpPost]
+        [Authorize(Roles = "Admin,Editor")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(NewsCreateViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var news = await _newsRepository.GetByIdAsync(viewModel.Id);
+                if (news == null) return NotFound();
+
+                news.Title = viewModel.Title;
+                news.Content = viewModel.Content;
+                news.CategoryId = viewModel.CategoryId;
+
+                if (viewModel.ImageFile != null)
+                {
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
+                    string path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", uniqueFileName);
+                    using (var stream = new FileStream(path, FileMode.Create)) { await viewModel.ImageFile.CopyToAsync(stream); }
+                    news.Image = uniqueFileName;
+                }
+
+                await _newsRepository.UpdateAsync(news);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(viewModel);
+        }
+
+        // 6. HABER SİLME (POST - AJAX) - [Düzeltilen Hata: Sil Butonu Çalışmama Sorunu]
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var news = await _newsRepository.GetByIdAsync(id);
+            if (news == null) return Json(new { success = false, message = "Haber bulunamadı!" });
+
+            // Klasördeki görseli de silelim ki sunucu dolmasın
+            if (!string.IsNullOrEmpty(news.Image) && news.Image != "no-image.png")
+            {
+                var path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", news.Image);
+                if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
             }
 
-            var news = new News
-            {
-                Title = viewModel.Title,
-                Content = viewModel.Content,
-                Author = viewModel.Author ?? "Admin", 
-                CategoryId = viewModel.CategoryId,
-                PublishDate = DateTime.Now,
-                IsPublished = true,
-
-                Image = uniqueFileName,  
-
-                ImageUrl = uniqueFileName
-            };
-
-            await _newsRepository.AddAsync(news);
-            return RedirectToAction(nameof(Index));
-        }
-
-        var categoryList = await _categoryRepository.GetAllAsync();
-        viewModel.Categories = categoryList.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
-
-        return View(viewModel);
-    }
-
-    [Authorize(Roles = "Admin,Editor")]
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null) return NotFound();
-
-        var news = await _newsRepository.GetByIdAsync(id.GetValueOrDefault());
-        if (news == null) return NotFound();
-
-        var categoryList = await _categoryRepository.GetAllAsync();
-
-        var viewModel = new NewsCreateViewModel
-        {
-            Id = news.Id,
-            Title = news.Title,
-            Content = news.Content,
-            ImageUrl = news.ImageUrl,
-            Author = news.Author,
-            CategoryId = news.CategoryId,
-            Categories = categoryList.Select(c => new SelectListItem
-            {
-                Value = c.Id.ToString(),
-                Text = c.Name
-            }).ToList()
-        };
-        return View(viewModel);
-    }
-
-    [Authorize(Roles = "Admin,Editor")]
-    [HttpPost]
-    public async Task<IActionResult> Edit(NewsCreateViewModel viewModel)
-
-    {
-        var categoryList = await _categoryRepository.GetAllAsync();
-        viewModel.Categories = categoryList.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
-
-        if (ModelState.IsValid)
-        {
-            var news = new News
-            {
-                Id = viewModel.Id,
-                Title = viewModel.Title,
-                Content = viewModel.Content,
-                ImageUrl = viewModel.ImageUrl,
-                Author = viewModel.Author,
-                CategoryId = viewModel.CategoryId,
-                PublishDate = DateTime.Now,
-            };
-            await _newsRepository.UpdateAsync(news);
-            return RedirectToAction(nameof(Index));
-        }
-        ModelState.AddModelError("", "Haber güncellenirken bir hata oluştu.");
-        return View(viewModel);
-    }
-
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null) return NotFound();
-        var news = await _newsRepository.GetByIdAsync(id.GetValueOrDefault());
-        if (news == null) return NotFound();
-        return View(news);
-    }
-
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        try
-        {
             await _newsRepository.DeleteAsync(id);
-
-            return Json(new { success = true, message = "Haber başarıyla silindi." });
+            return Json(new { success = true });
         }
-        catch (Exception ex)
+
+        // 7. DURUM DEĞİŞTİRME (POST - AJAX)
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(int id)
         {
-            return Json(new { success = false, message = "Silme işleminde hata oluştu." });
+            var news = await _newsRepository.GetByIdAsync(id);
+            if (news == null) return Json(new { success = false });
+
+            news.IsPublished = !news.IsPublished;
+            await _newsRepository.UpdateAsync(news);
+            return Json(new { success = true });
         }
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var news = await _newsRepository.GetByIdAsync(id);
-        if (news == null)
-        {
-            return Json(new { success = false, message = "Haber bulunamadı." });
-        }
-
-        // Resmi klasörden de silelim ki çöp birikmesin
-        if (!string.IsNullOrEmpty(news.Image))
-        {
-            string imagePath = Path.Combine(_hostEnvironment.WebRootPath, "uploads", news.Image);
-            if (System.IO.File.Exists(imagePath))
-            {
-                System.IO.File.Delete(imagePath);
-            }
-        }
-
-        await _newsRepository.DeleteAsync(id);
-        return Json(new { success = true });
-    }
-
-    [Authorize(Roles = "Admin")] 
-    public async Task<IActionResult> StatusManagement()
-    {
-        return View(); 
-        throw new NotImplementedException(); 
-    }
-    [HttpPost]
-    public async Task<IActionResult> ToggleStatus(int id)
-    {
-        var news = await _newsRepository.GetByIdAsync(id);
-        if (news == null)
-        {
-            return Json(new { success = false, message = "Haber bulunamadı." });
-        }
-
-        // Durumu tersine çevir (Açıksa kapa, kapalıysa aç)
-        news.IsPublished = !news.IsPublished;
-        await _newsRepository.UpdateAsync(news);
-
-        // Yeni durumu geri gönder ki sayfadaki renk değişsin
-        return Json(new { success = true, isPublished = news.IsPublished });
     }
 }

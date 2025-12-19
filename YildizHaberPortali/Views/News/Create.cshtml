@@ -34,7 +34,8 @@
 
                     <div class="form-group">
                         <label asp-for="Content" class="control-label font-weight-bold">Haber İçeriği</label>
-                        <textarea asp-for="Content" class="form-control summernote" rows="8"></textarea>
+                        <textarea asp-for="Content" class="form-control" rows="10" 
+                        placeholder="Haber metnini buraya düz yazı olarak giriniz..."></textarea>
                         <span asp-validation-for="Content" class="text-danger"></span>
                     </div>
                 </div>

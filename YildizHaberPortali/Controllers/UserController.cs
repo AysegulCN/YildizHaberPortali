@@ -98,4 +98,53 @@ public class UserController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    // 1. Sayfayı Açan Metot (GET) - 404'ü bu çözer!
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AssignRole(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var userRoles = await _userManager.GetRolesAsync(user); // Kullanıcının mevcut rolleri
+        var allRoles = _roleManager.Roles.ToList(); // Sistemdeki tüm roller
+
+        var viewModel = new AssignRoleViewModel
+        {
+            UserId = user.Id,
+            UserName = user.UserName,
+            Roles = allRoles.Select(role => new RoleSelection
+            {
+                RoleId = role.Id,
+                RoleName = role.Name,
+                IsSelected = userRoles.Contains(role.Name)
+            }).ToList()
+        };
+
+        return View(viewModel);
+    }
+
+    // 2. Rolleri Kaydeden Metot (POST)
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AssignRole(AssignRoleViewModel model)
+    {
+        var user = await _userManager.FindByIdAsync(model.UserId);
+        if (user == null) return NotFound();
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+
+        // Önce tüm mevcut rolleri sil (En temiz yöntem)
+        await _userManager.RemoveFromRolesAsync(user, userRoles);
+
+        // Seçilen yeni rolleri ekle
+        var selectedRoles = model.Roles.Where(x => x.IsSelected).Select(y => y.RoleName).ToList();
+        if (selectedRoles.Any())
+        {
+            await _userManager.AddToRolesAsync(user, selectedRoles);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
 }

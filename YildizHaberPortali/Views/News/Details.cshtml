@@ -1,0 +1,203 @@
+﻿@model YildizHaberPortali.Models.News
+
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Ana site layout'un
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-lg-8">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0">
+                    <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">@Model.Category?.Name</li>
+                </ol>
+            </nav>
+
+            <h1 class="font-weight-bold mb-3" style="font-size: 2.5rem; line-height: 1.2;">@Model.Title</h1>
+
+            <button id="btnReadAloud" class="btn btn-outline-primary btn-pill shadow-sm mb-4">
+                <i class="fas fa-volume-up mr-2"></i> Haberi Dinle (Sesli Okuma)
+            </button>
+
+            <div class="d-flex align-items-center text-muted mb-4 pb-3 border-bottom">
+                <div class="mr-3">
+                    <i class="far fa-calendar-alt mr-1"></i> @Model.CreatedDate.ToString("dd MMMM yyyy HH:mm")
+                </div>
+                <div class="mr-3">
+                    <i class="far fa-user mr-1"></i> Editör: <b>Admin</b>
+                </div>
+                <div>
+                    <i class="far fa-comment-dots mr-1"></i> @Model.Comments.Count(x => x.IsApproved) Yorum
+                </div>
+            </div>
+
+            <div class="mb-4 shadow-sm rounded overflow-hidden">
+                <img src="~/uploads/@Model.Image" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="@Model.Title">
+            </div>
+
+            <div class="news-content mb-5" style="font-size: 1.15rem; line-height: 1.8; color: #333;">
+                @Html.Raw(Model.Content)
+            </div>
+
+            <hr class="my-5">
+
+            <div class="comments-area">
+                <h3 class="font-weight-bold mb-4">Okuyucu Yorumları</h3>
+
+                <div id="comments-list">
+                    @if (Model.Comments.Any(x => x.IsApproved))
+                    {
+                        @foreach (var comment in Model.Comments.Where(x => x.IsApproved).OrderByDescending(x => x.CommentDate))
+                        {
+                            <div class="media ...">
+                                <h6 class="...">@comment.AuthorName</h6> <p>@comment.Content</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-light border shadow-sm">
+                            <i class="fas fa-info-circle mr-2"></i> Henüz yorum yapılmamış. İlk yorumu sen yap!
+                        </div>
+                    }
+                </div>
+
+                <div class="card mt-5 border-0 shadow-sm" style="border-radius: 15px;">
+                    <div class="card-body p-4 bg-light" style="border-radius: 15px;">
+                        <h5 class="font-weight-bold mb-4">Düşüncelerini Paylaş</h5>
+                        <form id="commentForm">
+                            <input type="hidden" name="newsId" value="@Model.Id" />
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <input type="text" id="userName" class="form-control rounded-pill px-4" placeholder="Adınız Soyadınız" required>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <textarea id="userComment" rows="4" class="form-control rounded-lg px-4 pt-3" placeholder="Yorumunuzu buraya yazın..." required></textarea>
+                                </div>
+                                <div class="col-md-12">
+                                    <button type="button" id="btnSubmitComment" class="btn btn-primary btn-lg rounded-pill px-5 font-weight-bold">
+                                        <i class="fas fa-paper-plane mr-2"></i> Gönder
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comment-section mt-5">
+    <h4>Yorum Yap</h4>
+    <hr />
+
+    @if (TempData["CommentSuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["CommentSuccess"]</div>
+    }
+
+    <form asp-controller="News" asp-action="AddComment" method="post">
+        <input type="hidden" name="newsId" value="@Model.Id" />
+        
+        <div class="form-group mb-3">
+            <label>Adınız Soyadınız</label>
+            <input type="text" name="authorName" class="form-control" placeholder="İsminizi yazın..." required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Yorumunuz</label>
+            <textarea name="content" class="form-control" rows="4" placeholder="Düşüncelerinizi paylaşın..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Gönder</button>
+    </form>
+
+    <div class="existing-comments mt-5">
+        <h4>Yorumlar</h4>
+        <hr />
+        @foreach (var comment in Model.Comments.Where(x => x.IsApproved))
+        {
+            <div class="media mb-4 p-3 border rounded shadow-sm">
+                <div class="media-body">
+                    <h5 class="mt-0 font-weight-bold">@comment.AuthorName <small class="text-muted">- @comment.CommentDate.ToString("dd.MM.yyyy")</small></h5>
+                    @comment.Content
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4 sticky-top" style="top: 100px;">
+                <div class="card-header bg-dark text-white font-weight-bold">
+                    İlginizi Çekebilir
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Buraya ileride "Benzer Haberler" listesini çekebiliriz dostum!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="share-buttons mt-4 mb-4">
+    <p class="font-weight-bold small text-muted text-uppercase mb-2">Bu haberi paylaş:</p>
+    <div class="d-flex">
+        <a href="~/https://twitter.com/share?url=@Context.Request.Path" target="_blank" class="btn btn-info btn-circle mr-2 shadow-sm">
+            <i class="fab fa-twitter"></i>
+        </a>
+        <a href="~/https://www.facebook.com/sharer/sharer.php?u=@Context.Request.Path" target="_blank" class="btn btn-primary btn-circle mr-2 shadow-sm" style="background-color: #3b5998;">
+            <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="~/https://wa.me/?text=@Context.Request.Path" target="_blank" class="btn btn-success btn-circle shadow-sm" style="background-color: #25d366;">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#btnSubmitComment").click(function () {
+                var newsId = $("input[name='newsId']").val();
+                var name = $("#userName").val();
+                var content = $("#userComment").val();
+
+                if (name == "" || content == "") {
+                    alert("Lütfen tüm alanları doldurun!");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Comment/PostComment",
+                    data: { newsId: newsId, name: name, content: content },
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message); // Yorumun admin onayına düştüğünü söyler
+                            $("#commentForm")[0].reset();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Yorum gönderilirken bir hata oluştu.");
+                    }
+                });
+            });
+        });
+
+                $("#btnReadAloud").click(function() {
+            // Haber içeriğindeki yazıları al (HTML etiketlerinden temizleyerek)
+            let content = $(".news-content").text();
+            let speech = new SpeechSynthesisUtterance();
+            speech.text = content;
+            speech.lang = "tr-TR"; // Türkçe seslendirme
+            window.speechSynthesis.speak(speech);
+        });
+
+    </script>
+}

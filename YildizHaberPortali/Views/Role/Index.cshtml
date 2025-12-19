@@ -1,42 +1,73 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @model IEnumerable<IdentityRole>
-
 @{
+    ViewData["Title"] = "Rol Yönetimi";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="row mb-4">
-    <div class="col-md-6">
-        <h2 class="text-gray-800">Rol Yönetimi</h2>
-    </div>
-    <div class="col-md-6 text-right">
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Yeni Rol Oluştur
-        </a>
-    </div>
+<style>
+    /* Premium Tasarım Sistemi */
+    .premium-card {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .role-table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+        .role-table tr {
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+            .role-table tr:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            }
+
+        .role-table td, .role-table th {
+            border: none !important;
+            padding: 15px !important;
+            vertical-align: middle !important;
+        }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 px-3">
+    <h3 class="font-weight-bold text-gray-800 m-0"><i class="fas fa-user-shield text-primary mr-2"></i>Sistem Rolleri</h3>
+    <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-toggle="modal" data-target="#addRoleModal">
+        <i class="fas fa-plus mr-1"></i> Yeni Rol Ekle
+    </button>
 </div>
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Sistemde Tanımlı Roller</h6>
-    </div>
-    <div class="card-body">
+<div class="card premium-card shadow-sm mx-2">
+    <div class="card-body bg-light" style="border-radius: 20px;">
         <div class="table-responsive">
-            <table class="table table-bordered" width="100%" cellspacing="0">
+            <table class="table role-table" id="roleTable">
                 <thead>
-                    <tr>
-                        <th>Rol Adı (Name)</th>
-                        <th style="width: 150px;">İşlemler</th>
+                    <tr class="text-muted small text-uppercase font-weight-bold">
+                        <th>Rol ID</th>
+                        <th>Rol İsmi</th>
+                        <th class="text-center">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var role in Model)
                     {
-                        <tr>
-                            <td>@item.Name</td>
-                            <td>
-                                <button type="button" class="btn btn-danger btn-sm btn-delete" data-id="@item.Id">
-                                    <i class="fas fa-trash"></i> Sil
+                        <tr id="row_@role.Id">
+                            <td class="text-muted small">#@role.Id</td>
+                            <td><span class="badge badge-light p-2 text-primary shadow-sm px-3">@role.Name</span></td>
+                            <td class="text-center">
+                                <button onclick="confirmDeleteRole('@role.Id')" class="btn btn-danger btn-sm rounded-circle shadow-sm">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </td>
                         </tr>
@@ -47,104 +78,80 @@
     </div>
 </div>
 
-<div id="undo-toast" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11; bottom: 20px; right: 20px;">
-    <div class="toast align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
-        <div class="d-flex">
-            <div class="toast-body">
-                Rol siliniyor... <span id="countdown-text">5</span>
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-0 bg-light" style="border-radius: 20px 20px 0 0;">
+                <h5 class="modal-title font-weight-bold text-primary">Yeni Rol Tanımla</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
-            <button type="button" id="btn-undo" class="btn btn-warning btn-sm m-auto me-2 font-weight-bold">
-                <i class="fas fa-undo"></i> GERİ AL
-            </button>
-        </div>
-        <div class="progress" style="height: 3px;">
-            <div id="undo-progress" class="progress-bar bg-warning" role="progressbar" style="width: 100%;"></div>
+            <div class="modal-body p-4">
+                <div class="form-group">
+                    <label class="font-weight-bold">Rol Adı</label>
+                    <input type="text" id="newRoleName" class="form-control rounded-pill px-3" placeholder="Örn: Editor">
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">Vazgeç</button>
+                <button type="button" onclick="saveRole()" class="btn btn-primary rounded-pill px-4 shadow">Kaydet</button>
+            </div>
         </div>
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    $(document).ready(function () {
 
-        let deleteTimer;
-        let rowToDelete;
-        let roleIdToDelete;
-        let countdownValue = 5;
-        let countdownInterval;
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // --- ROL KAYDETME (AJAX) ---
+        function saveRole() {
+            var name = $('#newRoleName').val();
+            if(!name) { Swal.fire('Hata', 'Rol adı boş olamaz!', 'error'); return; }
 
-        // Toast elemanını seç (Bootstrap 5)
-        var undoToastEl = document.getElementById('undo-toast');
-        // Eğer Bootstrap 4 kullanıyorsan aşağıdaki satır hata verebilir, o yüzden jQuery show/hide kullanacağız.
+            $.post('/Role/CreateAjax', { roleName: name }, function(res) {
+                if(res.success) {
+                    $('#addRoleModal').modal('hide');
+                    $('#newRoleName').val('');
 
-        $(".btn-delete").click(function () {
+                    var newRow = `<tr id="row_${res.id}" style="display:none;">
+                        <td class="text-muted small">#${res.id}</td>
+                        <td><span class="badge badge-light p-2 text-primary shadow-sm px-3">${res.name}</span></td>
+                        <td class="text-center">
+                            <button onclick="confirmDeleteRole('${res.id}')" class="btn btn-danger btn-sm rounded-circle shadow-sm"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                    $('#roleTable tbody').prepend(newRow);
+                    $('#row_' + res.id).fadeIn(800);
 
-            if(deleteTimer) forceDeleteNow();
-
-            roleIdToDelete = $(this).data("id");
-            rowToDelete = $(this).closest("tr");
-
-            // Satırı gizle
-            rowToDelete.fadeOut();
-
-            // Bildirimi manuel göster
-            $(".toast").addClass('show').show();
-
-            $("#undo-progress").css("width", "100%");
-            $("#undo-progress").css("transition", "width 5s linear");
-            countdownValue = 5;
-            $("#countdown-text").text(countdownValue);
-
-            setTimeout(() => { $("#undo-progress").css("width", "0%"); }, 100);
-
-            countdownInterval = setInterval(function() {
-                countdownValue--;
-                $("#countdown-text").text(countdownValue);
-                if(countdownValue <= 0) clearInterval(countdownInterval);
-            }, 1000);
-
-            deleteTimer = setTimeout(function () {
-                forceDeleteNow();
-            }, 5000);
-        });
-
-        $("#btn-undo").click(function () {
-            clearTimeout(deleteTimer);
-            clearInterval(countdownInterval);
-            deleteTimer = null;
-            rowToDelete.fadeIn();
-            $(".toast").removeClass('show').hide();
-            $("#undo-progress").css("transition", "none");
-            $("#undo-progress").css("width", "100%");
-        });
-
-        function forceDeleteNow() {
-            if (!roleIdToDelete) return;
-
-            $.ajax({
-                type: "POST",
-                url: "/Role/DeleteRole", // Controller adresine dikkat
-                data: { roleId: roleIdToDelete },
-                success: function (response) {
-                    if (response.success) {
-                        if(rowToDelete) rowToDelete.remove();
-                        console.log("Silindi.");
-                    } else {
-                        if(rowToDelete) rowToDelete.fadeIn();
-                        alert(response.message);
-                    }
-                },
-                error: function () {
-                    if(rowToDelete) rowToDelete.fadeIn();
-                    alert("Sunucu hatası!");
+                    Swal.fire({ icon: 'success', title: 'Rol Eklendi!', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
+                } else {
+                    Swal.fire('Hata', res.message, 'error');
                 }
             });
-
-            $(".toast").removeClass('show').hide();
-            clearTimeout(deleteTimer);
-            clearInterval(countdownInterval);
         }
-    });
-</script>
+
+        // --- ROL SİLME (AJAX + SweetAlert2) ---
+        function confirmDeleteRole(id) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu rol silindiğinde yetkili kullanıcılar etkilenebilir!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74a3b',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'Vazgeç',
+                borderRadius: '15px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('/Role/DeleteAjax/' + id, function(res) {
+                        if(res.success) {
+                            $('#row_' + id).fadeOut(400, function() { $(this).remove(); });
+                            Swal.fire({ icon: 'success', title: 'Rol Silindi', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

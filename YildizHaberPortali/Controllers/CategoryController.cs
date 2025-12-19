@@ -1,13 +1,16 @@
 ﻿
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using System.Linq;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
-using Microsoft.AspNetCore.Authorization; 
+using YildizHaberPortali.Helpers; // StringHelper için gerekli olan burası!
 
 namespace YildizHaberPortali.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Editor")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
@@ -23,83 +26,39 @@ namespace YildizHaberPortali.Controllers
             return View(categories);
         }
 
-        public IActionResult Create()
+        // --- AJAX İÇİN KATEGORİ EKLEME METODU ---
+        [HttpPost]
+        public async Task<IActionResult> CreateAjax(string name)
         {
-            return View();
+            if (string.IsNullOrEmpty(name))
+                return Json(new { success = false, message = "Kategori adı boş olamaz!" });
+
+            var category = new Category
+            {
+                Name = name,
+                Slug = StringHelper.ToSlug(name) // Helpers klasöründeki metodunu çağırır
+            };
+
+            await _categoryRepository.AddAsync(category);
+
+            // JSON ile "Bitti, işte yeni veriler!" diyoruz
+            return Json(new
+            {
+                success = true,
+                id = category.Id,
+                name = category.Name,
+                slug = category.Slug
+            });
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Category category)
-        {
-            if (ModelState.IsValid)
-            {
-                
-                category.Slug = GenerateSlug(category.Name);
-
-                
-                await _categoryRepository.AddAsync(category);
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(category);
-        }
-        private string GenerateSlug(string phrase)
-        {
-            string str = phrase.ToLower();
-
-            str = System.Text.RegularExpressions.Regex.Replace(str, @"[^a-z0-9\s-]", "");
-
-            str = System.Text.RegularExpressions.Regex.Replace(str, @"\s", "-").Trim();
-
-            str = System.Text.RegularExpressions.Regex.Replace(str, @"-+", "-");
-
-            return str.Length > 45 ? str.Substring(0, 45) : str;
-        }
-
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                await _categoryRepository.DeleteAsync(id);
-
-                return Json(new { success = true, message = "Kategori başarıyla silindi." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Silme işleminde hata oluştu." });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
             var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null) return Json(new { success = false });
 
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(Category category)
-        {
-            if (ModelState.IsValid)
-            {
-                await _categoryRepository.UpdateAsync(category);
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(category);
+            await _categoryRepository.DeleteAsync(id);
+            return Json(new { success = true });
         }
     }
 }
