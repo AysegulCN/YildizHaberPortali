@@ -1,128 +1,103 @@
 ﻿@model YildizHaberPortali.Models.HomeViewModel
-
 @{
-    ViewData["Title"] = "Yıldız Haber - Gündem";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
 <style>
-    /* Slider Konteynırı: Okların dışarı taşması için yanlardan boşluk bırakıyoruz */
-    #mainSlider {
+    /* Premium Slider Tasarımı */
+    .slider-container {
         position: relative;
-        padding: 0 70px; /* Oklar için 70px'lik alan açtık */
-        background: transparent;
+        padding: 40px 80px;
+        background: #fdfdfd;
+        border-radius: 30px;
+        margin-top: 20px;
     }
 
-    /* Okları dışarıya, o boşluğa itiyoruz */
+    .carousel-item img {
+        height: 500px;
+        object-fit: cover;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
     .carousel-control-prev {
-        left: -10px;
-        width: 50px;
+        left: -60px;
+        width: 60px;
+        opacity: 1;
     }
 
     .carousel-control-next {
-        right: -10px;
-        width: 50px;
+        right: -60px;
+        width: 60px;
+        opacity: 1;
     }
 
-    /* Okların stili: Belirgin, mavi ve yuvarlak */
     .carousel-control-prev-icon, .carousel-control-next-icon {
         background-color: #4e73df;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
-        width: 45px;
-        height: 45px;
         background-size: 50%;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        border: 4px solid #fff;
+        box-shadow: 0 5px 15px rgba(78,115,223,0.3);
     }
 
-    /* Haber görsellerini biraz küçültüp zarifleştiriyoruz */
-    .carousel-item img {
-        border-radius: 20px; /* Senin sevdiğin yuvarlak hatlar */
-        height: 450px;
-        object-fit: cover;
+    .carousel-caption {
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        padding: 40px 20px;
+        border-radius: 0 0 25px 25px;
+        text-align: left;
     }
 </style>
 
-
-<div class="slider-section">
-    <div class="container" style="position: relative;">
-        <div id="mainSlider" class="carousel slide" data-ride="carousel">
+<div class="container">
+    <div class="slider-container shadow-sm">
+        <div id="newsSlider" class="carousel slide carousel-fade" data-ride="carousel">
             <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img src="..." class="d-block w-100" alt="...">
-                    <div class="carousel-caption d-none d-md-block bg-dark-transparent rounded">
-                        <h5>Haber Başlığı</h5>
-                    </div>
-                </div>
-            </div>
-
-            <a class="carousel-control-prev" href="#mainSlider" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </a>
-            <a class="carousel-control-next" href="#mainSlider" role="button" data-slide="next">
-                <span class="carousel-control-next-icon"></span>
-            </a>
-        </div>
-    </div>
-</div>
-
-
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-lg-8">
-            <div id="mainSlider" class="carousel slide shadow rounded overflow-hidden" data-ride="carousel">
-                <div class="carousel-inner">
-                    @for (int i = 0; i < Model.SliderNews.Count; i++)
-                    {
-                        var news = Model.SliderNews[i];
-                        <div class="carousel-item @(i == 0 ? "active" : "")">
-                            <img src="~/uploads/@news.Image" class="d-block w-100" style="height: 400px; object-fit: cover;">
-                            <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.6); left:0; right:0; bottom:0; padding: 20px;">
-                                <h4 class="font-weight-bold">@news.Title</h4>
-                            </div>
-                        </div>
-                    }
-                </div>
-                <a class="carousel-control-prev" href="#mainSlider" data-slide="prev"><span class="carousel-control-prev-icon"></span></a>
-                <a class="carousel-control-next" href="#mainSlider" data-slide="next"><span class="carousel-control-next-icon"></span></a>
-            </div>
-        </div>
-
-        <div class="col-lg-4 d-none d-lg-block">
-            <div class="row">
-                @foreach (var news in Model.LatestNews)
+                @{
+                    var first = true;
+                }
+                @* 1. KISIM: Slider haberlerini döngüye alıyoruz *@
+                @foreach (var item in Model.SliderNews.Where(x => x.IsPublished).Take(5))
                 {
-                    <div class="col-12 mb-2">
-                        <div class="card border-0 shadow-sm overflow-hidden" style="height: 93px;">
-                            <div class="row no-gutters h-100">
-                                <div class="col-4"><img src="~/uploads/@news.Image" class="img-fluid h-100" style="object-fit:cover;"></div>
-                                <div class="col-8 p-2 font-weight-bold small">@news.Title</div>
+                    <div class="carousel-item @(first ? "active" : "")">
+                        <a asp-controller="News" asp-action="Details" asp-route-id="@item.Id">
+                            <img src="~/uploads/@item.Image" class="d-block w-100" alt="@item.Title">
+                            <div class="carousel-caption">
+                                <span class="badge badge-primary mb-2 shadow-sm">@item.Category?.Name</span>
+                                <h2 class="text-white">@item.Title</h2>
                             </div>
-                        </div>
+                        </a>
                     </div>
+                    first = false;
                 }
             </div>
+            <a class="carousel-control-prev" href="#newsSlider" role="button" data-slide="prev"><span class="carousel-control-prev-icon"></span></a>
+            <a class="carousel-control-next" href="#newsSlider" role="button" data-slide="next"><span class="carousel-control-next-icon"></span></a>
         </div>
     </div>
 
-    <div class="row mt-5">
-        <div class="col-lg-8">
-            <h4 class="border-bottom pb-2 mb-4 font-weight-bold text-primary">HABERLER</h4>
-            <div class="alert alert-info">Kategori blokları bir sonraki adımda buraya gelecek.</div>
-        </div>
+    <div class="mt-5 mb-4">
+        <h3 class="font-weight-bold"><i class="fas fa-fire text-danger mr-2"></i>Son Haberler</h3>
+        <hr />
+    </div>
 
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-dark text-white font-weight-bold">
-                    <i class="fas fa-fire mr-2 text-warning"></i> En Çok Okunanlar
-                </div>
-                <div class="list-group list-group-flush">
-                    @for (int i = 0; i < Model.MostReadNews.Count; i++)
-                    {
-                        <a href="#" class="list-group-item list-group-item-action py-3">
-                            <span class="badge badge-pill badge-primary mr-2">@(i + 1)</span> @Model.MostReadNews[i].Title
-                        </a>
-                    }
+    <div class="row">
+        @* KRİTİK DÜZELTME: Model.News yerine Model.LatestNews deniyoruz *@
+        @foreach (var item in Model.LatestNews.Take(12))
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
+                    <img src="~/uploads/@item.Image" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold">@item.Title</h5>
+                        <a asp-controller="News" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm rounded-pill">Devamını Oku</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 </div>

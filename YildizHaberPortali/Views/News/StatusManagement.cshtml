@@ -1,0 +1,122 @@
+﻿@model IEnumerable<YildizHaberPortali.Models.News>
+@{
+    ViewData["Title"] = "Haber Durum Yönetimi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* Premium Tasarım Sistemi */
+    .status-card {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .status-table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+        .status-table tr {
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+            .status-table tr:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            }
+
+        .status-table td, .status-table th {
+            border: none !important;
+            padding: 15px !important;
+            vertical-align: middle !important;
+        }
+
+    .author-badge {
+        background: #eef2ff;
+        color: #4e73df;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 5px 12px;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 px-3">
+    <h3 class="font-weight-bold text-gray-800 m-0"><i class="fas fa-tasks text-primary mr-2"></i>Haber Durum Yönetimi</h3>
+
+    <form method="get" asp-action="StatusManagement" class="form-inline">
+        <select name="categoryId" class="form-control rounded-pill shadow-sm border-0 px-4" onchange="this.form.submit()">
+            @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Categories)
+            {
+                <option value="@item.Value" selected="@(item.Value == ViewBag.SelectedCategory?.ToString())">@item.Text</option>
+            }
+        </select>
+    </form>
+</div>
+
+<div class="card status-card shadow-sm mx-2">
+    <div class="card-body bg-light" style="border-radius: 20px;">
+        <div class="table-responsive">
+            <table class="table status-table">
+                <thead>
+                    <tr class="text-muted small text-uppercase font-weight-bold">
+                        <th>Haber & Yazar</th>
+                        <th class="text-center">Kategori</th>
+                        <th class="text-center">Yorumlar</th>
+                        <th class="text-center">Yayın Durumu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr id="row_@item.Id">
+                            <td>
+                                <div class="font-weight-bold text-dark">@item.Title</div>
+                                <div class="mt-1"><span class="author-badge small"><i class="fas fa-user-edit mr-1"></i>@item.Author</span></div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light p-2 text-primary shadow-sm">@item.Category?.Name</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-pill badge-dark px-3">
+                                    <i class="fas fa-comments mr-1"></i> @(item.Comments?.Count ?? 0)
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="sw_@item.Id"
+                                           onclick="updateStatus(@item.Id)" @(item.IsPublished ? "checked" : "")>
+                                    <label class="custom-control-label" for="sw_@item.Id"></label>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function updateStatus(id) {
+            $.post('/News/ToggleStatus/' + id, function (res) {
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Durum Güncellendi',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            });
+        }
+    </script>
+}

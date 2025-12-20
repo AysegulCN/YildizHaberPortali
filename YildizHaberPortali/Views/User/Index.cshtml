@@ -1,20 +1,74 @@
 ﻿@model IEnumerable<YildizHaberPortali.Models.UserRolesViewModel>
 @{
-    ViewData["Title"] = "Kullanıcı Yönetimi";
+    ViewData["Title"] = "Kullanıcı Listesi";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow-sm border-0" style="border-radius: 20px;">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="m-0 font-weight-bold text-primary"><i class="fas fa-users-cog mr-2"></i>Kullanıcı Listesi</h5>
-    </div>
-    <div class="card-body bg-light">
+<style>
+    /* TARZ 2: PREMIUM TASARIM SİSTEMİ */
+    .premium-card {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .premium-table {
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        width: 100%;
+    }
+
+        .premium-table tr {
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+            .premium-table tr:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(78,115,223,0.1);
+            }
+
+        .premium-table td, .premium-table th {
+            border: none !important;
+            padding: 20px 15px !important;
+            vertical-align: middle !important;
+        }
+
+    /* Modern Rozetler ve Butonlar */
+    .role-badge {
+        border-radius: 10px;
+        padding: 6px 15px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .btn-round {
+        border-radius: 50px;
+        font-weight: 600;
+        padding: 8px 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: 0.3s;
+    }
+
+        .btn-round:hover {
+            transform: scale(1.05);
+        }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 px-3">
+    <h3 class="font-weight-bold text-gray-800 m-0">
+        <i class="fas fa-users-cog text-primary mr-2"></i>Kullanıcı Listesi
+    </h3>
+</div>
+
+<div class="card premium-card shadow-sm mx-2">
+    <div class="card-body bg-light" style="border-radius: 20px;">
         <div class="table-responsive">
-            <table class="table category-table">
-                @* Kategori stilini burada da kullanıyoruz *@
+            <table class="table premium-table">
                 <thead>
-                    <tr class="text-muted small text-uppercase">
-                        <th>Email / Kullanıcı Adı</th>
+                    <tr class="text-muted small text-uppercase font-weight-bold" style="letter-spacing: 1px;">
+                        <th>E-Posta / Kullanıcı Adı</th>
                         <th>Tanımlı Roller</th>
                         <th class="text-center">İşlemler</th>
                     </tr>
@@ -28,17 +82,24 @@
                                 <div class="small text-muted">@user.UserName</div>
                             </td>
                             <td>
-                                @foreach (var role in user.Roles)
+                                @if (user.Roles != null && user.Roles.Any())
                                 {
-                                    <span class="badge badge-pill badge-info px-3 shadow-sm mr-1">@role</span>
+                                    @foreach (var role in user.Roles)
+                                    {
+                                        <span class="badge badge-info role-badge shadow-sm">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge badge-light role-badge text-muted">Rol Yok</span>
                                 }
                             </td>
                             <td class="text-center">
-                                <a asp-action="AssignRole" asp-route-id="@user.UserId" class="btn btn-warning btn-sm rounded-pill shadow-sm px-3 mr-2">
-                                    <i class="fas fa-user-tag"></i> Rol Ata
+                                <a asp-action="AssignRole" asp-route-id="@user.UserId" class="btn btn-warning btn-round btn-sm text-white mr-2">
+                                    <i class="fas fa-user-tag mr-1"></i> Rol Ata
                                 </a>
-                                <button onclick="deleteUser('@user.UserId')" class="btn btn-danger btn-sm rounded-pill shadow-sm px-3">
-                                    <i class="fas fa-trash"></i> Sil
+                                <button onclick="confirmDeleteUser('@user.UserId')" class="btn btn-danger btn-round btn-sm shadow-sm">
+                                    <i class="fas fa-trash-alt mr-1"></i> Sil
                                 </button>
                             </td>
                         </tr>
@@ -49,25 +110,40 @@
     </div>
 </div>
 
-
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function () {
-            $('.btn-delete-user').click(function () {
-                var btn = $(this);
-                var id = btn.data("id");
-                var row = btn.closest("tr");
-
-                if (confirm("Bu kullanıcıyı sistemden tamamen silmek istediğinize emin misiniz?")) {
-                    $.post("/User/Delete/" + id, function (res) {
+        function confirmDeleteUser(id) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu kullanıcı sistemden tamamen silinecektir!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74a3b',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'Vazgeç',
+                borderRadius: '15px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('/User/DeleteAjax/' + id, function (res) {
                         if (res.success) {
-                            row.fadeOut(500, function() { $(this).remove(); });
+                            $('#user_' + id).fadeOut(400, function() { $(this).remove(); });
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Kullanıcı Silindi',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
                         } else {
-                            alert(res.message || "Silme işlemi başarısız!");
+                            Swal.fire('Hata!', res.message, 'error');
                         }
                     });
                 }
-            });
-        });
+            })
+        }
     </script>
 }

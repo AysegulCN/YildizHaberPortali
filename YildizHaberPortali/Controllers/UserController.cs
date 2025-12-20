@@ -147,4 +147,27 @@ public class UserController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteAjax(string id)
+    {
+        // 1. Kullanıcıyı bul
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return Json(new { success = false, message = "Kullanıcı bulunamadı!" });
+
+        // 2. Güvenlik: Giriş yapmış olan admin kendini silemesin
+        if (user.UserName == User.Identity.Name)
+            return Json(new { success = false, message = "Kendi hesabınızı silemezsiniz!" });
+
+        // 3. Kullanıcıyı sil
+        var result = await _userManager.DeleteAsync(user);
+        if (result.Succeeded)
+        {
+            return Json(new { success = true });
+        }
+
+        return Json(new { success = false, message = "Silme işlemi sırasında bir hata oluştu." });
+    }
+
+
 }

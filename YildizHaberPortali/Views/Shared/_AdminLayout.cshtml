@@ -20,36 +20,79 @@
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
 
     <style>
-        /* Premium Tasarım Sistemi */
-        .category-table {
-            border-collapse: separate;
-            border-spacing: 0 10px;
+        /* --- AYŞEGÜL'ÜN PREMIUM TASARIM SİSTEMİ (TARZ 2) --- */
+
+        /* 1. Yuvarlak ve Gölgeli Kartlar */
+        .premium-card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+            overflow: hidden; /* Köşelerin taşmaması için */
         }
 
-            .category-table tr {
+            .premium-card .card-header {
                 background: #fff;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-                border-radius: 12px;
-                transition: 0.3s;
+                border-bottom: 1px solid #f0f2f5;
+                padding: 20px;
+                font-weight: bold;
+                color: #4e73df; /* Tema rengin */
             }
 
-                .category-table tr:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        /* 2. Yüzen Tablo Satırları */
+        .premium-table {
+            border-collapse: separate;
+            border-spacing: 0 12px; /* Satır arası boşluk */
+            width: 100%;
+        }
+
+            .premium-table thead th {
+                border: none;
+                padding: 15px;
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+                color: #b7b9cc;
+                letter-spacing: 1px;
+            }
+
+            .premium-table tbody tr {
+                background: #fff;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+                border-radius: 15px;
+                transition: all 0.3s ease;
+            }
+
+                .premium-table tbody tr:hover {
+                    transform: translateY(-3px); /* Havalanma efekti */
+                    box-shadow: 0 8px 20px rgba(78,115,223,0.1); /* Mavi gölge */
                 }
 
-            .category-table td {
+            .premium-table td {
                 border: none !important;
-                padding: 15px !important;
+                padding: 20px 15px !important;
                 vertical-align: middle !important;
             }
 
-        .rounded-pill {
-            border-radius: 50px !important;
+        /* 3. Modern Butonlar ve Rozetler */
+        .btn-premium {
+            border-radius: 50px;
+            padding: 8px 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
         }
 
-        .shadow-sm {
-            box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+            .btn-premium:hover {
+                transform: scale(1.05);
+            }
+
+        .badge-premium {
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
         }
     </style>
 
@@ -154,25 +197,32 @@
                     <ul class="navbar-nav ml-auto">
                         @if (SignInManager.IsSignedIn(User))
                         {
+
                             <li class="nav-item dropdown no-arrow">
-                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
-                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-                                        Hoş Geldiniz, <b>@UserManager.GetUserName(User)</b>
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    @* İstersen buraya sabit "Ayşegül Çoban" yazabilirsin ya da @User.Identity.Name ile sistemden çekebilirsin *@
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 font-weight-bold">
+                                        <i class="fas fa-sparkles text-warning mr-1"></i> Hoş Geldin, Ayşegül!
                                     </span>
-                                    <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                    <img class="img-profile rounded-circle border shadow-sm" src="~/admin/img/undraw_profile.svg" style="width:35px; height:35px;">
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profilim
+                                    </a>
                                     <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">
                                         <i class="fas fa-tachometer-alt fa-sm fa-fw mr-2 text-primary"></i> Yönetici Paneli
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <form asp-controller="Account" asp-action="Logout" method="post">
                                         <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i> Çıkış Yap
+                                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i>Güvenli Çıkış
                                         </button>
                                     </form>
                                 </div>
                             </li>
+                            
                         }
                     </ul>
                 </nav>

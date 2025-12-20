@@ -1,65 +1,116 @@
-﻿@model YildizHaberPortali.Models.NewsCreateViewModel
-
+﻿@using YildizHaberPortali.Models.ViewModels
+@model NewsUpdateViewModel
 @{
-    ViewData["Title"] = "Haberi Düzenle";
+    ViewData["Title"] = "Haberi Güncelle";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h6>
-    </div>
-    <div class="card-body">
+<style>
+    /* PREMIUM DÜZENLEME TASARIMI */
+    .news-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
 
-        <form asp-action="Edit" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .form-control-premium {
+        border-radius: 15px;
+        padding: 14px 22px;
+        border: 1px solid #e3e6f0;
+        line-height: 1.5;
+    }
 
+    .status-box {
+        background: #f8f9fc;
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid #e3e6f0;
+    }
+
+    .preview-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .remove-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        display: none;
+    }
+</style>
+
+<div class="card news-card shadow-sm mx-2 mt-4">
+    <div class="card-body p-4 bg-light" style="border-radius: 20px;">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ExistingImage" id="existingImageName" />
 
-            <div class="form-group">
-                <label asp-for="CategoryId" class="control-label">Kategori Seçimi</label>
-                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
-                    <option value="">-- Kategori Seçiniz --</option>
-                </select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
-            </div>
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Kategori</label>
+                        <select asp-for="CategoryId" class="form-control form-control-premium" asp-items="Model.Categories"></select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Başlık</label>
+                        <input asp-for="Title" class="form-control form-control-premium" />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Haber İçeriği</label>
+                        <textarea asp-for="Content" class="form-control form-control-premium" rows="12"></textarea>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label asp-for="Title" class="control-label">Başlık</label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
+                <div class="col-lg-4">
+                    <div class="status-box mb-4 text-center">
+                        <label class="font-weight-bold d-block mb-3">Durum: <span id="stTxt" class="text-primary">@(Model.IsPublished ? "Yayında" : "Pasif")</span></label>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" asp-for="IsPublished" class="custom-control-input" id="stSw" onchange="document.getElementById('stTxt').innerText = this.checked ? 'Yayında' : 'Pasif'">
+                            <label class="custom-control-label" for="stSw"></label>
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label asp-for="Content" class="control-label">İçerik</label>
-                    <textarea asp-for="Content" class="form-control" rows="10"></textarea>
-                    <span asp-validation-for="Content" class="text-danger"></span>
-            </div>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Görsel Yönetimi</label>
+                        <div class="p-3 bg-white shadow-sm text-center" style="border-radius:15px;">
+                            <div class="preview-container">
+                                <span class="badge badge-danger remove-badge" id="rmvBtn" onclick="clearImg()">Resmi Kaldır X</span>
+                                <img id="prv" src="~/uploads/@Model.ExistingImage" class="img-fluid rounded mb-3 shadow-sm" style="max-height:160px; width:100%; object-fit:cover;" />
+                            </div>
+                            <input type="file" asp-for="ImageFile" class="form-control-file" id="inp" onchange="showImg(this)" />
+                        </div>
+                    </div>
 
-            @* Yazar *@
-            <div class="form-group">
-                <label asp-for="Author" class="control-label">Yazar</label>
-                <input asp-for="Author" class="form-control" />
-                <span asp-validation-for="Author" class="text-danger"></span>
-            </div>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Yazar</label>
+                        <input asp-for="Author" class="form-control form-control-premium" />
+                    </div>
 
-            @* Resim URL'si *@
-            <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label">Görsel URL</label>
-                <input asp-for="ImageUrl" class="form-control" />
-            </div>
-
-            <div class="form-group mt-3">
-                <input type="submit" value="Değişiklikleri Kaydet" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+                    <button type="submit" class="btn btn-primary btn-block rounded-pill font-weight-bold shadow p-3 mb-2">💾 Değişiklikleri Kaydet</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-block rounded-pill font-weight-bold">⬅️ Listeye Dön</a>
+                </div>
             </div>
         </form>
-
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script>
+        function showImg(i) {
+            const [f] = i.files;
+            if (f) {
+                document.getElementById('prv').src = URL.createObjectURL(f);
+                document.getElementById('rmvBtn').style.display = 'block';
+            }
+        }
+        function clearImg() {
+            document.getElementById('inp').value = "";
+            document.getElementById('prv').src = "/uploads/@Model.ExistingImage";
+            document.getElementById('rmvBtn').style.display = 'none';
+        }
+    </script>
 }

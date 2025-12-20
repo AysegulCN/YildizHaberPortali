@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
+using YildizHaberPortali.Models.ViewModels;
+
 
 namespace YildizHaberPortali.Controllers
 {
@@ -88,49 +90,30 @@ namespace YildizHaberPortali.Controllers
             return View(viewModel);
         }
 
-        // 4. HABER DÜZENLEME (GET) - [Düzeltilen Kritik Hata: ViewModel Uyuşmazlığı]
-        [Authorize(Roles = "Admin,Editor")]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var news = await _newsRepository.GetByIdAsync(id);
-            if (news == null) return NotFound();
-
-            var vm = new NewsCreateViewModel
-            {
-                Id = news.Id,
-                Title = news.Title,
-                Content = news.Content,
-                CategoryId = news.CategoryId,
-                ExistingImagePath = news.Image //
-            };
-
-            var categories = await _categoryRepository.GetAllAsync();
-            ViewBag.Categories = categories.ToList();
-            return View(vm);
-        }
-
-        // 5. HABER DÜZENLEME (POST)
         [HttpPost]
-        [Authorize(Roles = "Admin,Editor")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(NewsCreateViewModel viewModel)
+        public async Task<IActionResult> Edit(NewsUpdateViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
                 var news = await _newsRepository.GetByIdAsync(viewModel.Id);
                 if (news == null) return NotFound();
 
-                news.Title = viewModel.Title;
-                news.Content = viewModel.Content;
-                news.CategoryId = viewModel.CategoryId;
+                string uniqueFileName = viewModel.ExistingImage;
 
                 if (viewModel.ImageFile != null)
                 {
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
                     string path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", uniqueFileName);
                     using (var stream = new FileStream(path, FileMode.Create)) { await viewModel.ImageFile.CopyToAsync(stream); }
-                    news.Image = uniqueFileName;
                 }
+
+                news.Title = viewModel.Title;
+                news.Content = viewModel.Content;
+                news.CategoryId = viewModel.CategoryId;
+                news.IsPublished = viewModel.IsPublished;
+                news.Author = viewModel.Author;
+                news.Image = uniqueFileName;
 
                 await _newsRepository.UpdateAsync(news);
                 return RedirectToAction(nameof(Index));
@@ -138,7 +121,8 @@ namespace YildizHaberPortali.Controllers
             return View(viewModel);
         }
 
-        // 6. HABER SİLME (POST - AJAX) - [Düzeltilen Hata: Sil Butonu Çalışmama Sorunu]
+        
+
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
@@ -168,5 +152,26 @@ namespace YildizHaberPortali.Controllers
             await _newsRepository.UpdateAsync(news);
             return Json(new { success = true });
         }
+
+        [Authorize(Roles = "Admin,Editor")]
+        public async Task<IActionResult> StatusManagement(int? categoryId)
+        {
+            // 1. Kategorileri dropdown için çekiyoruz
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = new SelectListItem[] { new SelectListItem { Value = "", Text = "Tüm Kategoriler" } }
+                .Concat(categories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }));
+
+            // 2. Haberleri kategorisiyle ve yorumlarıyla beraber çekiyoruz
+            var newsQuery = await _newsRepository.GetAllWithCategoryAsync();
+
+            if (categoryId.HasValue)
+            {
+                newsQuery = newsQuery.Where(x => x.CategoryId == categoryId.Value).ToList();
+                ViewBag.SelectedCategory = categoryId.Value;
+            }
+
+            return View(newsQuery.OrderByDescending(x => x.CreatedDate));
+        }
+
     }
 }

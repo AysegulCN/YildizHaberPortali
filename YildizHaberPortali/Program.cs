@@ -83,10 +83,11 @@ app.MapHub<NewsHub>("/newsHub"); // SignalR Hub baðlantýsý
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    // 'Admin' yerine senin projenndeki 'Dashboard' ismini yazýyoruz
+    pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
 // UYGULAMAYI ÇALIÞTIR (Bu satýrdan sonra kod yazýlmaz!)
-app.Run();
+app.Run(); ;
 
 // --- YARDIMCI METODLAR (SADECE TANIMLAR) ---
 

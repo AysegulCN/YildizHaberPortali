@@ -1,77 +1,117 @@
-﻿@model YildizHaberPortali.Models.NewsCreateViewModel
-
+﻿@using YildizHaberPortali.Models.ViewModels
+@model NewsCreateViewModel
 @{
-    ViewData["Title"] = "Yeni Haber Ekle";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml"; 
+    ViewData["Title"] = "Yeni Haber Yayınla";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Yeni Haber Oluştur</h6>
-    </div>
-    <div class="card-body">
+<style>
+    /* --- TARZ 2: PREMIUM DİNAMİK FORM --- */
+    .news-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
 
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
+    .form-control-premium {
+        border-radius: 15px;
+        padding: 12px 20px;
+        border: 1px solid #e3e6f0;
+        height: auto;
+        line-height: 1.5;
+        transition: 0.3s;
+    }
+    /* Kategori kutusu düzeltmesi */
+    select.form-control-premium {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        appearance: none;
+        background-color: #fff;
+    }
 
+    /* Resim Önizleme Alanı */
+    .image-preview-wrapper {
+        position: relative;
+        display: none; /* Resim seçilene kadar gizli */
+        margin-top: 15px;
+    }
+
+    #remove-img-btn {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(231, 74, 59, 0.3);
+    }
+
+    .btn-premium {
+        border-radius: 50px;
+        padding: 10px 25px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 px-3">
+    <h3 class="font-weight-bold text-gray-800 m-0"><i class="fas fa-plus-circle text-primary mr-2"></i>Yeni Haber Yayınla</h3>
+</div>
+
+<div class="card news-card shadow-sm mx-2">
+    <div class="card-body p-4 bg-light" style="border-radius: 20px;">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" id="newsForm">
+            @Html.AntiForgeryToken()
             <div class="row">
-                <div class="col-md-8">
-
-
-                    <div class="form-group">
-                        <label asp-for="CategoryId" class="control-label font-weight-bold">Kategori</label>
-                        <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories">
-                            <option value="">-- Bir Kategori Seçiniz --</option>
+                <div class="col-lg-8">
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Kategori Seçimi</label>
+                        <select asp-for="CategoryId" class="form-control form-control-premium" asp-items="Model.Categories">
+                            <option value="">-- Kategori Seçiniz --</option>
                         </select>
-                        <span asp-validation-for="CategoryId" class="text-danger"></span>
                     </div>
-
-                    <div class="form-group">
-                        <label asp-for="Title" class="control-label font-weight-bold">Haber Başlığı</label>
-                        <input asp-for="Title" class="form-control" placeholder="Haberin başlığını giriniz..." />
-                        <span asp-validation-for="Title" class="text-danger"></span>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Haber Başlığı</label>
+                        <input asp-for="Title" class="form-control form-control-premium" placeholder="Başlık..." />
                     </div>
-
-
-                    <div class="form-group">
-                        <label asp-for="Content" class="control-label font-weight-bold">Haber İçeriği</label>
-                        <textarea asp-for="Content" class="form-control" rows="10" 
-                        placeholder="Haber metnini buraya düz yazı olarak giriniz..."></textarea>
-                        <span asp-validation-for="Content" class="text-danger"></span>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Haber İçeriği</label>
+                        <textarea asp-for="Content" class="form-control form-control-premium" rows="12"></textarea>
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-lg-4">
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Haber Görseli</label>
+                        <div class="p-3 bg-white shadow-sm text-center" style="border-radius:15px;">
+                            <input type="file" asp-for="ImageFile" class="form-control-file" id="imgInp" accept="image/*" />
 
-                    <div class="card bg-light mb-3">
-                        <div class="card-body text-center">
-                            <label asp-for="ImageFile" class="font-weight-bold">Haber Görseli</label>
-
-                            <div class="mb-3">
-                                <i class="fas fa-image fa-3x text-gray-300"></i>
+                            <div class="image-preview-wrapper" id="previewWrapper">
+                                <button type="button" class="btn btn-danger p-0" id="remove-img-btn" onclick="removeImage()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <img id="preview" src="#" class="img-fluid rounded shadow-sm" style="max-height:200px; width:100%; object-fit:cover;" />
+                                <small class="text-danger d-block mt-2 font-weight-bold">Resmi Kaldır</small>
                             </div>
-
-                            <input asp-for="ImageFile" type="file" class="form-control-file border p-1" />
-                            <small class="text-muted d-block mt-2">Desteklenen formatlar: JPG, PNG</small>
-                            <span asp-validation-for="ImageFile" class="text-danger"></span>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="Author" class="control-label font-weight-bold">Yazar</label>
-                        <input asp-for="Author" class="form-control" placeholder="Admin" />
-                        <span asp-validation-for="Author" class="text-danger"></span>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold ml-2">Yazar Adı</label>
+                        <input asp-for="Author" class="form-control form-control-premium" value="" placeholder="Yazar ismini giriniz..." />
                     </div>
 
-                    <hr />
-
-                    <button type="submit" class="btn btn-primary btn-block btn-lg">
-                        <i class="fas fa-save"></i> Haberi Kaydet
-                    </button>
-
-                    <a asp-action="Index" class="btn btn-secondary btn-block">
-                        <i class="fas fa-arrow-left"></i> Listeye Dön
-                    </a>
-
+                    <div class="card bg-white border-0 shadow-sm p-3 mt-5" style="border-radius: 15px;">
+                        <button type="submit" class="btn btn-primary btn-premium mb-3 shadow">
+                            <i class="fas fa-save mr-2"></i>Haberi Kaydet
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary btn-premium text-white shadow-sm">
+                            <i class="fas fa-arrow-left mr-2"></i>Listeye Dön
+                        </a>
+                    </div>
                 </div>
             </div>
         </form>
@@ -79,7 +119,25 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script>
+        const imgInp = document.getElementById('imgInp');
+        const preview = document.getElementById('preview');
+        const wrapper = document.getElementById('previewWrapper');
+
+        // Resim Seçildiğinde
+        imgInp.onchange = evt => {
+            const [file] = imgInp.files;
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                wrapper.style.display = 'block';
+            }
+        }
+
+        // Resmi Kaldır Butonuna Basıldığında
+        function removeImage() {
+            imgInp.value = ""; // Dosya girişini temizle
+            preview.src = "#";
+            wrapper.style.display = 'none'; // Önizlemeyi gizle
+        }
+    </script>
 }
