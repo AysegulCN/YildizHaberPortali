@@ -90,7 +90,39 @@ namespace YildizHaberPortali.Controllers
             return View(viewModel);
         }
 
+        // 4. HABER DÜZENLEME (GET)
+        [Authorize(Roles = "Admin,Editor")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            // Haberi getiriyoruz
+            var news = await _newsRepository.GetByIdAsync(id);
+            if (news == null) return NotFound();
+
+            // Kategorileri çekiyoruz (Dropdown için şart)
+            var categories = await _categoryRepository.GetAllAsync();
+
+            var vm = new NewsUpdateViewModel
+            {
+                Id = news.Id,
+                Title = news.Title,
+                Content = news.Content,
+                CategoryId = news.CategoryId,
+                Author = news.Author,
+                ExistingImage = news.Image,
+                IsPublished = news.IsPublished,
+                // Kategorileri eşleştiriyoruz
+                Categories = categories.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                }).ToList()
+            };
+            return View(vm);
+        }
+
+        // 5. HABER DÜZENLEME (POST)
         [HttpPost]
+        [Authorize(Roles = "Admin,Editor")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(NewsUpdateViewModel viewModel)
         {
@@ -99,29 +131,42 @@ namespace YildizHaberPortali.Controllers
                 var news = await _newsRepository.GetByIdAsync(viewModel.Id);
                 if (news == null) return NotFound();
 
+                // Mevcut resmi koruyoruz
                 string uniqueFileName = viewModel.ExistingImage;
 
                 if (viewModel.ImageFile != null)
                 {
+                    // Yeni bir resim seçildiyse yükleme işlemini yapıyoruz
                     uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
                     string path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", uniqueFileName);
-                    using (var stream = new FileStream(path, FileMode.Create)) { await viewModel.ImageFile.CopyToAsync(stream); }
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await viewModel.ImageFile.CopyToAsync(stream);
+                    }
                 }
 
+                // Verileri güncelliyoruz
                 news.Title = viewModel.Title;
                 news.Content = viewModel.Content;
                 news.CategoryId = viewModel.CategoryId;
                 news.IsPublished = viewModel.IsPublished;
-                news.Author = viewModel.Author;
+                news.Author = viewModel.Author ?? "Ayşegül";
                 news.Image = uniqueFileName;
 
                 await _newsRepository.UpdateAsync(news);
                 return RedirectToAction(nameof(Index));
             }
+
+            // Eğer validasyon hatası varsa kategorileri TEKRAR dolduruyoruz
+            var categories = await _categoryRepository.GetAllAsync();
+            viewModel.Categories = categories.Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.Name
+            }).ToList();
+
             return View(viewModel);
         }
-
-        
 
         [HttpPost]
         [Authorize(Roles = "Admin")]

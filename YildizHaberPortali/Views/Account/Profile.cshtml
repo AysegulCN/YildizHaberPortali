@@ -1,0 +1,121 @@
+﻿@using YildizHaberPortali.Models.ViewModels
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* TARZ 2: PREMIUM PROFiL TASARIMI */
+    .profile-card {
+        border-radius: 25px;
+        border: none;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        transition: 0.3s;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border-radius: 25px 25px 0 0;
+        height: 120px;
+    }
+
+    .profile-img-container {
+        margin-top: -60px;
+    }
+
+    .profile-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid #fff;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        object-fit: cover;
+    }
+
+    .form-control-premium {
+        border-radius: 15px;
+        padding: 12px 20px;
+        border: 1px solid #e3e6f0;
+        transition: 0.3s;
+    }
+
+    .btn-premium {
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .info-badge {
+        border-radius: 10px;
+        padding: 8px 15px;
+        background: #f8f9fc;
+        color: #4e73df;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 mb-4">
+            <div class="card profile-card text-center bg-white">
+                <div class="profile-header"></div>
+                <div class="card-body p-4">
+                    <div class="profile-img-container mb-3">
+                        <img src="~/img/@Model.ProfilePicture" class="profile-img" alt="Profil">
+                    </div>
+                    <h4 class="font-weight-bold text-gray-800 mb-1">@Model.FullName</h4>
+                    <p class="text-muted mb-3">@@@Model.UserName</p>
+                    <div class="info-badge mb-4">Grafik Tasarımcı & Yazılımcı</div>
+                    <hr class="my-4">
+                    <p class="small text-muted px-2">@Model.Bio</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card profile-card shadow-sm border-0">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-cog mr-2"></i>Hesap Ayarları</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold text-dark ml-2">Ad Soyad</label>
+                                <input type="text" asp-for="FullName" class="form-control form-control-premium" />
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold text-dark ml-2">E-Posta</label>
+                                <input type="email" asp-for="Email" class="form-control form-control-premium" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold text-dark ml-2">Telefon</label>
+                                <input type="text" asp-for="PhoneNumber" class="form-control form-control-premium" />
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold text-dark ml-2">Kullanıcı Adı</label>
+                                <input type="text" asp-for="UserName" class="form-control form-control-premium" readonly />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold text-dark ml-2">Biyografi / Hakkımda</label>
+                            <textarea asp-for="Bio" class="form-control form-control-premium" rows="4"></textarea>
+                        </div>
+
+                        <div class="text-right mt-4">
+                            <button type="submit" class="btn btn-primary btn-premium shadow">
+                                <i class="fas fa-check-circle mr-2"></i>Değişiklikleri Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

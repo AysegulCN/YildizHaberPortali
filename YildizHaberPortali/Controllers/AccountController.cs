@@ -1,11 +1,10 @@
-﻿// Controllers/AccountController.cs
-
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using YildizHaberPortali.Models;
+using YildizHaberPortali.Models.ViewModels;
 
-// Not: Login/Register ViewModellerini daha sonra oluşturacağız, şimdilik basit tutuyoruz.
 
 public class AccountController : Controller
 {
@@ -75,5 +74,16 @@ public class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    // (Login ve Register POST metotlarını, ViewModelleri oluşturduktan sonra ekleyeceğiz.)
+    [Authorize]
+    public async Task<IActionResult> Profile()
+    {
+        // Burası Views/Account/Profile.cshtml dosyasını açar
+        return View(new ProfileViewModel
+        {
+            FullName = "Ayşegül",
+            UserName = "aysegul_admin",
+            ProfilePicture = "avatar.png"
+        });
+    }
+
 }

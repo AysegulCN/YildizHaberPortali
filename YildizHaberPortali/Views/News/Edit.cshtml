@@ -6,7 +6,7 @@
 }
 
 <style>
-    /* PREMIUM DÜZENLEME TASARIMI */
+    /* PREMIUM TASARIM SİSTEMİ */
     .news-card {
         border-radius: 20px;
         border: none;
@@ -20,17 +20,42 @@
         line-height: 1.5;
     }
 
+    /* SWITCH BUTONUNUN ÜST ÜSTE BİNMESİNİ ÖNLEYEN YAPI */
     .status-box {
         background: #f8f9fc;
-        border-radius: 15px;
-        padding: 20px;
+        border-radius: 20px;
+        padding: 25px;
         border: 1px solid #e3e6f0;
     }
 
+    .custom-switch-premium {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .custom-switch .custom-control-label {
+        padding-left: 3.5rem !important;
+        cursor: pointer;
+    }
+
+        .custom-switch .custom-control-label::before {
+            height: 1.75rem;
+            width: 3rem;
+            border-radius: 2rem;
+            top: 0.15rem;
+        }
+
+        .custom-switch .custom-control-label::after {
+            width: calc(1.75rem - 4px);
+            height: calc(1.75rem - 4px);
+            border-radius: 2rem;
+            top: calc(0.15rem + 2px);
+        }
+
     .preview-container {
         position: relative;
-        display: inline-block;
-        width: 100%;
     }
 
     .remove-badge {
@@ -40,6 +65,13 @@
         cursor: pointer;
         display: none;
     }
+
+    .btn-premium {
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
 </style>
 
 <div class="card news-card shadow-sm mx-2 mt-4">
@@ -47,38 +79,42 @@
         <form asp-action="Edit" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="ExistingImage" id="existingImageName" />
+            <input type="hidden" asp-for="ExistingImage" id="oldImg" />
 
             <div class="row">
                 <div class="col-lg-8">
                     <div class="form-group mb-4">
-                        <label class="font-weight-bold ml-2">Kategori</label>
-                        <select asp-for="CategoryId" class="form-control form-control-premium" asp-items="Model.Categories"></select>
+                        <label class="font-weight-bold ml-2">Kategori Seçimi</label>
+                        <select asp-for="CategoryId" class="form-control form-control-premium" asp-items="Model.Categories">
+                            <option value="">-- Kategori Seçiniz --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
                     </div>
                     <div class="form-group mb-4">
                         <label class="font-weight-bold ml-2">Başlık</label>
-                        <input asp-for="Title" class="form-control form-control-premium" />
+                        <input asp-for="Title" class="form-control form-control-premium w-100" />
                     </div>
                     <div class="form-group mb-4">
                         <label class="font-weight-bold ml-2">Haber İçeriği</label>
-                        <textarea asp-for="Content" class="form-control form-control-premium" rows="12"></textarea>
+                        <textarea asp-for="Content" class="form-control form-control-premium w-100" rows="12"></textarea>
                     </div>
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="status-box mb-4 text-center">
-                        <label class="font-weight-bold d-block mb-3">Durum: <span id="stTxt" class="text-primary">@(Model.IsPublished ? "Yayında" : "Pasif")</span></label>
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" asp-for="IsPublished" class="custom-control-input" id="stSw" onchange="document.getElementById('stTxt').innerText = this.checked ? 'Yayında' : 'Pasif'">
-                            <label class="custom-control-label" for="stSw"></label>
+                    <div class="status-box mb-4 text-center shadow-sm">
+                        <label class="font-weight-bold d-block mb-3 text-muted">Yayın Durumu</label>
+                        <div class="custom-control custom-switch custom-switch-premium">
+                            <input type="checkbox" asp-for="IsPublished" class="custom-control-input" id="stSw" onchange="updTxt()">
+                            <label class="custom-control-label h4 font-weight-bold" for="stSw" id="stLbl">
+                                @(Model.IsPublished ? "Yayında" : "Pasif")
+                            </label>
                         </div>
                     </div>
 
-                    <div class="form-group mb-4">
-                        <label class="font-weight-bold ml-2">Görsel Yönetimi</label>
-                        <div class="p-3 bg-white shadow-sm text-center" style="border-radius:15px;">
+                    <div class="form-group mb-4 text-center">
+                        <div class="p-3 bg-white shadow-sm" style="border-radius: 15px;">
                             <div class="preview-container">
-                                <span class="badge badge-danger remove-badge" id="rmvBtn" onclick="clearImg()">Resmi Kaldır X</span>
+                                <span class="badge badge-danger remove-badge" id="rmBtn" onclick="clrImg()">Resmi Kaldır X</span>
                                 <img id="prv" src="~/uploads/@Model.ExistingImage" class="img-fluid rounded mb-3 shadow-sm" style="max-height:160px; width:100%; object-fit:cover;" />
                             </div>
                             <input type="file" asp-for="ImageFile" class="form-control-file" id="inp" onchange="showImg(this)" />
@@ -87,11 +123,13 @@
 
                     <div class="form-group mb-4">
                         <label class="font-weight-bold ml-2">Yazar</label>
-                        <input asp-for="Author" class="form-control form-control-premium" />
+                        <input asp-for="Author" class="form-control-premium w-100" />
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block rounded-pill font-weight-bold shadow p-3 mb-2">💾 Değişiklikleri Kaydet</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary btn-block rounded-pill font-weight-bold">⬅️ Listeye Dön</a>
+                    <div class="mt-5">
+                        <button type="submit" class="btn btn-primary btn-block btn-premium shadow p-3">Kaydet</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-block btn-premium mt-3">Listeye Dön</a>
+                    </div>
                 </div>
             </div>
         </form>
@@ -100,17 +138,25 @@
 
 @section Scripts {
     <script>
+        function updTxt() {
+            var s = document.getElementById('stSw');
+            var l = document.getElementById('stLbl');
+            l.innerText = s.checked ? "Yayında" : "Pasif";
+            l.className = s.checked ? "custom-control-label h4 font-weight-bold text-success" : "custom-control-label h4 font-weight-bold text-secondary";
+        }
         function showImg(i) {
             const [f] = i.files;
             if (f) {
                 document.getElementById('prv').src = URL.createObjectURL(f);
-                document.getElementById('rmvBtn').style.display = 'block';
+                document.getElementById('rmBtn').style.display = 'block';
             }
         }
-        function clearImg() {
+        function clrImg() {
             document.getElementById('inp').value = "";
             document.getElementById('prv').src = "/uploads/@Model.ExistingImage";
-            document.getElementById('rmvBtn').style.display = 'none';
+            document.getElementById('rmBtn').style.display = 'none';
         }
+        // Sayfa yüklendiğinde durum yazısının rengini ayarla
+        window.onload = updTxt;
     </script>
 }
