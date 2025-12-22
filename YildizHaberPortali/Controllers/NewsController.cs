@@ -21,17 +21,23 @@ namespace YildizHaberPortali.Controllers
         private readonly INewsRepository _newsRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IWebHostEnvironment _hostEnvironment;
-
         private readonly UserManager<AppUser> _userManager;
+        private readonly ICommentRepository _commentRepository;
 
-        public NewsController(INewsRepository newsRepository, ICategoryRepository categoryRepository,
-                              IWebHostEnvironment hostEnvironment, UserManager<AppUser> userManager)
+        public NewsController(INewsRepository newsRepository,
+                              ICategoryRepository categoryRepository,
+                              IWebHostEnvironment hostEnvironment,
+                              UserManager<AppUser> userManager,
+                              ICommentRepository commentRepository) 
         {
             _newsRepository = newsRepository;
             _categoryRepository = categoryRepository;
             _hostEnvironment = hostEnvironment;
-            _userManager = userManager; 
+            _userManager = userManager;
+            _commentRepository = commentRepository;
         }
+    
+
 
         public async Task<IActionResult> Index()
         {
@@ -77,20 +83,20 @@ namespace YildizHaberPortali.Controllers
                     CategoryId = model.CategoryId,
                     IsPublished = model.IsPublished,
                     AuthorId = user.Id,
+
+                    Author = user.FullName ?? "Yıldız Editör",
+
                     CreatedDate = DateTime.Now
                 };
 
-                await _newsRepository.AddAsync(news);
+
+                await _newsRepository.AddAsync(news); 
+                
                 return RedirectToAction(nameof(Index));
             }
-
-            var allCategories = await _categoryRepository.GetAllAsync();
-            model.Categories = allCategories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
-
+            
             return View(model);
         }
-
-
 
         [Authorize(Roles = "Admin,Editor")]
         public async Task<IActionResult> Edit(int id)
@@ -207,6 +213,22 @@ namespace YildizHaberPortali.Controllers
 
             return View(newsQuery.OrderByDescending(x => x.CreatedDate));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var news = await _newsRepository.GetByIdAsync(id);
+            if (news == null) return NotFound();
+
+            var comments = (await _commentRepository.GetAllAsync())
+                .Where(x => x.NewsId == id)
+                .OrderByDescending(x => x.CreatedDate)
+                .ToList();
+
+            ViewBag.Comments = comments;
+            return View(news);
+        }
+
 
     }
 }

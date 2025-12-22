@@ -1,55 +1,34 @@
-﻿@model IEnumerable<YildizHaberPortali.Models.Comment>
+﻿@model IEnumerable<Comment>
 @{
-    ViewData["Title"] = "Yorum Yönetimi";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow mb-4 border-0" style="border-radius: 15px;">
-    <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
-        <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-comments mr-2"></i>Gelen Yorumlar</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
-                <thead class="thead-light">
+<div class="container-fluid">
+    <h3 class="font-weight-bold text-primary mb-4">Canlı Yorum Denetimi</h3>
+
+    <div class="card shadow premium-card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="bg-primary text-white">
                     <tr>
-                        <th>Haber</th>
                         <th>Yazar</th>
+                        <th>Haber</th>
                         <th>Yorum</th>
                         <th>Tarih</th>
-                        <th class="text-center">İşlemler</th>
+                        <th>İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="small font-weight-bold">@item.News?.Title</td>
-                                <td>@item.AuthorName</td>
-                                <td class="small text-muted">@item.Content</td>
-                                <td class="small">@item.CommentDate.ToString("dd.MM.yyyy")</td>
-                                <td class="text-center">
-                                    @if (!item.IsApproved)
-                                    {
-                                        <button class="btn btn-success btn-circle btn-sm btn-approve" data-id="@item.Id" title="Onayla">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    }
-                                    <button class="btn btn-danger btn-circle btn-sm btn-delete-comment" data-id="@item.Id" title="Sil">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
+                    @foreach (var item in Model)
                     {
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">
-                                <i class="fas fa-info-circle mr-2"></i> Henüz yönetilecek bir yorum bulunmuyor.
-                            </td>
+                            @* "AuthorName" yerine "User.FullName" kullanıyoruz *@
+                            <td class="font-weight-bold">@(item.User?.FullName ?? "Silinmiş Kullanıcı")</td>
+                            @* "Content" yerine "Text" kullanıyoruz *@
+                            <td style="max-width:300px;">@item.Text</td>
+                            @* "CommentDate" yerine "CreatedDate" kullanıyoruz *@
+                            <td>@item.CreatedDate.ToShortDateString()</td>
+                            @* ... *@
                         </tr>
                     }
                 </tbody>

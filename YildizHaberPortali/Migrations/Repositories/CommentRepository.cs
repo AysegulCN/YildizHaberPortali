@@ -1,17 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using YildizHaberPortali.Data;
 using YildizHaberPortali.Models;
-using YildizHaberPortali.Repositories;
+using YildizHaberPortali.Contracts; // 🚀 Arayüzü (Interface) buradan çağırıyoruz
 
-public class CommentRepository : GenericRepository<Comment>, ICommentRepository
+namespace YildizHaberPortali.Repositories
 {
-    public CommentRepository(ApplicationDbContext context) : base(context) { }
-
-    public async Task<List<Comment>> GetApprovedCommentsByNewsIdAsync(int newsId)
+    public class CommentRepository : GenericRepository<Comment>, ICommentRepository
     {
-        return await _context.Comments
-            .Where(x => x.NewsId == newsId && x.IsApproved)
-            .OrderByDescending(x => x.CommentDate) 
-            .ToListAsync();
+        public CommentRepository(ApplicationDbContext context) : base(context) { }
+
+        public async Task<List<Comment>> GetApprovedCommentsByNewsIdAsync(int newsId)
+        {
+            return await _context.Comments
+                .Where(x => x.NewsId == newsId && x.IsApproved)
+                .OrderByDescending(x => x.CreatedDate) // 🚀 SqlException'ı bu isimle çözeceğiz
+                .ToListAsync();
+        }
     }
 }

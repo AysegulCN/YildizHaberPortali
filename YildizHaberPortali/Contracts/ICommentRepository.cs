@@ -1,7 +1,10 @@
-﻿using YildizHaberPortali.Contracts;
-using YildizHaberPortali.Models;
+﻿using YildizHaberPortali.Models;
 
-public interface ICommentRepository : IGenericRepository<Comment>
+namespace YildizHaberPortali.Contracts 
 {
-    Task<List<Comment>> GetApprovedCommentsByNewsIdAsync(int newsId);
+    // IGenericRepository'den miras almazsan GetList() metodunu göremezsin!
+    public interface ICommentRepository : IGenericRepository<Comment>
+    {
+        Task<List<Comment>> GetApprovedCommentsByNewsIdAsync(int newsId);
+    }
 }
