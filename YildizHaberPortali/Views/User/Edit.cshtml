@@ -1,0 +1,66 @@
+﻿@model YildizHaberPortali.Models.ViewModels.UserEditViewModel
+@{
+    ViewData["Title"] = "Yazar Düzenle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="premium-card card shadow">
+                <div class="card-header py-3 bg-white">
+                    <h5 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-edit mr-2"></i> Yazar Hesabını Yönet: @Model.FullName</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="font-weight-bold">Ad Soyad</label>
+                                    <input asp-for="FullName" class="form-control rounded-pill border-primary" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="font-weight-bold">E-posta (Değiştirilemez)</label>
+                                    <input asp-for="Email" class="form-control rounded-pill bg-light" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="font-weight-bold text-danger">Yetki Seviyesi (Rol)</label>
+                                    <select asp-for="SelectedRole" asp-items="Model.Roles" class="form-control rounded-pill border-danger"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-pill mt-4 shadow-sm border">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" asp-for="IsActive" class="custom-control-input" id="activeSw">
+                                        <label class="custom-control-label font-weight-bold text-primary" for="activeSw">Hesap Aktif (Dondurmak için kapatın)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold">Yazar Biyografisi (Bio)</label>
+                            <textarea asp-for="Bio" class="form-control shadow-sm" rows="4" style="border-radius:20px;"></textarea>
+                        </div>
+
+                        <div class="mt-4 text-right">
+                            <a asp-action="Writers" class="btn btn-secondary btn-premium px-5 mr-2">Vazgeç</a>
+                            <button type="submit" class="btn btn-primary btn-premium px-5">Güncellemeri Kaydet</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

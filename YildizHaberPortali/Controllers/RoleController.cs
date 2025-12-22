@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using YildizHaberPortali.Models;
 
-[Authorize(Roles = "Admin")] // Sadece Admin rolüne sahip kullanıcılar erişebilir (İleride kullanılacak)
+[Authorize(Roles = "Admin")] 
 public class RoleController : Controller
 {
     private readonly RoleManager<IdentityRole> _roleManager;

@@ -1,33 +1,29 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
 
-    
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+}
 
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Yıldız Haber Portalı Yönetim Paneli">
     <title>Yıldız Haber Admin | @ViewData["Title"]</title>
 
     <link href="~/admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="~/admin/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
 
     <style>
-        /* --- AYŞEGÜL'ÜN PREMIUM TASARIM SİSTEMİ (TARZ 2) --- */
-
-        /* 1. Yuvarlak ve Gölgeli Kartlar */
         .premium-card {
             border-radius: 20px;
             border: none;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
-            overflow: hidden; /* Köşelerin taşmaması için */
+            overflow: hidden;
         }
 
             .premium-card .card-header {
@@ -35,25 +31,14 @@
                 border-bottom: 1px solid #f0f2f5;
                 padding: 20px;
                 font-weight: bold;
-                color: #4e73df; /* Tema rengin */
+                color: #4e73df;
             }
 
-        /* 2. Yüzen Tablo Satırları */
         .premium-table {
             border-collapse: separate;
-            border-spacing: 0 12px; /* Satır arası boşluk */
+            border-spacing: 0 12px;
             width: 100%;
         }
-
-            .premium-table thead th {
-                border: none;
-                padding: 15px;
-                font-weight: 700;
-                text-transform: uppercase;
-                font-size: 0.85rem;
-                color: #b7b9cc;
-                letter-spacing: 1px;
-            }
 
             .premium-table tbody tr {
                 background: #fff;
@@ -63,126 +48,90 @@
             }
 
                 .premium-table tbody tr:hover {
-                    transform: translateY(-3px); /* Havalanma efekti */
-                    box-shadow: 0 8px 20px rgba(78,115,223,0.1); /* Mavi gölge */
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 20px rgba(78,115,223,0.1);
                 }
-
-            .premium-table td {
-                border: none !important;
-                padding: 20px 15px !important;
-                vertical-align: middle !important;
-            }
-
-        /* 3. Modern Butonlar ve Rozetler */
-        .btn-premium {
-            border-radius: 50px;
-            padding: 8px 25px;
-            font-weight: 600;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-        }
-
-            .btn-premium:hover {
-                transform: scale(1.05);
-            }
-
-        .badge-premium {
-            border-radius: 10px;
-            padding: 8px 15px;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-        }
     </style>
 
     @RenderSection("Styles", required: false)
 </head>
 
 <body id="page-top">
-
     <div id="wrapper">
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
             <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-controller="Dashboard" asp-action="Index">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-star text-warning"></i>
-                </div>
+                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-star text-warning"></i></div>
                 <div class="sidebar-brand-text mx-3">YILDIZ HABER <sup>Admin</sup></div>
             </a>
 
-            <li><hr class="sidebar-divider my-0"></li>
+            <hr class="sidebar-divider my-0">
 
             <li class="nav-item">
                 <a class="nav-link" asp-controller="Home" asp-action="Index" target="_blank">
-                    <i class="fas fa-fw fa-external-link-alt"></i>
-                    <span>Siteyi Görüntüle</span>
+                    <i class="fas fa-fw fa-external-link-alt"></i><span>Siteyi Görüntüle</span>
                 </a>
             </li>
-
-            <li class="nav-item active">
-                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Kontrol Paneli</span>
-                </a>
-            </li>
-
-            <li><hr class="sidebar-divider"></li>
-            <li><div class="sidebar-heading">İÇERİK YÖNETİMİ</div></li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHaber" aria-expanded="true">
-                    <i class="fas fa-fw fa-newspaper"></i>
-                    <span>Haber İşlemleri</span>
+                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
+                    <i class="fas fa-fw fa-tachometer-alt"></i><span>Kontrol Paneli</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading">İÇERİK YÖNETİMİ</div>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHaber">
+                    <i class="fas fa-fw fa-newspaper"></i><span>Haber İşlemleri</span>
                 </a>
                 <div id="collapseHaber" class="collapse" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="@Url.Action("Index", "News")">Haber Listesi</a>
-                        <a class="collapse-item" href="@Url.Action("Create", "News")">Yeni Haber Ekle</a>
+                        <a class="collapse-item" asp-controller="News" asp-action="Index">Haber Listesi</a>
+                        <a class="collapse-item" asp-controller="News" asp-action="Create">Yeni Haber Ekle</a>
                     </div>
                 </div>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "News", new { isStatusPage = true })">
-                    <i class="fas fa-fw fa-tasks"></i>
-                    <span>Haber Durum Yönetimi</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Index", "Category")">
-                    <i class="fas fa-fw fa-layer-group"></i>
-                    <span>Kategori Yönetimi</span>
-                </a>
-            </li>
-
+            @if (User.IsInRole("Admin"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Category" asp-action="Index">
+                        <i class="fas fa-fw fa-layer-group"></i><span>Kategori Yönetimi</span>
+                    </a>
+                </li>
+            }
 
             <li class="nav-item">
                 <a class="nav-link" asp-controller="Comment" asp-action="Index">
                     <i class="fas fa-fw fa-comments"></i>
                     <span>Yorumlar</span>
-                    @await Component.InvokeAsync("CommentCount")
                 </a>
             </li>
 
+            @if (User.IsInRole("Admin"))
+            {
+                <hr class="sidebar-divider">
+                <div class="sidebar-heading">SİSTEM AYARLARI</div>
 
-            <li><hr class="sidebar-divider"></li>
-            <li><div class="sidebar-heading">SİSTEM AYARLARI</div></li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser" aria-expanded="true">
-                    <i class="fas fa-fw fa-users-cog"></i>
-                    <span>Yetkilendirme</span>
-                </a>
-                <div id="collapseUser" class="collapse" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="@Url.Action("Index", "User")">Kullanıcı Listesi</a>
-                        <a class="collapse-item" href="@Url.Action("Index", "Role")">Rol Yönetimi</a>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser" aria-expanded="true" aria-controls="collapseUser">
+                        <i class="fas fa-fw fa-users-cog"></i>
+                        <span>Yetkilendirme</span>
+                    </a>
+                    <div id="collapseUser" class="collapse" aria-labelledby="headingUser" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" asp-controller="User" asp-action="Index">Kullanıcı Listesi</a>
+                            <a class="collapse-item" asp-controller="Role" asp-action="Index">Rol Yönetimi</a>
+                            <a class="collapse-item" asp-controller="User" asp-action="Writers">Yazar Kadrosu</a>
+                        </div>
                     </div>
-                </div>
-            </li>
+                </li>
+            }
 
-            <div class="text-center d-none d-md-inline mt-4">
+            <hr class="sidebar-divider d-none d-md-block">
+            <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
         </ul>
@@ -190,40 +139,30 @@
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"><i class="fa fa-bars"></i></button>
 
                     <ul class="navbar-nav ml-auto">
                         @if (SignInManager.IsSignedIn(User))
                         {
-
                             <li class="nav-item dropdown no-arrow">
-                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    @* İstersen buraya sabit "Ayşegül Çoban" yazabilirsin ya da @User.Identity.Name ile sistemden çekebilirsin *@
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
                                     <span class="mr-2 d-none d-lg-inline text-gray-600 font-weight-bold">
-                                        <i class="fas fa-sparkles text-warning mr-1"></i> Hoş Geldin, Ayşegül!
+                                        <i class="fas fa-sparkles text-warning mr-1"></i> Hoş Geldin, @(currentUser?.FullName ?? "Kullanıcı")!
                                     </span>
-                                    <img class="img-profile rounded-circle border shadow-sm" src="~/admin/img/undraw_profile.svg" style="width:35px; height:35px;">
+                                    <img id="header-profile-img" class="img-profile rounded-circle border shadow-sm"
+                                         src="~/img/@(currentUser?.ProfilePicture ?? "undraw_profile.svg")"
+                                         style="width:35px; height:35px; object-fit: cover;">
                                 </a>
-
-                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
                                     <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
-                                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Profilim
-                                    </a>
-                                    <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">
-                                        <i class="fas fa-tachometer-alt fa-sm fa-fw mr-2 text-primary"></i> Yönetici Paneli
+                                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profilim
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <form asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i>Güvenli Çıkış
-                                        </button>
+                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i>Güvenli Çıkış</button>
                                     </form>
                                 </div>
                             </li>
-                            
                         }
                     </ul>
                 </nav>
@@ -235,31 +174,17 @@
         </div>
     </div>
 
-    <a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="~/https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/admin/vendor/jquery/jquery.min.js"></script>
     <script src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/admin/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="~/admin/js/sb-admin-2.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
 
     <script>
         var connection = new signalR.HubConnectionBuilder().withUrl("/newsHub").build();
-
         connection.on("ReceiveNotification", function (user, message) {
-            var badge = $("#comment-count-badge");
-            var currentCount = parseInt(badge.text()) || 0;
-            badge.text(currentCount + 1).fadeIn();
-
             alert("📢 Yeni Bildirim!\n" + user + ": " + message);
         });
-
-        connection.start().catch(function (err) {
-            return console.error(err.toString());
-        });
+        connection.start().catch(function (err) { return console.error(err.toString()); });
     </script>
 
     @RenderSection("Scripts", required: false)

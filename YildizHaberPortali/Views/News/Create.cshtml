@@ -1,98 +1,53 @@
-﻿@using YildizHaberPortali.Models.ViewModels
-@model NewsUpdateViewModel
+﻿@model YildizHaberPortali.Models.ViewModels.NewsCreateViewModel
+
 @{
-    ViewData["Title"] = "Haberi Güncelle";
+    ViewData["Title"] = "Yeni Haber Ekle";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<style>
-    /* PREMIUM TASARIM SİSTEMİ */
-    .news-card {
-        border-radius: 20px;
-        border: none;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-
-    .form-control-premium {
-        border-radius: 15px;
-        padding: 14px 22px;
-        border: 1px solid #e3e6f0;
-        line-height: 1.5;
-    }
-
-    /* İSTEDİĞİN ÖZEL SWITCH TASARIMI */
-    .status-box {
-        background: #f8f9fc;
-        border-radius: 20px;
-        padding: 25px;
-        border: 1px solid #e3e6f0;
-    }
-
-    .custom-switch .custom-control-label::before {
-        height: 1.8rem;
-        width: 3.2rem;
-        border-radius: 2rem;
-        cursor: pointer;
-    }
-
-    .custom-switch .custom-control-label::after {
-        width: calc(1.8rem - 4px);
-        height: calc(1.8rem - 4px);
-        border-radius: 2rem;
-        cursor: pointer;
-    }
-
-    .custom-switch .custom-control-input:checked ~ .custom-control-label::before {
-        background-color: #4e73df;
-        border-color: #4e73df;
-    }
-</style>
-
-<div class="card news-card shadow-sm mx-2 mt-4">
+<div class="card shadow-sm mx-2 mt-4" style="border-radius: 20px;">
     <div class="card-body p-4 bg-light" style="border-radius: 20px;">
-        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <h3 class="font-weight-bold text-primary mb-4">Yeni Haber Oluştur</h3>
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="ExistingImage" />
 
             <div class="row">
                 <div class="col-lg-8">
                     <div class="form-group mb-4">
-                        <label class="font-weight-bold ml-2">Haber Başlığı</label>
-                        <input asp-for="Title" class="form-control-premium w-100" />
+                        <label asp-for="Title" class="font-weight-bold ml-2">Başlık</label>
+                        <input asp-for="Title" class="form-control" style="border-radius:15px; padding:25px;" />
+                        <span asp-validation-for="Title" class="text-danger small"></span> 
                     </div>
                     <div class="form-group mb-4">
-                        <label class="font-weight-bold ml-2">İçerik</label>
-                        <textarea asp-for="Content" class="form-control-premium w-100" rows="12"></textarea>
+                        <label asp-for="Content" class="font-weight-bold ml-2">İçerik</label>
+                        <textarea asp-for="Content" class="form-control" rows="10" style="border-radius:15px;"></textarea>
+                        <span asp-validation-for="Content" class="text-danger small"></span> 
                     </div>
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="status-box mb-4 text-center shadow-sm">
-                        <label class="font-weight-bold d-block mb-3 text-muted">Yayın Durumu</label>
-                        <div class="custom-control custom-switch d-inline-flex align-items-center">
-                            <input type="checkbox" asp-for="IsPublished" class="custom-control-input" id="stSw" onchange="updTxt()">
-                            <label class="custom-control-label h4 font-weight-bold ml-3 mb-0" for="stSw" id="stLbl">
-                                @(Model.IsPublished ? "Yayında" : "Pasif")
-                            </label>
+                    <div class="form-group mb-4">
+                        <label asp-for="CategoryId" class="font-weight-bold">Kategori</label>
+                        <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories" style="border-radius:15px;">
+                            <option value="">-- Kategori Seç --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="p-3 bg-white mb-4 shadow-sm" style="border-radius:15px;">
+                        <label class="font-weight-bold d-block mb-3">Yayın Durumu</label>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" asp-for="IsPublished" class="custom-control-input" id="stSw">
+                            <label class="custom-control-label" for="stSw">Hemen Yayına Al</label>
                         </div>
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="font-weight-bold ml-2 text-muted">Mevcut Görsel</label>
-                        <img src="~/uploads/@Model.ExistingImage" class="img-fluid rounded shadow-sm mb-3" style="max-height:160px; width:100%; object-fit:cover;" />
+                        <label asp-for="ImageFile" class="font-weight-bold">Haber Görseli</label>
                         <input type="file" asp-for="ImageFile" class="form-control-file" />
                     </div>
 
-                    <div class="form-group mb-4">
-                        <label class="font-weight-bold ml-2 text-muted">Yazar</label>
-                        <input asp-for="Author" class="form-control-premium w-100" />
-                    </div>
-
-                    <div class="mt-5">
-                        <button type="submit" class="btn btn-primary btn-block rounded-pill font-weight-bold shadow p-3">Kaydet</button>
-                        <a asp-action="Index" class="btn btn-outline-secondary btn-block rounded-pill mt-3">Listeye Dön</a>
-                    </div>
+                    <button type="submit" class="btn btn-primary btn-block p-3 font-weight-bold shadow" style="border-radius:50px;">Haberi Kaydet</button>
                 </div>
             </div>
         </form>
@@ -100,14 +55,6 @@
 </div>
 
 @section Scripts {
-    <script>
-        function updTxt() {
-            var s = document.getElementById('stSw');
-            var l = document.getElementById('stLbl');
-            l.innerText = s.checked ? "Yayında" : "Pasif";
-            l.className = s.checked ? "custom-control-label h4 font-weight-bold ml-3 mb-0 text-success" : "custom-control-label h4 font-weight-bold ml-3 mb-0 text-secondary";
-        }
-        // Sayfa yüklendiğinde rengi ayarla
-        window.onload = updTxt;
-    </script>
+    <partial name="_ValidationScriptsPartial" /> 
 }
+

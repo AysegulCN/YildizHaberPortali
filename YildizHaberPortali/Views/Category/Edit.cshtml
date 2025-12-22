@@ -1,54 +1,79 @@
 ﻿@model YildizHaberPortali.Models.Category
-
 @{
     ViewData["Title"] = "Kategori Düzenle";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Kategoriyi Düzenle: @Model.Name</h6>
+<style>
+    /* TARZ 2: PREMIUM KATEGORİ TASARIMI */
+    .premium-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .form-control-premium {
+        border-radius: 15px;
+        padding: 14px 22px;
+        border: 1px solid #e3e6f0;
+        line-height: 1.5;
+        transition: 0.3s;
+    }
+
+        .form-control-premium:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.1);
+            outline: none;
+        }
+
+    .btn-premium {
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 px-3">
+    <h3 class="font-weight-bold text-gray-800 m-0">
+        <i class="fas fa-tags text-warning mr-2"></i>Kategoriyi Güncelle
+    </h3>
+</div>
+
+<div class="card premium-card shadow-sm mx-2">
+    <div class="card-header bg-white py-3">
+        <h6 class="m-0 font-weight-bold text-warning">Düzenlenen: @Model.Name</h6>
     </div>
-    <div class="card-body">
-
+    <div class="card-body p-4 bg-light" style="border-radius: 0 0 20px 20px;">
         <form asp-action="Edit" method="post">
-
+            @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
 
             <div class="row">
-                <div class="col-md-6">
-
-                    <div class="form-group">
-                        <label asp-for="Name" class="control-label font-weight-bold">Kategori Adı</label>
-                        <input asp-for="Name" class="form-control" />
-                        <span asp-validation-for="Name" class="text-danger"></span>
+                <div class="col-lg-7">
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-dark ml-2 mb-2">Kategori Adı</label>
+                        <input asp-for="Name" class="form-control form-control-premium" placeholder="Örn: Teknoloji" />
+                        <span asp-validation-for="Name" class="text-danger small ml-2"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="Slug" class="control-label font-weight-bold">URL Adresi (Slug)</label>
-                        <input asp-for="Slug" class="form-control" />
-                        <small class="form-text text-muted">Örn: spor-haberleri (Otomatik veya manuel girebilirsin)</small>
-                        <span asp-validation-for="Slug" class="text-danger"></span>
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-dark ml-2 mb-2">URL Adresi (Slug)</label>
+                        <input asp-for="Slug" class="form-control form-control-premium" placeholder="teknoloji-haberleri" />
+                        <small class="form-text text-muted ml-2">Kısa ve Türkçe karakter içermeyen bir adres girin.</small>
+                        <span asp-validation-for="Slug" class="text-danger small ml-2"></span>
                     </div>
+                </div>
 
-                    <hr />
-
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-warning btn-icon-split">
-                            <span class="icon text-white-50">
-                                <i class="fas fa-edit"></i>
-                            </span>
-                            <span class="text">Değişiklikleri Kaydet</span>
+                <div class="col-lg-5">
+                    <div class="card bg-white border-0 shadow-sm p-4 h-100 d-flex flex-column justify-content-center" style="border-radius: 20px;">
+                        <button type="submit" class="btn btn-warning btn-premium mb-3 shadow text-white">
+                            <i class="fas fa-save mr-2"></i>Değişiklikleri Kaydet
                         </button>
-
-                        <a asp-action="Index" class="btn btn-secondary btn-icon-split ml-2">
-                            <span class="icon text-white-50">
-                                <i class="fas fa-arrow-left"></i>
-                            </span>
-                            <span class="text">Listeye Dön</span>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-premium shadow-sm">
+                            <i class="fas fa-undo mr-2"></i>Vazgeç ve Dön
                         </a>
                     </div>
-
                 </div>
             </div>
         </form>

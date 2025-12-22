@@ -5,7 +5,7 @@
 namespace YildizHaberPortali.Migrations
 {
     /// <inheritdoc />
-    public partial class SonDeneme : Migration
+    public partial class SonDuzenleme : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

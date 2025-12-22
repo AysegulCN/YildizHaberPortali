@@ -1,46 +1,41 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using System.Security.Claims
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
 
-<ul class="navbar-nav">
+@{
+    // 🚀 CS0103 HATASINI BU SATIR ÇÖZER
+    var currentUser = await UserManager.GetUserAsync(User);
+}
+
+<ul class="navbar-nav ml-auto">
     @if (SignInManager.IsSignedIn(User))
     {
-        // Kullanıcının Adını ve Soyadını Çekiyoruz
-        var fullName = User.FindFirst("FullName")?.Value;
-        if (string.IsNullOrEmpty(fullName))
+        @* 🛡️ YÖNETİCİ PANELİ: Sadece Admin ve Yazar görebilir *@
+        @if (User.IsInRole("Admin") || User.IsInRole("Yazar"))
         {
-            fullName = User.Identity.Name; // İsim yoksa maili göster
-        }
-
-        // --- EĞER KULLANICI ADMIN İSE PANEL BUTONU ÇIKSIN ---
-        @if (User.IsInRole("Admin"))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-danger font-weight-bold" asp-area="" asp-controller="Category" asp-action="Index">
-                    <i class="fas fa-cogs"></i> YÖNETİCİ PANELİ
+            <li class="nav-item mr-3">
+                <a class="btn btn-outline-danger btn-sm rounded-pill px-3 font-weight-bold shadow-sm"
+                   asp-controller="Dashboard" asp-action="Index">
+                    <i class="fas fa-tools mr-1"></i> YÖNETİCİ PANELİ
                 </a>
             </li>
         }
 
-        // --- PROFİL VE HOŞGELDİN KISMI ---
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-dark font-weight-bold" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-user-circle text-warning"></i> @fullName
+            <a class="nav-link dropdown-toggle text-dark font-weight-bold" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                <i class="fas fa-user-circle text-primary mr-1"></i>
+                @(currentUser?.FullName ?? User.Identity.Name)
             </a>
-            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="navbarDropdown">
-
-                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
-                    <i class="fas fa-user-cog fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Hesap Ayarları
+            <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--fade-in" style="border-radius: 15px;">
+                @* 🚀 İSİM DÜZELTİLDİ: Hesap Ayarları *@
+                <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile">
+                    <i class="fas fa-user-cog fa-sm fa-fw mr-2 text-primary"></i> Hesap Ayarları
                 </a>
-
                 <div class="dropdown-divider"></div>
-
-                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                    <button type="submit" class="dropdown-item text-danger">
-                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i>
-                        Güvenli Çıkış
+                @* 🚀 İSİM DÜZELTİLDİ: Güvenli Çıkış *@
+                <form asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                    <button type="submit" class="dropdown-item text-danger py-2">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i> Güvenli Çıkış
                     </button>
                 </form>
             </div>
@@ -48,15 +43,15 @@
     }
     else
     {
-        // --- GİRİŞ YAPMAMIŞ KULLANICI ---
+        @* 🚀 GERİ GELEN BUTONLAR *@
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">
-                <i class="fas fa-user-plus"></i> Kayıt Ol
+            <a class="nav-link text-dark font-weight-bold px-3" asp-area="Identity" asp-page="/Account/Login">
+                <i class="fas fa-sign-in-alt mr-1 text-primary"></i> Giriş Yap
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark btn btn-outline-warning btn-sm ml-2" asp-area="Identity" asp-page="/Account/Login">
-                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+            <a class="nav-link text-dark font-weight-bold px-3" asp-area="Identity" asp-page="/Account/Register">
+                <i class="fas fa-user-plus mr-1 text-success"></i> Kayıt Ol
             </a>
         </li>
     }

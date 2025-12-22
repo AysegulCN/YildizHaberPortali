@@ -1,121 +1,135 @@
-﻿@using YildizHaberPortali.Models.ViewModels
-@model ProfileViewModel
+﻿@model YildizHaberPortali.Models.ViewModels.ProfileViewModel
 @{
-    ViewData["Title"] = "Profilim";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Hesap Ayarları";
+
+    // 🚀 1. KRİTİK DOKUNUŞ: Yetkiye göre Layout seçimi
+    if (User.IsInRole("Admin") || User.IsInRole("Yazar"))
+    {
+        Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
 }
 
-<style>
-    /* TARZ 2: PREMIUM PROFiL TASARIMI */
-    .profile-card {
-        border-radius: 25px;
-        border: none;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-        transition: 0.3s;
-    }
-
-    .profile-header {
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        border-radius: 25px 25px 0 0;
-        height: 120px;
-    }
-
-    .profile-img-container {
-        margin-top: -60px;
-    }
-
-    .profile-img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 5px solid #fff;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        object-fit: cover;
-    }
-
-    .form-control-premium {
-        border-radius: 15px;
-        padding: 12px 20px;
-        border: 1px solid #e3e6f0;
-        transition: 0.3s;
-    }
-
-    .btn-premium {
-        border-radius: 50px;
-        padding: 12px 30px;
-        font-weight: 700;
-        transition: 0.3s;
-    }
-
-    .info-badge {
-        border-radius: 10px;
-        padding: 8px 15px;
-        background: #f8f9fc;
-        color: #4e73df;
-        font-weight: 600;
-    }
-</style>
-
-<div class="container-fluid px-4">
+<div class="container-fluid py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-4 mb-4">
-            <div class="card profile-card text-center bg-white">
-                <div class="profile-header"></div>
-                <div class="card-body p-4">
-                    <div class="profile-img-container mb-3">
-                        <img src="~/img/@Model.ProfilePicture" class="profile-img" alt="Profil">
-                    </div>
-                    <h4 class="font-weight-bold text-gray-800 mb-1">@Model.FullName</h4>
-                    <p class="text-muted mb-3">@@@Model.UserName</p>
-                    <div class="info-badge mb-4">Grafik Tasarımcı & Yazılımcı</div>
-                    <hr class="my-4">
-                    <p class="small text-muted px-2">@Model.Bio</p>
+        <div class="@(Layout.Contains("_AdminLayout") ? "col-lg-10" : "col-lg-7")">
+            <div class="card shadow-sm border-0" style="border-radius: 20px;">
+                @* Üst Kısım: Dinamik Renk Tasarımı *@
+                <div class="card-header @(User.IsInRole("Admin") ? "bg-gradient-primary" : "bg-primary") p-4 text-center border-0" style="border-radius: 20px 20px 0 0;">
+                    <h4 class="text-white mb-0 font-weight-bold"><i class="fas fa-user-shield mr-2"></i> Profil & Güvenlik Ayarları</h4>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-lg-8">
-            <div class="card profile-card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-0">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-cog mr-2"></i>Hesap Ayarları</h6>
-                </div>
-                <div class="card-body p-4">
-                    <form>
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="font-weight-bold text-dark ml-2">Ad Soyad</label>
-                                <input type="text" asp-for="FullName" class="form-control form-control-premium" />
+                <div class="card-body p-4 p-md-5">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success border-0 shadow-sm rounded-pill px-4">@TempData["Success"]</div>
+                    }
+
+                    @* 🚀 2. KRİTİK DOKUNUŞ: Resim gönderebilmek için enctype şart! *@
+                    <form asp-action="Profile" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        @* 📸 PROFİL FOTOĞRAFI YÜKLEME ALANI *@
+                        <div class="text-center mb-5">
+                            <div class="position-relative d-inline-block">
+                                @* Mevcut resim veya varsayılan ikon *@
+                                <img src="~/img/@(Model.ExistingPicture ?? "undraw_profile.svg")" id="previewImg"
+                                     class="rounded-circle border shadow"
+                                     style="width: 130px; height: 130px; object-fit: cover;">
+
+                                @* Fotoğraf Seçme Butonu (Makine İkonu) *@
+                                <label for="fileInput" class="btn btn-primary btn-sm rounded-circle position-absolute"
+                                       style="bottom: 5px; right: 5px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i class="fas fa-camera"></i>
+                                </label>
+                                <input type="file" asp-for="ImageFile" id="fileInput" class="d-none" onchange="previewFile()" accept="image/*">
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="font-weight-bold text-dark ml-2">E-Posta</label>
-                                <input type="email" asp-for="Email" class="form-control form-control-premium" />
-                            </div>
+                            <p class="text-muted small mt-2">Profil fotoğrafını değiştirmek için ikona tıkla</p>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="font-weight-bold text-dark ml-2">Telefon</label>
-                                <input type="text" asp-for="PhoneNumber" class="form-control form-control-premium" />
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="font-weight-bold text-dark ml-2">Kullanıcı Adı</label>
-                                <input type="text" asp-for="UserName" class="form-control form-control-premium" readonly />
-                            </div>
-                        </div>
+                        <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">Kişisel Bilgiler</h5>
 
                         <div class="form-group mb-4">
-                            <label class="font-weight-bold text-dark ml-2">Biyografi / Hakkımda</label>
-                            <textarea asp-for="Bio" class="form-control form-control-premium" rows="4"></textarea>
+                            <label class="font-weight-bold text-dark ml-2">Ad Soyad</label>
+                            <input asp-for="FullName" class="form-control pro-input" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
                         </div>
 
-                        <div class="text-right mt-4">
-                            <button type="submit" class="btn btn-primary btn-premium shadow">
-                                <i class="fas fa-check-circle mr-2"></i>Değişiklikleri Kaydet
-                            </button>
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-4">
+                                <label class="font-weight-bold text-dark ml-2">Telefon</label>
+                                <input asp-for="PhoneNumber" class="form-control pro-input" placeholder="05xx..." />
+                            </div>
+                            <div class="col-md-6 form-group mb-4">
+                                <label class="font-weight-bold text-dark ml-2">E-posta (Değiştirilemez)</label>
+                                <input asp-for="Email" class="form-control bg-light border-0 rounded-pill px-4" readonly />
+                            </div>
                         </div>
+
+                        <h5 class="text-danger font-weight-bold mt-5 mb-4 border-bottom pb-2">Şifre Güncelleme</h5>
+
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold text-dark ml-2">Mevcut Şifre</label>
+                            <input asp-for="CurrentPassword" type="password" class="form-control pro-input" placeholder="Şu anki şifrenizi girin" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-4">
+                                <label class="font-weight-bold text-dark ml-2">Yeni Şifre</label>
+                                <input asp-for="NewPassword" type="password" class="form-control pro-input" placeholder="En az 6 karakter" />
+                            </div>
+                            <div class="col-md-6 form-group mb-4">
+                                <label class="font-weight-bold text-dark ml-2">Yeni Şifre Tekrar</label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control pro-input" placeholder="Tekrar yazın" />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg rounded-pill shadow-lg font-weight-bold py-3 mt-4">
+                            <i class="fas fa-save mr-2"></i> DEĞİŞİKLİKLERİ KAYDET
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@* 🚀 SCRIPTS: Anlık Önizleme ve Doğrulama *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewFile() {
+            const preview = document.getElementById('previewImg');
+            const file = document.getElementById('fileInput').files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = function () {
+                preview.src = reader.result;
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+}
+
+@* 🚀 STYLES: Belirgin Kutucuk Tasarımı *@
+<style>
+    .pro-input {
+        border: 2px solid #e9ecef !important;
+        background-color: #fbfbfb !important;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        transition: all 0.3s ease;
+    }
+
+        .pro-input:focus {
+            border-color: #4e73df !important;
+            background-color: #fff !important;
+            box-shadow: 0 0 10px rgba(78,115,223,0.1) !important;
+        }
+</style>

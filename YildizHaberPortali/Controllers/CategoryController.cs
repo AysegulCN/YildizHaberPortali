@@ -1,23 +1,23 @@
-﻿
-
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
+using YildizHaberPortali.Helpers;
 using YildizHaberPortali.Models;
-using YildizHaberPortali.Helpers; // StringHelper için gerekli olan burası!
 
 namespace YildizHaberPortali.Controllers
 {
-    [Authorize(Roles = "Admin,Editor")]
+    [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly INewsRepository _newsRepository; // EKLENDİ
 
-        public CategoryController(ICategoryRepository categoryRepository)
+        public CategoryController(ICategoryRepository categoryRepository, INewsRepository newsRepository)
         {
             _categoryRepository = categoryRepository;
+            _newsRepository = newsRepository; // ENJEKTE EDİLDİ
         }
 
         public async Task<IActionResult> Index()
@@ -26,7 +26,6 @@ namespace YildizHaberPortali.Controllers
             return View(categories);
         }
 
-        // --- AJAX İÇİN KATEGORİ EKLEME METODU ---
         [HttpPost]
         public async Task<IActionResult> CreateAjax(string name)
         {
@@ -36,29 +35,56 @@ namespace YildizHaberPortali.Controllers
             var category = new Category
             {
                 Name = name,
-                Slug = StringHelper.ToSlug(name) // Helpers klasöründeki metodunu çağırır
+                Slug = StringHelper.ToSlug(name)
             };
 
             await _categoryRepository.AddAsync(category);
-
-            // JSON ile "Bitti, işte yeni veriler!" diyoruz
-            return Json(new
-            {
-                success = true,
-                id = category.Id,
-                name = category.Name,
-                slug = category.Slug
-            });
+            return Json(new { success = true, id = category.Id, name = category.Name, slug = category.Slug });
         }
 
-        [HttpPost]
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null) return NotFound();
+            return View(category);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
-            if (category == null) return Json(new { success = false });
+            if (category == null) return NotFound();
+
+            var newsInCategory = await _newsRepository.GetAllAsync();
+            if (newsInCategory.Any(x => x.CategoryId == id))
+            {
+                TempData["Error"] = "Bu kategoriye bağlı haberler olduğu için silemezsiniz!";
+                return RedirectToAction(nameof(Index));
+            }
 
             await _categoryRepository.DeleteAsync(id);
-            return Json(new { success = true });
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null) return NotFound();
+            return View(category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                await _categoryRepository.UpdateAsync(category);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(category);
         }
     }
 }

@@ -1,0 +1,52 @@
+﻿@model IEnumerable<YildizHaberPortali.Models.AppUser>
+@{
+    ViewData["Title"] = "Yazar Kadromuz";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <h3 class="font-weight-bold text-primary mb-4"><i class="fas fa-pen-nib mr-2"></i> Yazar Kadromuz</h3>
+
+    <div class="premium-card card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Kayıtlı Yazarlar Listesi</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Fotoğraf</th>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Hakkında (Bio)</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="~/img/@(item.ProfilePicture ?? "undraw_profile.svg")"
+                                         class="rounded-circle border shadow-sm"
+                                         style="width:50px; height:50px; object-fit:cover;">
+                                </td>
+                                <td class="font-weight-bold text-dark">@item.FullName</td>
+                                <td>@item.Email</td>
+                                <td style="max-width: 300px;">
+                                    <small class="text-muted">@(item.Bio ?? "Henüz bir bilgi girilmemiş.")</small>
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-premium">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

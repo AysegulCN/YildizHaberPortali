@@ -2,11 +2,9 @@
 
 namespace YildizHaberPortali.Hubs
 {
+    // Hub sınıfından miras alıyoruz
     public class NewsHub : Hub
     {
-        public async Task SendCommentNotification(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveNotification", user, message);
-        }
+        // Admin paneline genel bildirim göndermek için boş kalsa da olur.
     }
 }

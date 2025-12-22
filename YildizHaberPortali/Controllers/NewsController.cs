@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
@@ -14,39 +15,42 @@ using YildizHaberPortali.Models.ViewModels;
 
 namespace YildizHaberPortali.Controllers
 {
+    [Authorize(Roles = "Admin,Yazar")]
     public class NewsController : Controller
     {
         private readonly INewsRepository _newsRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IWebHostEnvironment _hostEnvironment;
 
-        public NewsController(INewsRepository newsRepository, ICategoryRepository categoryRepository, IWebHostEnvironment hostEnvironment)
+        private readonly UserManager<AppUser> _userManager;
+
+        public NewsController(INewsRepository newsRepository, ICategoryRepository categoryRepository,
+                              IWebHostEnvironment hostEnvironment, UserManager<AppUser> userManager)
         {
             _newsRepository = newsRepository;
             _categoryRepository = categoryRepository;
             _hostEnvironment = hostEnvironment;
+            _userManager = userManager; 
         }
 
-        // 1. HABER LİSTELEME
-        [AllowAnonymous]
-        public async Task<IActionResult> Index(int? categoryId, string status)
+        public async Task<IActionResult> Index()
         {
-            var newsList = await _newsRepository.GetAllWithCategoryAsync();
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+            var news = await _newsRepository.GetAllAsync();
 
-            if (categoryId.HasValue)
-                newsList = newsList.Where(x => x.CategoryId == categoryId).ToList();
+            if (roles.Contains("Admin")) return View(news);
 
-            if (!string.IsNullOrEmpty(status))
+            if (roles.Contains("Yazar"))
             {
-                if (status == "active") newsList = newsList.Where(x => x.IsPublished).ToList();
-                else if (status == "passive") newsList = newsList.Where(x => !x.IsPublished).ToList();
+                return View(news.Where(x => x.AuthorId == user.Id).ToList());
             }
 
-            return View(newsList.OrderByDescending(x => x.CreatedDate).ToList());
+            return View(new List<News>());
         }
 
-        // 2. YENİ HABER EKLEME (GET)
-        [Authorize(Roles = "Admin,Editor")]
+        [HttpGet]
+        [Authorize(Roles = "Admin,Yazar")]
         public async Task<IActionResult> Create()
         {
             var categories = await _categoryRepository.GetAllAsync();
@@ -57,48 +61,43 @@ namespace YildizHaberPortali.Controllers
             return View(viewModel);
         }
 
-        // 3. YENİ HABER EKLEME (POST)
         [HttpPost]
-        [Authorize(Roles = "Admin,Editor")]
+        [Authorize(Roles = "Admin,Yazar")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(NewsCreateViewModel viewModel)
+        public async Task<IActionResult> Create(NewsCreateViewModel model)
         {
             if (ModelState.IsValid)
             {
-                string uniqueFileName = "no-image.png";
-                if (viewModel.ImageFile != null)
-                {
-                    uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
-                    string path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", uniqueFileName);
-                    using (var stream = new FileStream(path, FileMode.Create)) { await viewModel.ImageFile.CopyToAsync(stream); }
-                }
+                var user = await _userManager.GetUserAsync(User);
 
                 var news = new News
                 {
-                    Title = viewModel.Title,
-                    Content = viewModel.Content,
-                    Author = User.Identity.Name ?? "Admin",
-                    CategoryId = viewModel.CategoryId,
-                    CreatedDate = DateTime.Now,
-                    IsPublished = true,
-                    Image = uniqueFileName
+                    Title = model.Title,
+                    Content = model.Content,
+                    CategoryId = model.CategoryId,
+                    IsPublished = model.IsPublished,
+                    AuthorId = user.Id,
+                    CreatedDate = DateTime.Now
                 };
 
                 await _newsRepository.AddAsync(news);
                 return RedirectToAction(nameof(Index));
             }
-            return View(viewModel);
+
+            var allCategories = await _categoryRepository.GetAllAsync();
+            model.Categories = allCategories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
+
+            return View(model);
         }
 
-        // 4. HABER DÜZENLEME (GET)
+
+
         [Authorize(Roles = "Admin,Editor")]
         public async Task<IActionResult> Edit(int id)
         {
-            // Haberi getiriyoruz
             var news = await _newsRepository.GetByIdAsync(id);
             if (news == null) return NotFound();
 
-            // Kategorileri çekiyoruz (Dropdown için şart)
             var categories = await _categoryRepository.GetAllAsync();
 
             var vm = new NewsUpdateViewModel
@@ -110,7 +109,6 @@ namespace YildizHaberPortali.Controllers
                 Author = news.Author,
                 ExistingImage = news.Image,
                 IsPublished = news.IsPublished,
-                // Kategorileri eşleştiriyoruz
                 Categories = categories.Select(c => new SelectListItem
                 {
                     Value = c.Id.ToString(),
@@ -120,9 +118,8 @@ namespace YildizHaberPortali.Controllers
             return View(vm);
         }
 
-        // 5. HABER DÜZENLEME (POST)
         [HttpPost]
-        [Authorize(Roles = "Admin,Editor")]
+        [Authorize(Roles = "Admin,Yazar")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(NewsUpdateViewModel viewModel)
         {
@@ -131,12 +128,10 @@ namespace YildizHaberPortali.Controllers
                 var news = await _newsRepository.GetByIdAsync(viewModel.Id);
                 if (news == null) return NotFound();
 
-                // Mevcut resmi koruyoruz
                 string uniqueFileName = viewModel.ExistingImage;
 
                 if (viewModel.ImageFile != null)
                 {
-                    // Yeni bir resim seçildiyse yükleme işlemini yapıyoruz
                     uniqueFileName = Guid.NewGuid().ToString() + "_" + viewModel.ImageFile.FileName;
                     string path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", uniqueFileName);
                     using (var stream = new FileStream(path, FileMode.Create))
@@ -145,7 +140,6 @@ namespace YildizHaberPortali.Controllers
                     }
                 }
 
-                // Verileri güncelliyoruz
                 news.Title = viewModel.Title;
                 news.Content = viewModel.Content;
                 news.CategoryId = viewModel.CategoryId;
@@ -157,7 +151,6 @@ namespace YildizHaberPortali.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Eğer validasyon hatası varsa kategorileri TEKRAR dolduruyoruz
             var categories = await _categoryRepository.GetAllAsync();
             viewModel.Categories = categories.Select(c => new SelectListItem
             {
@@ -175,7 +168,6 @@ namespace YildizHaberPortali.Controllers
             var news = await _newsRepository.GetByIdAsync(id);
             if (news == null) return Json(new { success = false, message = "Haber bulunamadı!" });
 
-            // Klasördeki görseli de silelim ki sunucu dolmasın
             if (!string.IsNullOrEmpty(news.Image) && news.Image != "no-image.png")
             {
                 var path = Path.Combine(_hostEnvironment.WebRootPath, "uploads", news.Image);
@@ -186,7 +178,6 @@ namespace YildizHaberPortali.Controllers
             return Json(new { success = true });
         }
 
-        // 7. DURUM DEĞİŞTİRME (POST - AJAX)
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(int id)
         {
@@ -198,15 +189,14 @@ namespace YildizHaberPortali.Controllers
             return Json(new { success = true });
         }
 
-        [Authorize(Roles = "Admin,Editor")]
+        [Authorize(Roles = "Admin,Yazar")]
         public async Task<IActionResult> StatusManagement(int? categoryId)
         {
-            // 1. Kategorileri dropdown için çekiyoruz
+
             var categories = await _categoryRepository.GetAllAsync();
             ViewBag.Categories = new SelectListItem[] { new SelectListItem { Value = "", Text = "Tüm Kategoriler" } }
                 .Concat(categories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }));
 
-            // 2. Haberleri kategorisiyle ve yorumlarıyla beraber çekiyoruz
             var newsQuery = await _newsRepository.GetAllWithCategoryAsync();
 
             if (categoryId.HasValue)
