@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,9 +14,9 @@ namespace YildizHaberPortali.Controllers
     [Authorize(Roles = "Admin,Yazar")]
     public class CommentController : Controller
     {
-        private readonly ICommentRepository _commentRepository; 
+        private readonly ICommentRepository _commentRepository;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IHubContext<NewsHub> _hubContext; 
+        private readonly IHubContext<NewsHub> _hubContext;
 
         public CommentController(ICommentRepository commentRepository,
                                  UserManager<AppUser> userManager,
@@ -25,22 +24,29 @@ namespace YildizHaberPortali.Controllers
         {
             _commentRepository = commentRepository;
             _userManager = userManager;
-            _hubContext = hubContext; 
+            _hubContext = hubContext;
         }
 
+        // 🚀 YORUM YÖNETİM PANELİ (Index)
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
             var roles = await _userManager.GetRolesAsync(user);
-            var comments = await _commentRepository.GetAllAsync();
 
-            if (roles.Contains("Admin")) return View(comments);
+            // 🎯 ÖNEMLİ: GetAllWithNewsAsync metodunu repository'de tanımlamış olman gerekir!
+            var comments = await _commentRepository.GetAllWithNewsAsync();
 
-            return View(comments.Where(c => c.News?.AuthorId == user.Id).ToList());
+            if (roles.Contains("Admin"))
+                return View(comments.OrderByDescending(x => x.CreatedDate).ToList());
+
+            // Yazarlar sadece kendi haberlerine gelen yorumları görür
+            var writerComments = comments.Where(c => c.News?.AuthorId == user.Id).OrderByDescending(x => x.CreatedDate).ToList();
+            return View(writerComments);
         }
 
+        // 💬 YORUM YAPMA (Haber Detay Sayfasından Gelen İstek)
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> PostComment(int newsId, string name, string content)
@@ -48,23 +54,24 @@ namespace YildizHaberPortali.Controllers
             if (string.IsNullOrEmpty(content))
                 return Json(new { success = false, message = "Lütfen yorumunuzu yazın!" });
 
-            var user = await _userManager.GetUserAsync(User); // Giriş yapan kullanıcıyı al
-
             var comment = new Comment
             {
                 NewsId = newsId,
-                UserId = user?.Id, // Giriş yapmadıysa null olabilir veya anonim id atayabilirsin
-                Text = content, // 🚀 Content yerine Text!
-                CreatedDate = DateTime.Now, // 🚀 CommentDate yerine CreatedDate!
-                IsApproved = true
+                UserName = name, // 🚀 UserName modeline eklendi
+                Text = content,
+                CreatedDate = DateTime.Now,
+                IsApproved = true // 🚀 Final isteği: Direkt onaylı yayınlansın!
             };
 
             await _commentRepository.AddAsync(comment);
-            await _hubContext.Clients.All.SendAsync("ReceiveNotification", name, "Yeni bir yorum yapıldı!");
+
+            // 🔔 SIGNALR: Sayfayı yenilemeden bildirim gönder
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", name, "Yeni bir yorum yaptı!");
 
             return Json(new { success = true, message = "Yorumunuz yayınlandı." });
         }
 
+        // ✅ AJAX İLE ONAYLAMA
         [HttpPost]
         public async Task<IActionResult> Approve(int id)
         {
@@ -78,35 +85,13 @@ namespace YildizHaberPortali.Controllers
             return Json(new { success = false });
         }
 
+        // ❌ AJAX İLE SİLME
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            // Repository'de DeleteAsync(int id) metodun varsa direkt çalışır
             await _commentRepository.DeleteAsync(id);
             return Json(new { success = true });
         }
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int NewsId, string Text)
-        {
-            var user = await _userManager.GetUserAsync(User);
-
-            var comment = new Comment
-            {
-                NewsId = NewsId,
-                UserId = user.Id,
-                Text = Text,
-                IsApproved = true, // 🚀 Ayşegül'ün isteği: Anında yayınlanıyor!
-                CreatedDate = DateTime.Now
-            };
-
-            await _commentRepository.AddAsync(comment);
-
-            // 📢 Bildirim gelsin ama onay bekliyor demesin, sadece "Yeni yorum yazıldı" desin
-            await _hubContext.Clients.All.SendAsync("ReceiveNotification", user.FullName, "Haberinize yeni bir yorum bıraktı.");
-
-            return RedirectToAction("Details", "News", new { id = NewsId });
-        }
-
     }
 }

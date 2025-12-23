@@ -19,11 +19,14 @@ namespace YildizHaberPortali.Controllers
 
         public async Task<IActionResult> Index()
         {
-            
             var allNews = await _newsRepository.GetAllWithCommentsAsync();
+
             ViewBag.TotalCount = allNews.Count;
             ViewBag.ActiveCount = allNews.Count(x => x.IsPublished);
             ViewBag.PassiveCount = allNews.Count(x => !x.IsPublished);
+
+            
+            ViewBag.PendingCommentsCount = allNews.SelectMany(x => x.Comments).Count(c => !c.IsApproved);
 
             var mostCommented = allNews
                 .OrderByDescending(x => x.Comments.Count)

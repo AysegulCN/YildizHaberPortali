@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System; 
 using System.Diagnostics;
+using System.Linq; 
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
-using System; 
-using System.Linq; 
+using YildizHaberPortali.Repositories;
 
 namespace YildizHaberPortali.Controllers
 {
@@ -12,33 +13,86 @@ namespace YildizHaberPortali.Controllers
     {
         private readonly INewsRepository _newsRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ICommentRepository _commentRepository;
 
-        public HomeController(INewsRepository newsRepository, ICategoryRepository categoryRepository)
+        // 🚀 DÜZELTİLMİŞ CONSTRUCTOR (Virgül ve Parantez Hatası Giderildi)
+        public HomeController(INewsRepository newsRepository,
+                              ICategoryRepository categoryRepository,
+                              ICommentRepository commentRepository)
         {
             _newsRepository = newsRepository;
             _categoryRepository = categoryRepository;
+            _commentRepository = commentRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? categoryId)
         {
             var allNews = await _newsRepository.GetAllWithCategoryAsync();
+            var categories = await _categoryRepository.GetAllAsync();
+
             var publishedNews = allNews.Where(x => x.IsPublished).OrderByDescending(x => x.CreatedDate).ToList();
 
             var model = new HomeViewModel();
-            model.SliderNews = publishedNews.Take(5).ToList();
-            model.LatestNews = publishedNews.Skip(5).Take(4).ToList();
+            model.Categories = categories.ToList();
+            model.SliderNews = publishedNews.Take(5).ToList(); 
 
-            var categories = await _categoryRepository.GetCategoriesWithLatestNewsAsync();
-            model.Categories = categories.Where(c => c.News.Any()).ToList();
+            if (categoryId.HasValue)
+            {
+                model.LatestNews = publishedNews.Where(x => x.CategoryId == categoryId.Value).ToList();
+
+                var selectedCat = categories.FirstOrDefault(c => c.Id == categoryId.Value);
+                ViewBag.SelectedCategoryName = selectedCat?.Name;
+            }
+            else
+            {
+                model.LatestNews = publishedNews.Skip(5).Take(10).ToList();
+            }
 
             model.MostReadNews = publishedNews.OrderBy(x => Guid.NewGuid()).Take(5).ToList();
 
             return View(model);
         }
 
+        public async Task<IActionResult> Details(int id)
+        {
+            var news = await _newsRepository.GetByIdAsync(id);
+            if (news == null) return View("NotFound");
+
+            // Habere ait yorumları veritabanından süzüyoruz
+            var comments = await _commentRepository.GetAllAsync();
+            var newsComments = comments.Where(x => x.NewsId == id && x.IsApproved).ToList();
+
+            var viewModel = new NewsDetailViewModel
+            {
+                News = news,
+                Comments = newsComments,
+                NewComment = new Comment()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostComment(int NewsId, string UserName, string Text)
+        {
+            var comment = new Comment
+            {
+                NewsId = NewsId,
+                UserName = UserName,
+                Text = Text,
+                CreatedDate = DateTime.Now,
+                IsApproved = false 
+            };
+
+            await _commentRepository.AddAsync(comment); 
+
+            TempData["SuccessMessage"] = "Yorumunuz alındı, admin onayından sonra yayınlanacaktır!";
+            return RedirectToAction("Details", new { id = NewsId });
+        }
+
         public IActionResult Contact()
         {
-            ViewData["Title"] = "Bize Ula��n";
+            ViewData["Title"] = "Bize Ulaşın";
             return View();
         }
 
@@ -58,10 +112,9 @@ namespace YildizHaberPortali.Controllers
         {
             if (code == 404)
             {
-                return View("NotFound"); // 404 ise �zel tasar�m�m�za git
+                return View("NotFound"); 
             }
 
-            // Di�er hatalar i�in (500 vs.) standart hata sayfas�na git
             return View("Error");
         }
     }

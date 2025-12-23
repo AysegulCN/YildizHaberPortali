@@ -4,97 +4,110 @@
 }
 
 <style>
-    /* Premium Slider Tasarımı */
-    .slider-container {
-        position: relative;
-        padding: 40px 80px;
-        background: #fdfdfd;
+    /* ✨ Premium Tasarım Detayları */
+    .main-slider {
         border-radius: 30px;
-        margin-top: 20px;
-    }
-
-    .carousel-item img {
-        height: 500px;
-        object-fit: cover;
-        border-radius: 25px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    }
-
-    .carousel-control-prev {
-        left: -60px;
-        width: 60px;
-        opacity: 1;
-    }
-
-    .carousel-control-next {
-        right: -60px;
-        width: 60px;
-        opacity: 1;
-    }
-
-    .carousel-control-prev-icon, .carousel-control-next-icon {
-        background-color: #4e73df;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-size: 50%;
-        border: 4px solid #fff;
-        box-shadow: 0 5px 15px rgba(78,115,223,0.3);
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     }
 
     .carousel-caption {
-        background: linear-gradient(transparent, rgba(0,0,0,0.8));
-        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.85));
+        right: 0;
         left: 0;
         bottom: 0;
-        padding: 40px 20px;
-        border-radius: 0 0 25px 25px;
-        text-align: left;
+        padding: 50px 30px;
+    }
+
+    .news-card img {
+        height: 250px !important; /* Alanı 200'den 250'ye genişlettik */
+        object-fit: cover; /* Resmi alanı dolduracak şekilde yayar */
+        object-position: center; /* Merkeze odaklar */
+        border-radius: 20px 20px 0 0;
+        transition: transform 0.5s ease;
+    }
+
+    /* Kartın üzerine gelince resmin hafifçe büyümesi (Pro Efekt) */
+    .news-card:hover img {
+        transform: scale(1.08);
+    }
+
+    .category-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 10;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+    }
+
+    .news-image-wrapper:hover img {
+        transform: scale(1.1);
     }
 </style>
 
-<div class="container">
-    <div class="slider-container shadow-sm">
-        <div id="newsSlider" class="carousel slide carousel-fade" data-ride="carousel">
+<div class="container py-4">
+
+    @if (Model.SliderNews != null && Model.SliderNews.Any())
+    {
+        <div id="newsSlider" class="carousel slide main-slider mb-5" data-ride="carousel">
             <div class="carousel-inner">
-                @{
-                    var first = true;
-                }
-                @* 1. KISIM: Slider haberlerini döngüye alıyoruz *@
-                @foreach (var item in Model.SliderNews.Where(x => x.IsPublished).Take(5))
+                @for (int i = 0; i < Model.SliderNews.Count; i++)
                 {
-                    <div class="carousel-item @(first ? "active" : "")">
-                        <a asp-controller="News" asp-action="Details" asp-route-id="@item.Id">
-                            <img src="~/uploads/@item.Image" class="d-block w-100" alt="@item.Title">
-                            <div class="carousel-caption">
-                                <span class="badge badge-primary mb-2 shadow-sm">@item.Category?.Name</span>
-                                <h2 class="text-white">@item.Title</h2>
-                            </div>
-                        </a>
+                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                        <img src="~/uploads/@Model.SliderNews[i].Image" class="d-block w-100" style="height: 520px; object-fit: cover;" onerror="this.src='/img/no-image.png'">
+                        <div class="carousel-caption text-left px-5">
+                            <span class="badge badge-warning rounded-pill px-3 py-2 mb-3">@Model.SliderNews[i].Category?.Name</span>
+                            <h1 class="font-weight-bold display-4">@Model.SliderNews[i].Title</h1>
+                            @* 🚀 Summary Hatası Çözümü: Content'ten özet oluşturuyoruz *@
+                            <p class="d-none d-md-block lead opacity-75">
+                                @(Model.SliderNews[i].Content?.Length > 120 ? Model.SliderNews[i].Content.Substring(0, 120) + "..." : Model.SliderNews[i].Content)
+                            </p>
+                            <a href="/Home/Details/@Model.SliderNews[i].Id" class="btn btn-light btn-lg rounded-pill px-5 font-weight-bold shadow">Hemen Oku</a>
+                        </div>
                     </div>
-                    first = false;
                 }
             </div>
-            <a class="carousel-control-prev" href="#newsSlider" role="button" data-slide="prev"><span class="carousel-control-prev-icon"></span></a>
-            <a class="carousel-control-next" href="#newsSlider" role="button" data-slide="next"><span class="carousel-control-next-icon"></span></a>
+            <a class="carousel-control-prev" href="#newsSlider" data-slide="prev"><span class="carousel-control-prev-icon"></span></a>
+            <a class="carousel-control-next" href="#newsSlider" data-slide="next"><span class="carousel-control-next-icon"></span></a>
         </div>
-    </div>
+    }
 
-    <div class="mt-5 mb-4">
-        <h3 class="font-weight-bold"><i class="fas fa-fire text-danger mr-2"></i>Son Haberler</h3>
-        <hr />
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+        <h2 class="font-weight-bold text-dark m-0">
+            <i class="fas @(ViewBag.SelectedCategoryName != null ? "fa-filter text-primary" : "fa-bolt text-warning") mr-2"></i>
+            @(ViewBag.SelectedCategoryName ?? "Son Haberler")
+        </h2>
+        @if (ViewBag.SelectedCategoryName != null)
+        {
+            <a href="/Home/Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Tümünü Göster</a>
+        }
     </div>
 
     <div class="row">
-        @* KRİTİK DÜZELTME: Model.News yerine Model.LatestNews deniyoruz *@
-        @foreach (var item in Model.LatestNews.Take(12))
+        @foreach (var news in Model.LatestNews)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
-                    <img src="~/uploads/@item.Image" class="card-img-top" style="height: 200px; object-fit: cover;">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card news-card h-100">
+                    <span class="badge badge-primary category-badge rounded-pill px-3 py-2">@news.Category?.Name</span>
+                    @* 🚀 Mevcut <img> etiketini bu blokla değiştiriyoruz *@
+                    <div class="news-image-wrapper" style="overflow: hidden; border-radius: 20px 20px 0 0; height: 250px; background-color: #f8f9fa;">
+                        <img src="~/uploads/@news.Image"
+                             class="card-img-top"
+                             style="height: 100%; width: 100%; object-fit: cover; object-position: center; transition: transform 0.5s ease;"
+                             onerror="this.src='/img/no-image.png'">
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title font-weight-bold">@item.Title</h5>
-                        <a asp-controller="News" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm rounded-pill">Devamını Oku</a>
+                        <h5 class="card-title font-weight-bold text-dark mb-2">@news.Title</h5>
+                        @* 🚀 Summary Hatası Çözümü: Content'ten kısa özet *@
+                        <p class="card-text text-muted small mb-0">
+                            @(news.Content?.Length > 90 ? news.Content.Substring(0, 90) + "..." : news.Content)
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-4 pt-0 px-4 d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="far fa-user mr-1"></i> @news.Author</small>
+                        <a href="/Home/Details/@news.Id" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">Devamı</a>
                     </div>
                 </div>
             </div>

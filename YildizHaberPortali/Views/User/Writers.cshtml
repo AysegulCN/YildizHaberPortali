@@ -14,7 +14,6 @@
                     <h4 class="m-0 font-weight-bold text-dark">
                         <i class="fas fa-pen-nib text-primary mr-3"></i> Yazar Kadromuz
                     </h4>
-                    <small class="text-muted">Ekip üyelerinin hesap durumlarını buradan takip edebilirsiniz.</small>
                 </div>
             </div>
         </div>
@@ -26,7 +25,7 @@
                         <tr>
                             <th class="border-0 px-5 py-4">FOTOĞRAF</th>
                             <th class="border-0 py-4">AD SOYAD</th>
-                            <th class="border-0 py-4">DURUM</th> @* 🚀 YENİ SÜTUN *@
+                            <th class="border-0 py-4">DURUM</th> 
                             <th class="border-0 py-4">UZMANLIK ALANI</th>
                             <th class="border-0 py-4">HAKKINDA (BIO)</th>
                             <th class="border-0 py-4 text-center">İŞLEMLER</th>
@@ -35,7 +34,6 @@
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            @* 🚀 Durum Mantığı: LockoutEnd boşsa veya geçmişteyse AKTİF *@
                             bool isActive = item.LockoutEnd == null || item.LockoutEnd < DateTimeOffset.Now;
 
                             <tr style="transition: all 0.2s ease; opacity: @(isActive ? "1" : "0.7");">
@@ -45,14 +43,12 @@
                                              class="rounded-circle shadow-sm border border-white"
                                              style="width: 55px; height: 55px; object-fit: cover; border-width: 3px !important;">
 
-                                        @* 🟢/🔴 Dinamik Durum Noktası *@
                                         <span class="status-indicator @(isActive ? "bg-success" : "bg-danger")"
                                               title="@(isActive ? "Aktif" : "Dondurulmuş")"></span>
                                     </div>
                                 </td>
                                 <td class="font-weight-bold text-dark">@item.FullName</td>
 
-                                @* 🚀 YENİ DURUM ROZETİ *@
                                 <td>
                                     @if (isActive)
                                     {
@@ -94,7 +90,6 @@
 </div>
 
 <style>
-    /* Premium Durum Renkleri */
     .bg-success-soft {
         background-color: rgba(40, 167, 69, 0.1);
     }
@@ -114,7 +109,6 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* Pasif olan yazarın satırını biraz soluklaştırıyoruz (Pro dokunuş) */
     tr.disabled {
         background-color: #f8f9fc;
     }

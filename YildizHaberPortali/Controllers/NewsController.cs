@@ -38,19 +38,26 @@ namespace YildizHaberPortali.Controllers
         }
 
         // 📰 Haber Listesi (Index)
-        public async Task<IActionResult> Index(int? categoryId) // 🚀 Parametre eklemek ŞART
-       {
+        public async Task<IActionResult> Index(int? categoryId, bool? isPublished) // 👈 Buraya isPublished eklendi!
+        {
             var user = await _userManager.GetUserAsync(User);
             var roles = await _userManager.GetRolesAsync(user);
             var categories = await _categoryRepository.GetAllAsync();
+
             ViewBag.Categories = categories;
             ViewBag.SelectedCategory = categoryId;
 
             var news = await _newsRepository.GetAllWithCategoryAsync();
 
+            // 🎯 Dashborad'dan gelen filtreleme burada çalışacak
+            if (isPublished.HasValue)
+            {
+                news = news.Where(x => x.IsPublished == isPublished.Value).ToList();
+                ViewBag.IsPublishedFilter = isPublished.Value;
+            }
+
             if (categoryId.HasValue)
             {
-                // Gelen ID'ye göre listeyi süzüyoruz
                 news = news.Where(x => x.CategoryId == categoryId.Value).ToList();
             }
 
@@ -63,6 +70,23 @@ namespace YildizHaberPortali.Controllers
             }
 
             return View(new List<News>());
+        }
+
+        // 🚀 KATEGORİ 404 HATASINI ÇÖZEN METOD
+        public async Task<IActionResult> CategoryNews(string slug)
+        {
+            // 1. Veritabanından ismi 'slug' parametresine eşit olan kategoriyi bul
+            var categories = await _categoryRepository.GetAllAsync();
+            var category = categories.FirstOrDefault(c => c.Name.Replace(" ", "-").ToLower() == slug.ToLower());
+
+            if (category != null)
+            {
+                // 2. Eğer kategori bulunduysa, Home/Index'e ID ile gönder (Filtreleme çalışsın)
+                return RedirectToAction("Index", "Home", new { categoryId = category.Id });
+            }
+
+            // 3. Bulunamazsa ana sayfaya dön
+            return RedirectToAction("Index", "Home");
         }
 
         // ✨ Yeni Haber Ekle (GET)

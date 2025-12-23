@@ -40,6 +40,7 @@ namespace YildizHaberPortali.Models
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
         public string? AuthorId { get; set; }
+        public string Summary { get; set; }
 
 
     }
