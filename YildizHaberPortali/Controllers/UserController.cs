@@ -21,7 +21,6 @@ namespace YildizHaberPortali.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IWebHostEnvironment _hostEnvironment;
 
-        // 🚀 TEK VE TEMİZ CONSTRUCTOR
         public UserController(UserManager<AppUser> userManager,
                               RoleManager<IdentityRole> roleManager,
                               IWebHostEnvironment hostEnvironment)
@@ -31,7 +30,7 @@ namespace YildizHaberPortali.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
-        // 👥 KULLANICI LİSTESİ (Index)
+        // 👥 SİSTEM KULLANICILARI (Index)
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -51,10 +50,44 @@ namespace YildizHaberPortali.Controllers
             return View(userRolesViewModel);
         }
 
-        // 🖋️ YAZAR KADROSU (Writers)
+        // 🗑️ KULLANICI SİLME (AJAX - PRO VERSİYON)
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            // 1. Silinecek kullanıcıyı bul
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return Json(new { success = false, message = "Kullanıcı bulunamadı!" });
+
+            // 2. GÜVENLİK: Admin'in kendisini silmesini engelle!
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null && currentUser.Id == id)
+            {
+                return Json(new { success = false, message = "Kendi yönetici hesabınızı silemezsiniz!" });
+            }
+
+            // 3. Profil Resmi Varsa Dosyayı Sil
+            if (!string.IsNullOrEmpty(user.ProfilePicture) && user.ProfilePicture != "undraw_profile.svg")
+            {
+                string path = Path.Combine(_hostEnvironment.WebRootPath, "img", user.ProfilePicture);
+                if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            }
+
+            // 4. Kullanıcıyı Identity'den Sil
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false, message = "Silme işlemi sırasında teknik bir hata oluştu." });
+        }
+
+        // 🖋️ YAZAR KADROSU
         public async Task<IActionResult> Writers()
         {
-            var users = _userManager.Users.ToList();
+            var users = await _userManager.Users.ToListAsync();
             var writers = new List<AppUser>();
 
             foreach (var user in users)
@@ -67,7 +100,7 @@ namespace YildizHaberPortali.Controllers
             return View(writers);
         }
 
-       [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -84,7 +117,6 @@ namespace YildizHaberPortali.Controllers
                 Bio = user.Bio,
                 Branch = user.Branch,
                 ExistingProfilePicture = user.ProfilePicture,
-                // LockoutEnd gelecekteyse hesap dondurulmuş demektir.
                 IsActive = (user.LockoutEnd == null || user.LockoutEnd < DateTimeOffset.Now),
                 SelectedRole = userRoles.FirstOrDefault(),
                 Roles = allRoles.Select(r => new SelectListItem { Value = r.Name, Text = r.Name }).ToList()
@@ -92,12 +124,10 @@ namespace YildizHaberPortali.Controllers
             return View(model);
         }
 
-        // Düzenleme İşlemi (POST) - PRO VERSİYON
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserEditViewModel model)
         {
-            // 🚀 Formun içindeki Roller listesini tekrar doldurmalıyız (Validation hatası olursa sayfa boş gelmesin diye)
             var allRoles = _roleManager.Roles.ToList();
             model.Roles = allRoles.Select(r => new SelectListItem { Value = r.Name, Text = r.Name }).ToList();
 
@@ -106,15 +136,12 @@ namespace YildizHaberPortali.Controllers
             var user = await _userManager.FindByIdAsync(model.Id);
             if (user == null) return NotFound();
 
-            // 1. Temel Bilgileri Güncelle
             user.FullName = model.FullName;
             user.Bio = model.Bio;
             user.Branch = model.Branch;
 
-            // 2. Profil Resmi Yönetimi
             if (model.ProfileImageFile != null)
             {
-                // Eski resmi sil (Default resim değilse)
                 if (!string.IsNullOrEmpty(user.ProfilePicture) && user.ProfilePicture != "undraw_profile.svg")
                 {
                     string oldImagePath = Path.Combine(_hostEnvironment.WebRootPath, "img", user.ProfilePicture);
@@ -131,13 +158,11 @@ namespace YildizHaberPortali.Controllers
                 user.ProfilePicture = uniqueFileName;
             }
 
-            // 3. Hesap Aktiflik Durumu (Lockout Mantığı)
             if (!model.IsActive)
-                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue); // Sonsuza kadar dondur
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
             else
-                await _userManager.SetLockoutEndDateAsync(user, null); // Kilidi aç
+                await _userManager.SetLockoutEndDateAsync(user, null);
 
-            // 4. Rol Güncelleme (Pro Dokunuş)
             var currentRoles = await _userManager.GetRolesAsync(user);
             if (!currentRoles.Contains(model.SelectedRole))
             {
@@ -148,14 +173,12 @@ namespace YildizHaberPortali.Controllers
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "Yazar bilgileri pırıl pırıl güncellendi!";
-                return RedirectToAction("Writers");
+                TempData["SuccessMessage"] = "Kullanıcı bilgileri pırıl pırıl güncellendi!";
+                return RedirectToAction("Index");
             }
 
             foreach (var error in result.Errors) ModelState.AddModelError("", error.Description);
             return View(model);
         }
-
-        // Diğer metodların (DeleteAjax, Index vb.) aynen devam edebilir...
     }
 }

@@ -38,20 +38,27 @@ namespace YildizHaberPortali.Controllers
         }
 
         // 📰 Haber Listesi (Index)
-        public async Task<IActionResult> Index()
-        {
+        public async Task<IActionResult> Index(int? categoryId) // 🚀 Parametre eklemek ŞART
+       {
             var user = await _userManager.GetUserAsync(User);
             var roles = await _userManager.GetRolesAsync(user);
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = categories;
+            ViewBag.SelectedCategory = categoryId;
 
-            // Kategori bilgileriyle birlikte tüm haberleri çek
             var news = await _newsRepository.GetAllWithCategoryAsync();
+
+            if (categoryId.HasValue)
+            {
+                // Gelen ID'ye göre listeyi süzüyoruz
+                news = news.Where(x => x.CategoryId == categoryId.Value).ToList();
+            }
 
             if (roles.Contains("Admin"))
                 return View(news);
 
             if (roles.Contains("Yazar"))
             {
-                // Yazara sadece kendi haberlerini göster
                 return View(news.Where(x => x.AuthorId == user.Id).ToList());
             }
 
