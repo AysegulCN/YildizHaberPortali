@@ -5,56 +5,111 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow-sm mx-2 mt-4" style="border-radius: 20px;">
-    <div class="card-body p-4 bg-light" style="border-radius: 20px;">
-        <h3 class="font-weight-bold text-primary mb-4">Yeni Haber Oluştur</h3>
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
+<div class="container-fluid py-4">
+    <div class="card shadow-sm border-0" style="border-radius: 25px; overflow: hidden;">
+        <div class="card-header bg-white py-4 px-5">
+            <h3 class="font-weight-bold text-primary mb-0">
+                <i class="fas fa-plus-circle mr-2"></i> Yeni Haber Oluştur
+            </h3>
+        </div>
 
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="form-group mb-4">
-                        <label asp-for="Title" class="font-weight-bold ml-2">Başlık</label>
-                        <input asp-for="Title" class="form-control" style="border-radius:15px; padding:25px;" />
-                        <span asp-validation-for="Title" class="text-danger small"></span> 
-                    </div>
-                    <div class="form-group mb-4">
-                        <label asp-for="Content" class="font-weight-bold ml-2">İçerik</label>
-                        <textarea asp-for="Content" class="form-control" rows="10" style="border-radius:15px;"></textarea>
-                        <span asp-validation-for="Content" class="text-danger small"></span> 
-                    </div>
-                </div>
+        <div class="card-body p-5 bg-light">
+            @* 🚀 RZ1034 Çözümü: Form etiketi tüm içeriği kapsıyor *@
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
 
-                <div class="col-lg-4">
-                    <div class="form-group mb-4">
-                        <label asp-for="CategoryId" class="font-weight-bold">Kategori</label>
-                        <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories" style="border-radius:15px;">
-                            <option value="">-- Kategori Seç --</option>
-                        </select>
-                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
-                    </div>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="form-group mb-4">
+                            <label asp-for="Title" class="font-weight-bold text-dark ml-2">Haber Başlığı</label>
+                            <input asp-for="Title" class="form-control shadow-sm border-0 px-4 py-4"
+                                   style="border-radius: 15px; height: 60px; font-size: 1.1rem;"
+                                   placeholder="Haber başlığını buraya girin..." />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
 
-                    <div class="p-3 bg-white mb-4 shadow-sm" style="border-radius:15px;">
-                        <label class="font-weight-bold d-block mb-3">Yayın Durumu</label>
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" asp-for="IsPublished" class="custom-control-input" id="stSw">
-                            <label class="custom-control-label" for="stSw">Hemen Yayına Al</label>
+                        <div class="form-group mb-4">
+                            <label asp-for="Content" class="font-weight-bold text-dark ml-2">Haber İçeriği</label>
+                            <textarea asp-for="Content" class="form-control shadow-sm border-0 p-4"
+                                      rows="12" style="border-radius: 20px;"
+                                      placeholder="Haber detaylarını profesyonel bir dille yazın..."></textarea>
+                            <span asp-validation-for="Content" class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <div class="form-group mb-4">
-                        <label asp-for="ImageFile" class="font-weight-bold">Haber Görseli</label>
-                        <input type="file" asp-for="ImageFile" class="form-control-file" />
-                    </div>
+                    <div class="col-lg-4">
 
-                    <button type="submit" class="btn btn-primary btn-block p-3 font-weight-bold shadow" style="border-radius:50px;">Haberi Kaydet</button>
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold text-muted ml-2 small text-uppercase">Kategori Seçimi</label>
+                            <div class="input-group shadow-sm" style="height: 55px; border-radius: 50px; border: 1px solid #e3e6f0; overflow: hidden; background: white;">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white border-0 px-4">
+                                        <i class="fas fa-tags text-primary"></i>
+                                    </span>
+                                </div>
+                                <select asp-for="CategoryId" asp-items="ViewBag.CategoryId"
+                                        class="form-control border-0 bg-white"
+                                        style="height: 100%; cursor: pointer;">
+                                    <option value="">-- Kategori Seçiniz --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                            <div class="card-body p-4">
+                                <label class="font-weight-bold text-dark d-block mb-3">Yayın Durumu</label>
+                                <div class="custom-control custom-switch custom-switch-lg">
+                                    <input type="checkbox" asp-for="IsPublished" class="custom-control-input" id="stSw">
+                                    <label class="custom-control-label font-weight-bold text-primary" for="stSw" style="cursor: pointer;">
+                                        Hemen Yayına Al
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                            <div class="card-body p-4 text-center">
+                                <label asp-for="ImageFile" class="font-weight-bold text-dark d-block mb-3">Haber Görseli</label>
+                                <div class="p-3 border-dashed rounded-lg" style="border: 2px dashed #d1d3e2;">
+                                    <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                    <input type="file" asp-for="ImageFile" class="form-control-file small" accept="image/*" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block p-4 font-weight-bold shadow-lg mt-2"
+                                style="border-radius: 50px; font-size: 1.1rem; transition: all 0.3s;">
+                            <i class="fas fa-save mr-2"></i> Haberi Sisteme Kaydet
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-light btn-block rounded-pill mt-3 text-muted">Vazgeç</a>
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" /> 
+    <partial name="_ValidationScriptsPartial" />
 }
 
+<style>
+    /* Premium Buton Efekti */
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(78, 115, 223, 0.2) !important;
+    }
+
+    .custom-switch-lg .custom-control-label::before {
+        height: 1.5rem;
+        width: 2.5rem;
+        border-radius: 1rem;
+    }
+
+    .custom-switch-lg .custom-control-label::after {
+        width: calc(1.5rem - 4px);
+        height: calc(1.5rem - 4px);
+        border-radius: 1rem;
+    }
+</style>

@@ -4,63 +4,172 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+<style>
+    .premium-card {
+        border-radius: 30px !important;
+        border: none;
+    }
 
+    .rounded-pill-custom {
+        border-radius: 50px !important;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
 
-<div class="container-fluid">
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 15px rgba(78,115,223,0.1);
+    }
+
+    .img-profile-preview {
+        width: 160px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid #fff;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="container-fluid py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="premium-card card shadow">
-                <div class="card-header py-3 bg-white">
-                    <h5 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-edit mr-2"></i> Yazar Hesabını Yönet: @Model.FullName</h5>
-                </div>
-                <div class="card-body p-4">
-                    <form asp-action="Edit" method="post">
-                        <input type="hidden" asp-for="Id" />
+        <div class="col-lg-10">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ExistingProfilePicture" /> 
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-4">
-                                    <label class="font-weight-bold">Ad Soyad</label>
-                                    <input asp-for="FullName" class="form-control rounded-pill border-primary" />
-                                </div>
+                <div class="premium-card card shadow border-0" style="border-radius: 25px; overflow: hidden;">
+                    <div class="card-header py-4 bg-white border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-primary-soft text-primary mr-3 p-3 rounded-circle">
+                                <i class="fas fa-user-edit fa-lg"></i>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-4">
-                                    <label class="font-weight-bold">E-posta (Değiştirilemez)</label>
-                                    <input asp-for="Email" class="form-control rounded-pill bg-light" readonly />
-                                </div>
-                            </div>
+                            <h4 class="m-0 font-weight-bold text-dark">Yazar Hesabını Yönet: <span class="text-primary">@Model.FullName</span></h4>
                         </div>
+                    </div>
 
+                    <div class="card-body p-5">
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-4">
-                                    <label class="font-weight-bold text-danger">Yetki Seviyesi (Rol)</label>
-                                    <select asp-for="SelectedRole" asp-items="Model.Roles" class="form-control rounded-pill border-danger"></select>
+                            <div class="col-md-4 border-right text-center">
+                                <div class="profile-upload-section mb-4">
+                                    <h6 class="font-weight-bold text-muted mb-3 text-uppercase">Yazar Fotoğrafı</h6>
+                                    <div class="position-relative d-inline-block">
+                                        <img src="~/img/@(string.IsNullOrEmpty(Model.ExistingProfilePicture) ? "undraw_profile.svg" : Model.ExistingProfilePicture)"
+                                             class="rounded-circle img-thumbnail shadow-lg mb-3"
+                                             style="width: 180px; height: 180px; object-fit: cover; border: 4px solid #f8f9fc;"
+                                             id="profilePreview">
+
+                                        <div class="mt-2">
+                                            <label for="ProfileImageFile" class="btn btn-sm btn-outline-primary rounded-pill px-4">
+                                                <i class="fas fa-camera mr-2"></i> Fotoğraf Değiştir
+                                            </label>
+                                            <input type="file" asp-for="ProfileImageFile" class="d-none" id="ProfileImageFile" accept="image/*" onchange="previewImage(this)">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded-pill mt-4 shadow-sm border">
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" asp-for="IsActive" class="custom-control-input" id="activeSw">
-                                        <label class="custom-control-label font-weight-bold text-primary" for="activeSw">Hesap Aktif (Dondurmak için kapatın)</label>
+
+                            <div class="col-md-8 pl-md-5">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-4">
+                                            <label class="font-weight-bold text-dark ml-2">Ad Soyad</label>
+                                            <input asp-for="FullName" class="form-control rounded-pill border-light bg-light px-4 py-4 shadow-sm" style="height: 50px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-4">
+                                            <label class="font-weight-bold text-dark ml-2">E-posta (Sabit)</label>
+                                            <input asp-for="Email" class="form-control rounded-pill bg-white px-4 border-0" readonly style="height: 50px; color: #b7b9cc;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-4">
+                                            <label class="font-weight-bold text-danger ml-2">Yetki Seviyesi (Rol)</label>
+                                            <select asp-for="SelectedRole" asp-items="Model.Roles" class="form-control rounded-pill border-danger-soft px-4 shadow-sm" style="height: 50px;"></select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-4">
+                                            <label class="font-weight-bold text-primary ml-2">Uzmanlık Alanı (Dal)</label>
+                                            <input asp-for="Branch" class="form-control rounded-pill border-primary-soft px-4 shadow-sm" style="height: 50px;" placeholder="Örn: Teknoloji Editörü" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label class="font-weight-bold text-dark ml-2">Yazar Biyografisi (Bio)</label>
+                                    <textarea asp-for="Bio" class="form-control border-light shadow-sm px-4 py-3" rows="4" style="border-radius:25px;" placeholder="Yazarın profesyonel geçmişinden kısaca bahsedin..."></textarea>
+                                </div>
+
+                                <div class="row align-items-center mt-5">
+                                    <div class="col-md-6">
+                                        <div class="custom-control custom-switch ml-2">
+                                            <input type="checkbox" asp-for="IsActive" class="custom-control-input" id="activeSw">
+                                            <label class="custom-control-label font-weight-bold text-primary cursor-pointer" for="activeSw">Hesap Durumu: Aktif</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <a asp-action="Writers" class="btn btn-light rounded-pill px-5 mr-3 font-weight-bold">Vazgeç</a>
+                                        <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-lg font-weight-bold py-3">
+                                            <i class="fas fa-save mr-2"></i> Güncellemeleri Kaydet
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold">Yazar Biyografisi (Bio)</label>
-                            <textarea asp-for="Bio" class="form-control shadow-sm" rows="4" style="border-radius:20px;"></textarea>
-                        </div>
-
-                        <div class="mt-4 text-right">
-                            <a asp-action="Writers" class="btn btn-secondary btn-premium px-5 mr-2">Vazgeç</a>
-                            <button type="submit" class="btn btn-primary btn-premium px-5">Güncellemeri Kaydet</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#profilePreview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
+
+<style>
+    .bg-primary-soft {
+        background-color: rgba(78, 115, 223, 0.1);
+    }
+
+    .border-danger-soft {
+        border: 1px solid rgba(231, 74, 59, 0.2);
+    }
+
+    .border-primary-soft {
+        border: 1px solid rgba(78, 115, 223, 0.2);
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .btn-premium {
+        transition: all 0.3s ease;
+    }
+
+        .btn-premium:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.1);
+    }
+</style>

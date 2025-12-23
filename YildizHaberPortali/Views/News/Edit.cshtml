@@ -83,13 +83,23 @@
 
             <div class="row">
                 <div class="col-lg-8">
+                    @* Haber Kategorisi Seçim Alanı *@
                     <div class="form-group mb-4">
-                        <label class="font-weight-bold ml-2">Kategori Seçimi</label>
-                        <select asp-for="CategoryId" class="form-control form-control-premium" asp-items="Model.Categories">
-                            <option value="">-- Kategori Seçiniz --</option>
-                        </select>
-                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        <label class="font-weight-bold text-muted ml-2 small text-uppercase">Haber Kategorisi</label>
+                        <div class="input-group shadow-sm" style="height: 55px; border-radius: 50px; border: 1px solid #e3e6f0; overflow: hidden;">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white border-0 px-4" style="display: flex; align-items: center;">
+                                    <i class="fas fa-tags text-primary"></i>
+                                </span>
+                            </div>
+                            <select asp-for="CategoryId" asp-items="ViewBag.CategoryId"
+                                    class="form-control border-0 bg-white"
+                                    style="height: 100%; cursor: pointer; font-size: 1rem;">
+                                <option value="">-- Kategori Seçiniz --</option>
+                            </select>
+                        </div>
                     </div>
+
                     <div class="form-group mb-4">
                         <label class="font-weight-bold ml-2">Başlık</label>
                         <input asp-for="Title" class="form-control form-control-premium w-100" />

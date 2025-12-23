@@ -6,112 +6,97 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-5 mb-5">
+<div class="container py-5 mt-2">
     <div class="row">
         <div class="col-lg-8">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent p-0 mb-4">
-                    <li class="breadcrumb-item"><a href="/" class="text-primary">Ana Sayfa</a></li>
+
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light rounded-pill px-4 py-2 shadow-sm border-0">
+                    <li class="breadcrumb-item"><a href="/" class="text-primary font-weight-bold">Ana Sayfa</a></li>
                     <li class="breadcrumb-item active text-muted">@Model.Category?.Name</li>
                 </ol>
             </nav>
 
-            <h1 class="font-weight-bold mb-4" style="font-size: 2.8rem; line-height: 1.1; color: #1a1a1a;">@Model.Title</h1>
+            <h1 class="display-4 font-weight-bold mb-4" style="color: #1a1a1a; letter-spacing: -1px; line-height: 1.2;">@Model.Title</h1>
 
-            <div class="d-flex align-items-center justify-content-between text-muted mb-4 py-3 border-top border-bottom">
+            <div class="d-flex align-items-center justify-content-between text-muted mb-5 py-3 border-top border-bottom">
                 <div class="d-flex align-items-center">
-                    <span class="mr-4"><i class="far fa-calendar-alt mr-2 text-primary"></i>@Model.CreatedDate.ToString("dd MMMM yyyy")</span>
-
-                    @* 🚀 HATA ÇÖZÜMÜ: .FullName ekini sildik, sadece Model.Author kullanıyoruz *@
-                    <div class="mr-3">
-                        <i class="far fa-user mr-1 text-primary"></i> Editör: <b>@(Model.Author ?? "Yıldız Editör")</b>
-                    </div>
-
-                    <div>
-                        <i class="far fa-comment-dots mr-1 text-primary"></i> @(((List<Comment>)ViewBag.Comments).Count) Yorum
-                    </div>
-
+                    <span class="mr-4 small"><i class="far fa-calendar-alt mr-2 text-primary"></i>@Model.CreatedDate.ToString("dd MMMM yyyy")</span>
+                    <span class="mr-4 small"><i class="far fa-user mr-2 text-primary"></i>Editör: <b class="text-dark">@(Model.Author ?? "Yıldız Editör")</b></span>
+                    <span class="small"><i class="far fa-comment-dots mr-2 text-primary"></i>@(((List<Comment>)ViewBag.Comments).Count) Yorum</span>
                 </div>
-
-                <button id="btnReadAloud" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                <button id="btnReadAloud" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm font-weight-bold">
                     <i class="fas fa-volume-up mr-1"></i> Dinle
                 </button>
             </div>
 
-            <div class="mb-5 shadow rounded-lg overflow-hidden border">
-                <img src="~/img/@Model.ImageUrl" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="@Model.Title">
+            <div class="mb-5 shadow-lg overflow-hidden border-0" style="border-radius: 30px;">
+                @if (!string.IsNullOrEmpty(Model.Image))
+                {
+                    <img src="~/uploads/@Model.Image" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="@Model.Title">
+                }
+                else
+                {
+                    <img src="~/img/no-image.png" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;">
+                }
             </div>
 
-            <div class="news-content mb-5" style="font-size: 1.25rem; line-height: 1.9; color: #2c3e50; font-family: 'Georgia', serif;">
+            <div class="news-content mb-5" style="font-size: 1.25rem; line-height: 1.9; color: #2c3e50; font-family: 'Segoe UI', sans-serif;">
                 @Html.Raw(Model.Content)
             </div>
 
-            <div class="p-4 bg-light rounded-lg mb-5 border">
-                <p class="font-weight-bold small text-muted text-uppercase mb-3">Haberi Sevdin mi? Paylaş:</p>
-                <div class="d-flex">
-                    <a href="https://twitter.com/share?url=@Context.Request.Path" target="_blank" class="btn btn-info btn-circle mr-2 shadow-sm"><i class="fab fa-twitter"></i></a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=@Context.Request.Path" target="_blank" class="btn btn-primary btn-circle mr-2 shadow-sm" style="background-color: #3b5998;"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://wa.me/?text=@Context.Request.Path" target="_blank" class="btn btn-success btn-circle shadow-sm" style="background-color: #25d366;"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
+            <hr class="my-5" style="border-top: 2px dashed #eee;">
 
             <div class="comments-section">
-                <h3 class="font-weight-bold mb-4 text-dark"><i class="fas fa-comments text-primary mr-2"></i> Okuyucu Sözü</h3>
+                <h3 class="font-weight-bold mb-4"><i class="fas fa-quote-left text-primary mr-3"></i>Okuyucu Sözü</h3>
 
                 <div id="comments-list" class="mb-5">
-                    @if (((List<Comment>)ViewBag.Comments).Any())
+                    @foreach (var comment in (List<Comment>)ViewBag.Comments)
                     {
-                        @foreach (var comment in (List<Comment>)ViewBag.Comments)
-                        {
-                            <div class="card border-0 shadow-sm mb-3" style="border-radius: 20px;">
-                                <div class="card-body p-4">
-                                    <div class="media">
-                                        <img src="~/img/@(comment.User?.ProfilePicture ?? "undraw_profile.svg")"
-                                             class="mr-3 rounded-circle border shadow-sm"
-                                             style="width: 55px; height: 55px; object-fit: cover;">
-                                        <div class="media-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mt-0 font-weight-bold text-primary">@(comment.User?.FullName ?? "Okuyucu")</h6>
-                                                <small class="text-muted">@comment.CreatedDate.ToString("dd.MM.yyyy")</small>
-                                            </div>
-                                            <p class="text-secondary mb-0 mt-2">@comment.Text</p>
+                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 25px; background: #fff; border-left: 6px solid #4e73df !important;">
+                            <div class="card-body p-4">
+                                <div class="media align-items-center">
+                                    <img src="~/img/@(comment.User?.ProfilePicture ?? "undraw_profile.svg")"
+                                         class="mr-4 rounded-circle border shadow-sm"
+                                         style="width: 55px; height: 55px; object-fit: cover;">
+                                    <div class="media-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="mb-0 font-weight-bold text-primary">@(comment.User?.FullName ?? "Okuyucu")</h6>
+                                            <small class="text-muted">@comment.CreatedDate.ToString("dd.MM.yyyy")</small>
                                         </div>
+                                        <p class="text-dark mb-0" style="line-height: 1.5;">@comment.Text</p>
                                     </div>
                                 </div>
                             </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="alert alert-light border shadow-sm rounded-pill px-4 text-center">
-                            <i class="fas fa-feather mr-2 text-primary"></i> Henüz yorum yapılmamış. İlk sözü sen söyle!
                         </div>
                     }
                 </div>
 
-                <div class="card border-0 shadow rounded-lg overflow-hidden">
-                    <div class="card-header bg-primary text-white p-4">
-                        <h5 class="mb-0 font-weight-bold"><i class="fas fa-pen-fancy mr-2"></i> Fikrini Paylaş</h5>
+                <div class="card border-0 shadow-lg" style="border-radius: 25px; overflow: hidden;">
+                    <div class="card-header bg-primary text-white py-3 px-4 border-0">
+                        <h5 class="mb-0 font-weight-bold"><i class="fas fa-edit mr-2"></i>Fikrini Paylaş</h5>
                     </div>
-                    <div class="card-body p-4 bg-white">
+                    <div class="card-body p-4 bg-light">
                         @if (User.Identity.IsAuthenticated)
                         {
                             <form asp-controller="Comment" asp-action="Create" method="post">
                                 <input type="hidden" name="NewsId" value="@Model.Id" />
                                 <div class="form-group mb-4">
-                                    <textarea name="Text" class="form-control border-0 bg-light rounded-lg p-4"
-                                          rows="4" placeholder="Düşüncelerinizi buraya yazın..." required
-                                          style="font-size: 1.1rem; border-radius: 15px !important;"></textarea>
+                                    <textarea name="Text" class="form-control border-0 shadow-sm p-4"
+                                          rows="4" placeholder="Düşüncelerini buraya yaz..." required
+                                          style="border-radius: 20px; font-size: 1.1rem;"></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block btn-lg rounded-pill shadow font-weight-bold">
-                                    <i class="fas fa-paper-plane mr-2"></i> Yorumu Yayınla
-                                </button>
+                                <div class="text-right">
+                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg font-weight-bold">
+                                        Yorumu Yayınla <i class="fas fa-paper-plane ml-2"></i>
+                                    </button>
+                                </div>
                             </form>
                         }
                         else
                         {
                             <div class="text-center py-4">
-                                <p class="text-muted">Bu habere yorum yapabilmek için lütfen giriş yapın.</p>
+                                <p class="text-muted mb-3 font-italic">Düşüncelerini paylaşmak için aramıza katılmalısın. ✨</p>
                                 <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary rounded-pill px-5 font-weight-bold">Giriş Yap</a>
                             </div>
                         }
@@ -122,27 +107,19 @@
 
         <div class="col-lg-4 mt-5 mt-lg-0">
             <div class="sticky-top" style="top: 100px;">
-                <div class="card border-0 shadow-sm rounded-lg mb-4 overflow-hidden">
-                    <div class="card-header bg-dark text-white font-weight-bold p-3">
-                        <i class="fas fa-fire mr-2 text-warning"></i> İlginizi Çekebilir
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                    <div class="card-header bg-dark text-white font-weight-bold p-3 border-0" style="border-radius: 20px 20px 0 0;">
+                        <i class="fas fa-bolt text-warning mr-2"></i>İlginizi Çekebilir
                     </div>
-                    <div class="card-body p-4 text-center">
-                        <p class="text-muted small italic mb-0">Takipte kal yol arkadaşım! ✨</p>
+                    <div class="card-body bg-light text-center py-5">
+                        <p class="text-muted italic mb-0 px-3">Haberin devamındaki diğer içeriklerimiz için takipte kal yol arkadaşım! 🚀</p>
                     </div>
+                </div>
+
+                <div class="p-4 bg-primary text-white text-center shadow-sm" style="border-radius: 20px;">
+                    <h6 class="font-weight-bold mb-0">Yıldız Haber 2025</h6>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        $("#btnReadAloud").click(function() {
-            let content = $(".news-content").text();
-            let speech = new SpeechSynthesisUtterance();
-            speech.text = content;
-            speech.lang = "tr-TR";
-            window.speechSynthesis.speak(speech);
-        });
-    </script>
-}

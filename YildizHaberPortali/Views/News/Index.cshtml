@@ -42,55 +42,77 @@
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4 px-3">
-    <h3 class="font-weight-bold text-gray-800 m-0"><i class="fas fa-newspaper text-primary mr-2"></i>Haber Listesi</h3>
-    <a asp-action="Create" class="btn btn-primary btn-round shadow">
-        <i class="fas fa-plus mr-2"></i>Yeni Haber Yayınla
-    </a>
-</div>
+@* Views/News/Index.cshtml *@
 
-<div class="card premium-card shadow-sm mx-2">
-    <div class="card-body bg-light" style="border-radius: 20px;">
-        <div class="table-responsive">
-            <table class="table premium-table">
-                <thead>
-                    <tr class="text-muted small text-uppercase font-weight-bold">
-                        <th width="100">Görsel</th>
-                        <th>Haber Başlığı</th>
-                        <th class="text-center">Durum</th>
-                        <th class="text-center">İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
+<div class="container-fluid py-4">
+    <div class="card shadow border-0" style="border-radius: 25px; overflow: hidden;">
+        <div class="card-header bg-white py-4 px-5 d-flex justify-content-between align-items-center border-bottom-0">
+            <h4 class="m-0 font-weight-bold text-dark"><i class="fas fa-list text-primary mr-3"></i> Haber Listesi</h4>
+            <a href="/News/Create" class="btn btn-primary rounded-pill px-4 shadow-sm font-weight-bold">
+                <i class="fas fa-plus mr-2"></i> Yeni Haber Yayınla
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-muted small text-uppercase">
                         <tr>
-                            <td>
-                                <img src="~/uploads/@item.Image" class="rounded shadow-sm" style="width:70px; height:50px; object-fit:cover;" />
-                            </td>
-                            <td>
-                                <div class="font-weight-bold text-dark">@item.Title</div>
-                                <div class="small text-primary">@item.Category?.Name</div>
-                            </td>
-                            <td class="text-center">
-                                <i class="fas fa-circle @(item.IsPublished ? "text-success" : "text-secondary") small mr-1"></i>
-                                <span class="font-weight-bold">@(item.IsPublished ? "Yayında" : "Pasif")</span>
-                            </td>
-                            <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-round btn-sm text-white mr-1 shadow-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-round btn-sm shadow-sm">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
+                            <th class="border-0 px-5 py-4">GÖRSEL</th>
+                            <th class="border-0 py-4">HABER BAŞLIĞI</th>
+                            <th class="border-0 py-4">KATEGORİ</th> @* 🚀 İSTEDİĞİN SÜTUN *@
+                            <th class="border-0 py-4">YAZAR</th>
+                            <th class="border-0 py-4 text-center">DURUM</th>
+                            <th class="border-0 py-4 text-center">İŞLEMLER</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-5">
+                                    <img src="~/uploads/@item.Image" class="rounded shadow-sm border" 
+                                         style="width: 60px; height: 40px; object-fit: cover;" 
+                                         onerror="this.src='/img/no-image.png'">
+                                </td>
+                                <td class="font-weight-bold text-dark">@item.Title</td>
+                                
+                                @* 🚀 Kategori Rozeti *@
+                                <td>
+                                    <span class="badge badge-light-primary text-primary rounded-pill px-3 py-2 border" style="background-color: rgba(78, 115, 223, 0.05); border: 1px solid rgba(78,115,223,0.1) !important;">
+                                        <i class="fas fa-tag mr-1 small"></i> @(item.Category?.Name ?? "Genel")
+                                    </span>
+                                </td>
+
+                                <td class="text-muted small"><i class="far fa-user mr-1"></i> @item.Author</td>
+
+                                <td class="text-center">
+                                    @if (item.IsPublished)
+                                    {
+                                        <span class="text-success font-weight-bold"><i class="fas fa-check-circle mr-1"></i> Yayında</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger font-weight-bold"><i class="fas fa-pause-circle mr-1"></i> Taslak</span>
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                    <a href="/News/Edit/@item.Id" class="btn btn-warning btn-sm rounded-circle shadow-sm mr-2" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="deleteNews(@item.Id)" class="btn btn-danger btn-sm rounded-circle shadow-sm" title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
 
 
 @section Scripts {

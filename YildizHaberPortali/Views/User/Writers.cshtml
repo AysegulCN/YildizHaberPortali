@@ -1,45 +1,87 @@
 ﻿@model IEnumerable<YildizHaberPortali.Models.AppUser>
+
 @{
     ViewData["Title"] = "Yazar Kadromuz";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <h3 class="font-weight-bold text-primary mb-4"><i class="fas fa-pen-nib mr-2"></i> Yazar Kadromuz</h3>
+<div class="container-fluid py-4">
+    <div class="card shadow border-0" style="border-radius: 25px; overflow: hidden;">
 
-    <div class="premium-card card shadow">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Kayıtlı Yazarlar Listesi</h6>
+        <div class="card-header bg-white py-4 px-5 border-bottom-0">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="m-0 font-weight-bold text-dark">
+                        <i class="fas fa-pen-nib text-primary mr-3"></i> Yazar Kadromuz
+                    </h4>
+                    <small class="text-muted">Ekip üyelerinin hesap durumlarını buradan takip edebilirsiniz.</small>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
+
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="premium-table">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-muted small text-uppercase">
                         <tr>
-                            <th>Fotoğraf</th>
-                            <th>Ad Soyad</th>
-                            <th>E-posta</th>
-                            <th>Hakkında (Bio)</th>
-                            <th>İşlemler</th>
+                            <th class="border-0 px-5 py-4">FOTOĞRAF</th>
+                            <th class="border-0 py-4">AD SOYAD</th>
+                            <th class="border-0 py-4">DURUM</th> @* 🚀 YENİ SÜTUN *@
+                            <th class="border-0 py-4">UZMANLIK ALANI</th>
+                            <th class="border-0 py-4">HAKKINDA (BIO)</th>
+                            <th class="border-0 py-4 text-center">İŞLEMLER</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            <tr>
-                                <td>
-                                    <img src="~/img/@(item.ProfilePicture ?? "undraw_profile.svg")"
-                                         class="rounded-circle border shadow-sm"
-                                         style="width:50px; height:50px; object-fit:cover;">
+                            @* 🚀 Durum Mantığı: LockoutEnd boşsa veya geçmişteyse AKTİF *@
+                            bool isActive = item.LockoutEnd == null || item.LockoutEnd < DateTimeOffset.Now;
+
+                            <tr style="transition: all 0.2s ease; opacity: @(isActive ? "1" : "0.7");">
+                                <td class="px-5 py-4">
+                                    <div class="position-relative d-inline-block">
+                                        <img src="~/img/@(string.IsNullOrEmpty(item.ProfilePicture) ? "undraw_profile.svg" : item.ProfilePicture)"
+                                             class="rounded-circle shadow-sm border border-white"
+                                             style="width: 55px; height: 55px; object-fit: cover; border-width: 3px !important;">
+
+                                        @* 🟢/🔴 Dinamik Durum Noktası *@
+                                        <span class="status-indicator @(isActive ? "bg-success" : "bg-danger")"
+                                              title="@(isActive ? "Aktif" : "Dondurulmuş")"></span>
+                                    </div>
                                 </td>
                                 <td class="font-weight-bold text-dark">@item.FullName</td>
-                                <td>@item.Email</td>
-                                <td style="max-width: 300px;">
-                                    <small class="text-muted">@(item.Bio ?? "Henüz bir bilgi girilmemiş.")</small>
+
+                                @* 🚀 YENİ DURUM ROZETİ *@
+                                <td>
+                                    @if (isActive)
+                                    {
+                                        <span class="badge rounded-pill bg-success-soft text-success px-3 py-2">
+                                            <i class="fas fa-check-circle mr-1"></i> AKTİF
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-danger-soft text-danger px-3 py-2">
+                                            <i class="fas fa-snowflake mr-1"></i> DONDURULMUŞ
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <span class="badge rounded-pill px-3 py-2 border-primary text-primary"
+                                          style="border: 1.5px solid; font-weight: 600; background: rgba(78, 115, 223, 0.05);">
+                                        @(item.Branch ?? "Genel Editör")
+                                    </span>
                                 </td>
                                 <td>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-premium">
-                                        <i class="fas fa-edit"></i> Düzenle
+                                    <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;">
+                                        @(string.IsNullOrEmpty(item.Bio) ? "Henüz bir bilgi yok." : item.Bio)
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <a href="/User/Edit/@item.Id" class="btn btn-info btn-sm rounded-pill px-4 shadow-sm">
+                                        <i class="fas fa-edit mr-1"></i> Düzenle
                                     </a>
                                 </td>
                             </tr>
@@ -50,3 +92,30 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Premium Durum Renkleri */
+    .bg-success-soft {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .bg-danger-soft {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .status-indicator {
+        position: absolute;
+        bottom: 5px;
+        right: 0;
+        width: 14px;
+        height: 14px;
+        border: 2.5px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Pasif olan yazarın satırını biraz soluklaştırıyoruz (Pro dokunuş) */
+    tr.disabled {
+        background-color: #f8f9fc;
+    }
+</style>
