@@ -219,14 +219,19 @@ namespace YildizHaberPortali.Controllers
         }
 
         [HttpGet]
+
         public async Task<IActionResult> Details(int id)
         {
+            
             var news = await _context.News
-                .Include(x => x.Category)
-                .Include(x => x.Comments.Where(c => c.IsApproved == true))
-                .FirstOrDefaultAsync(m => m.Id == id);
+                                     .Include(n => n.Comments) 
+                                     .Include(n => n.Category) 
+                                     .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (news == null) return NotFound();
+            if (news == null)
+            {
+                return NotFound();
+            }
 
             return View(news);
         }

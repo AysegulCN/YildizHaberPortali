@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System; 
+using System;
 using System.Diagnostics;
-using System.Linq; 
+using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Models;
-using YildizHaberPortali.Repositories;
+using YildizHaberPortali.Models.ViewModels; // ViewModel için eklendi
 
 namespace YildizHaberPortali.Controllers
 {
@@ -33,7 +34,7 @@ namespace YildizHaberPortali.Controllers
 
             var model = new HomeViewModel();
             model.Categories = categories.ToList();
-            model.SliderNews = publishedNews.Take(5).ToList(); 
+            model.SliderNews = publishedNews.Take(5).ToList();
 
             if (categoryId.HasValue)
             {
@@ -58,13 +59,20 @@ namespace YildizHaberPortali.Controllers
 
             if (news == null)
             {
-                return View("NotFound"); 
+                return View("NotFound");
             }
+
+            // DÜZELTME: Yorumları Repository'den çekip filtreliyoruz
+            var allComments = await _commentRepository.GetAllWithNewsAsync();
+            var approvedComments = allComments
+                                    .Where(c => c.NewsId == id && c.IsApproved)
+                                    .OrderByDescending(c => c.CreatedDate)
+                                    .ToList();
 
             var viewModel = new NewsDetailViewModel
             {
                 News = news,
-                Comments = new List<Comment>(), 
+                Comments = approvedComments, // Boş liste yerine gerçek yorumları atadık
                 NewComment = new Comment()
             };
 
@@ -83,10 +91,10 @@ namespace YildizHaberPortali.Controllers
                 UserName = UserName,
                 Text = Text,
                 CreatedDate = DateTime.Now,
-                IsApproved = false 
+                IsApproved = false
             };
 
-            await _commentRepository.AddAsync(comment); 
+            await _commentRepository.AddAsync(comment);
 
             TempData["SuccessMessage"] = "Yorumunuz alındı, admin onayından sonra yayınlanacaktır!";
             return RedirectToAction("Details", new { id = NewsId });
@@ -98,8 +106,6 @@ namespace YildizHaberPortali.Controllers
             return View();
         }
 
-
-
         public IActionResult Privacy()
         {
             return View();
@@ -110,11 +116,12 @@ namespace YildizHaberPortali.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
         public IActionResult ErrorPage(int? code)
         {
             if (code == 404)
             {
-                return View("NotFound"); 
+                return View("NotFound");
             }
 
             return View("Error");

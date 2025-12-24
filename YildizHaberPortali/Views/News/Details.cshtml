@@ -48,23 +48,30 @@
             <hr class="my-5" style="border-top: 2px dashed #eee;">
 
             <div class="comments-section mt-5 p-4 bg-white shadow-sm" style="border-radius: 20px;">
+
                 <h4 class="font-weight-bold mb-4">
-                    <i class="fas fa-comments text-primary mr-2"></i> Yorumlar (@Model.Comments.Count)
+                    <i class="fas fa-comments text-primary mr-2"></i>
+                    Yorumlar (@Model.Comments.Count(x => x.IsApproved))
                 </h4>
 
-                @if (Model.Comments.Any())
+                @if (Model.Comments.Any(x => x.IsApproved))
                 {
-                    @foreach (var comment in Model.Comments.OrderByDescending(x => x.CreatedDate))
+                    @foreach (var comment in Model.Comments.Where(x => x.IsApproved).OrderByDescending(x => x.CreatedDate))
                     {
                         <div class="comment-item d-flex mb-4 p-3 border-bottom">
                             <div class="mr-3">
-                                <img src="~/img/undraw_profile.svg" class="rounded-circle shadow-sm" style="width: 50px; height: 50px; border: 2px solid #ffc107;">
+                                <img src="https://ui-avatars.com/api/?name=@comment.UserName&background=random&color=fff"
+                                     class="rounded-circle shadow-sm"
+                                     style="width: 50px; height: 50px; border: 2px solid #ffc107;"
+                                     alt="@comment.UserName">
                             </div>
 
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <h6 class="font-weight-bold mb-0 text-dark">@comment.UserName</h6>
-                                    <small class="text-muted"><i class="far fa-clock mr-1"></i> @comment.CreatedDate.ToString("dd MMMM yyyy")</small>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock mr-1"></i> @comment.CreatedDate.ToString("dd MMMM yyyy HH:mm")
+                                    </small>
                                 </div>
                                 <p class="text-secondary mb-0">@comment.Text</p>
                             </div>
@@ -75,7 +82,7 @@
                 {
                     <div class="alert alert-light text-center py-4" style="border: 2px dashed #eee; border-radius: 15px;">
                         <i class="fas fa-comment-slash fa-2x text-muted mb-2"></i>
-                        <p class="mb-0 text-muted">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>
+                        <p class="mb-0 text-muted">Henüz yayınlanmış bir yorum yok. İlk yorumu sen yap, editörümüz onaylasın! 🚀</p>
                     </div>
                 }
             </div>
