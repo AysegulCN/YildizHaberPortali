@@ -70,16 +70,23 @@
             "timeOut": "5000"
         };
 
-        var connection = new signalR.HubConnectionBuilder().withUrl("/newsHub").build();
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/newsHub")
+            .withAutomaticReconnect()
+            .build();
 
-        connection.on("ReceiveNotification", function (u, m) {
-            toastr.warning(u + ": " + m, "Yeni Bildirim!");
+        connection.on("ReceiveNotification", function (user, message) {
+            toastr.info(message, "🔔 " + user + " Yorum Yaptı!", {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "8000"
+            });
         });
 
-B        connection.start().then(function () {
-            console.log("SignalR Bağlantısı Hazır (Sessiz Mod)");
-        }).catch(function (err) {
-            console.error(err.toString());
+
+        connection.start().catch(function (err) {
+            console.error("SignalR Bağlantı Hatası:", err.toString());
         });
     </script>
 
