@@ -4,7 +4,6 @@
 }
 
 <style>
-    /* ✨ Premium Tasarım Detayları */
     .main-slider {
         border-radius: 30px;
         overflow: hidden;
@@ -20,14 +19,13 @@
     }
 
     .news-card img {
-        height: 250px !important; /* Alanı 200'den 250'ye genişlettik */
-        object-fit: cover; /* Resmi alanı dolduracak şekilde yayar */
-        object-position: center; /* Merkeze odaklar */
+        height: 250px !important; 
+        object-fit: cover; 
+        object-position: center; 
         border-radius: 20px 20px 0 0;
         transition: transform 0.5s ease;
     }
 
-    /* Kartın üzerine gelince resmin hafifçe büyümesi (Pro Efekt) */
     .news-card:hover img {
         transform: scale(1.08);
     }
@@ -59,7 +57,6 @@
                         <div class="carousel-caption text-left px-5">
                             <span class="badge badge-warning rounded-pill px-3 py-2 mb-3">@Model.SliderNews[i].Category?.Name</span>
                             <h1 class="font-weight-bold display-4">@Model.SliderNews[i].Title</h1>
-                            @* 🚀 Summary Hatası Çözümü: Content'ten özet oluşturuyoruz *@
                             <p class="d-none d-md-block lead opacity-75">
                                 @(Model.SliderNews[i].Content?.Length > 120 ? Model.SliderNews[i].Content.Substring(0, 120) + "..." : Model.SliderNews[i].Content)
                             </p>
@@ -90,7 +87,6 @@
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card news-card h-100">
                     <span class="badge badge-primary category-badge rounded-pill px-3 py-2">@news.Category?.Name</span>
-                    @* 🚀 Mevcut <img> etiketini bu blokla değiştiriyoruz *@
                     <div class="news-image-wrapper" style="overflow: hidden; border-radius: 20px 20px 0 0; height: 250px; background-color: #f8f9fa;">
                         <img src="~/uploads/@news.Image"
                              class="card-img-top"
@@ -100,7 +96,6 @@
 
                     <div class="card-body">
                         <h5 class="card-title font-weight-bold text-dark mb-2">@news.Title</h5>
-                        @* 🚀 Summary Hatası Çözümü: Content'ten kısa özet *@
                         <p class="card-text text-muted small mb-0">
                             @(news.Content?.Length > 90 ? news.Content.Substring(0, 90) + "..." : news.Content)
                         </p>

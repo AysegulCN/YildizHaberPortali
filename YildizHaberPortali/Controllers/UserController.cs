@@ -30,7 +30,6 @@ namespace YildizHaberPortali.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
-        // 👥 SİSTEM KULLANICILARI (Index)
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -50,31 +49,26 @@ namespace YildizHaberPortali.Controllers
             return View(userRolesViewModel);
         }
 
-        // 🗑️ KULLANICI SİLME (AJAX - PRO VERSİYON)
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
-            // 1. Silinecek kullanıcıyı bul
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return Json(new { success = false, message = "Kullanıcı bulunamadı!" });
 
-            // 2. GÜVENLİK: Admin'in kendisini silmesini engelle!
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null && currentUser.Id == id)
             {
                 return Json(new { success = false, message = "Kendi yönetici hesabınızı silemezsiniz!" });
             }
 
-            // 3. Profil Resmi Varsa Dosyayı Sil
             if (!string.IsNullOrEmpty(user.ProfilePicture) && user.ProfilePicture != "undraw_profile.svg")
             {
                 string path = Path.Combine(_hostEnvironment.WebRootPath, "img", user.ProfilePicture);
                 if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
             }
 
-            // 4. Kullanıcıyı Identity'den Sil
             var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
@@ -84,7 +78,6 @@ namespace YildizHaberPortali.Controllers
             return Json(new { success = false, message = "Silme işlemi sırasında teknik bir hata oluştu." });
         }
 
-        // 🖋️ YAZAR KADROSU
         public async Task<IActionResult> Writers()
         {
             var users = await _userManager.Users.ToListAsync();

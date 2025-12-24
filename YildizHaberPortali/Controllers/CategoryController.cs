@@ -12,12 +12,12 @@ namespace YildizHaberPortali.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly INewsRepository _newsRepository; // EKLENDİ
+        private readonly INewsRepository _newsRepository; 
 
         public CategoryController(ICategoryRepository categoryRepository, INewsRepository newsRepository)
         {
             _categoryRepository = categoryRepository;
-            _newsRepository = newsRepository; // ENJEKTE EDİLDİ
+            _newsRepository = newsRepository; 
         }
 
         public async Task<IActionResult> Index()

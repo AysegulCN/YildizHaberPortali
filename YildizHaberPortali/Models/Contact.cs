@@ -19,7 +19,7 @@ namespace YildizHaberPortali.Models
         [Required(ErrorMessage = "Mesaj alanı boş bırakılamaz.")]
         public string Message { get; set; }
 
-        public string? PhotoPath { get; set; } // Haber ihbarı için fotoğraf
+        public string? PhotoPath { get; set; } 
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }

@@ -17,7 +17,6 @@
     <link href="~/admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="~/admin/css/sb-admin-2.min.css" rel="stylesheet">
-    @* Toastr CSS Üstte Olmalı *@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <style>
@@ -119,7 +118,6 @@
                 </a>
             </li>
 
-            @* 🚀 YENİ: GELEN İHBARLAR (Messages) *@
             <li class="nav-item">
                 <a class="nav-link" asp-controller="Contact" asp-action="Messages">
                     <i class="fas fa-fw fa-envelope-open-text text-warning"></i>
@@ -197,7 +195,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
-        // 🚀 GÜÇLÜ SİGNALR BAĞLANTISI
         var connection = new signalR.HubConnectionBuilder()
             .withUrl("/newsHub")
             .withAutomaticReconnect()
@@ -211,10 +208,8 @@
                 "timeOut": "6000"
             };
 
-            // 📢 Profesyonel Bildirim
             toastr.info(message, user + " Yeni Yorum Yaptı!");
 
-            // Dinamik Başlık
             var oldTitle = document.title;
             document.title = "🔔 Yeni Bildirim!";
             setTimeout(function() { document.title = oldTitle; }, 3000);

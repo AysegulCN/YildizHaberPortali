@@ -6,13 +6,11 @@ namespace YildizHaberPortali.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // AspNetUsers, AspNetRoles ve diğer tüm Identity tablolarının CREATE TABLE kodları buraya gelmelidir.
-            // Bu kodlar, SSMS'te çalıştırdığımız devasa SQL sorgusundan kopyalanabilir.
+            
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Tüm Identity tabloları için DropTable komutları buraya gelmelidir.
         }
     }
 }

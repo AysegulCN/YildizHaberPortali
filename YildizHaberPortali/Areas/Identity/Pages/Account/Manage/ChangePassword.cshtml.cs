@@ -70,14 +70,11 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            // --- SENİN İSTEDİĞİN ÖZEL KONTROL ---
-            // Eski şifre ile yeni şifre aynıysa hata fırlatıyoruz.
             if (Input.OldPassword == Input.NewPassword)
             {
                 ModelState.AddModelError(string.Empty, "Yeni şifreniz, eski şifrenizle aynı olamaz. Lütfen farklı bir şifre seçiniz.");
                 return Page();
             }
-            // -------------------------------------
 
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -90,7 +87,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account.Manage
             {
                 foreach (var error in changePasswordResult.Errors)
                 {
-                    // Hataları Türkçe'ye çevirerek gösterelim
                     if (error.Code == "PasswordMismatch")
                         ModelState.AddModelError(string.Empty, "Mevcut şifrenizi yanlış girdiniz.");
                     else

@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "Hesap Ayarları";
 
-    // 🚀 1. KRİTİK DOKUNUŞ: Yetkiye göre Layout seçimi
     if (User.IsInRole("Admin") || User.IsInRole("Yazar"))
     {
         Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -17,7 +16,6 @@
     <div class="row justify-content-center">
         <div class="@(Layout.Contains("_AdminLayout") ? "col-lg-10" : "col-lg-7")">
             <div class="card shadow-sm border-0" style="border-radius: 20px;">
-                @* Üst Kısım: Dinamik Renk Tasarımı *@
                 <div class="card-header @(User.IsInRole("Admin") ? "bg-gradient-primary" : "bg-primary") p-4 text-center border-0" style="border-radius: 20px 20px 0 0;">
                     <h4 class="text-white mb-0 font-weight-bold"><i class="fas fa-user-shield mr-2"></i> Profil & Güvenlik Ayarları</h4>
                 </div>
@@ -28,19 +26,15 @@
                         <div class="alert alert-success border-0 shadow-sm rounded-pill px-4">@TempData["Success"]</div>
                     }
 
-                    @* 🚀 2. KRİTİK DOKUNUŞ: Resim gönderebilmek için enctype şart! *@
                     <form asp-action="Profile" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-                        @* 📸 PROFİL FOTOĞRAFI YÜKLEME ALANI *@
                         <div class="text-center mb-5">
                             <div class="position-relative d-inline-block">
-                                @* Mevcut resim veya varsayılan ikon *@
                                 <img src="~/img/@(Model.ExistingPicture ?? "undraw_profile.svg")" id="previewImg"
                                      class="rounded-circle border shadow"
                                      style="width: 130px; height: 130px; object-fit: cover;">
 
-                                @* Fotoğraf Seçme Butonu (Makine İkonu) *@
                                 <label for="fileInput" class="btn btn-primary btn-sm rounded-circle position-absolute"
                                        style="bottom: 5px; right: 5px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                                     <i class="fas fa-camera"></i>
@@ -97,7 +91,6 @@
     </div>
 </div>
 
-@* 🚀 SCRIPTS: Anlık Önizleme ve Doğrulama *@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
@@ -117,7 +110,6 @@
     </script>
 }
 
-@* 🚀 STYLES: Belirgin Kutucuk Tasarımı *@
 <style>
     .pro-input {
         border: 2px solid #e9ecef !important;

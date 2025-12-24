@@ -5,25 +5,22 @@
 }
 
 <style>
-/* ✨ DASHBOARD KARTLARI İÇİN PREMIUM HOVER EFEKTİ */
 .premium-card {
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Yumuşak ve profesyonel geçiş */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
     cursor: pointer;
-    border: none !important; /* Kenarlıkları temizle */
+    border: none !important; 
 }
 
 .premium-card:hover {
-    transform: translateY(-10px); /* 🚀 Kartı 10 piksel yukarı kaldırır */
-    box-shadow: 0 15px 35px rgba(0,0,0,0.12) !important; /* Daha derin bir gölge verir */
+    transform: translateY(-10px); 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12) !important; 
 }
 
-/* İkonların üzerine gelince hafifçe büyümesi için */
 .premium-card:hover i {
     transform: scale(1.1);
     transition: transform 0.3s ease;
 }
 
-/* Kartın içindeki metinlerin okunabilirliğini korumak için */
 .premium-card:hover .text-primary,
 .premium-card:hover .text-success,
 .premium-card:hover .text-secondary {
@@ -229,12 +226,12 @@
     <script>
         var ctx = document.getElementById('commentChart').getContext('2d');
         var myChart = new Chart(ctx, {
-            type: 'bar', // Çubuk grafik
+            type: 'bar', 
             data: {
-                labels: @Html.Raw(Json.Serialize(ViewBag.ChartLabels)), // Haber Başlıkları
+                labels: @Html.Raw(Json.Serialize(ViewBag.ChartLabels)), 
                 datasets: [{
                     label: 'Yorum Sayısı',
-                    data: @Html.Raw(Json.Serialize(ViewBag.ChartData)), // Yorum Sayıları
+                    data: @Html.Raw(Json.Serialize(ViewBag.ChartData)), 
                     backgroundColor: 'rgba(78, 115, 223, 0.8)',
                     hoverBackgroundColor: 'rgba(78, 115, 223, 1)',
                     borderColor: '#4e73df',
@@ -259,7 +256,6 @@
 
 
 <script>
-    // Ücretsiz bir API'den canlı çekelim
     fetch('https://api.openweathermap.org/data/2.5/weather?q=Antalya&units=metric&lang=tr&appid=YOUR_API_KEY')
     .then(response => response.json())
     .then(data => {

@@ -10,14 +10,12 @@ namespace YildizHaberPortali.Repositories
 {
     public class CommentRepository : GenericRepository<Comment>, ICommentRepository
     {
-        // 🎯 DÜZELTME: AppDbContext yerine ApplicationDbContext yazdık
         public CommentRepository(ApplicationDbContext context) : base(context) { }
 
         public async Task<List<Comment>> GetAllWithNewsAsync()
         {
-            // _context, GenericRepository'den miras gelir
             return await _context.Comments
-                .Include(x => x.News) // 🚀 Haberi bağla
+                .Include(x => x.News) 
                 .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync();
         }

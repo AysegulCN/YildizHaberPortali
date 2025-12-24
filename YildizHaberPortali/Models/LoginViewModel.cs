@@ -1,5 +1,4 @@
-﻿// Models/LoginViewModel.cs
-
+﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace YildizHaberPortali.Models

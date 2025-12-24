@@ -15,7 +15,6 @@ namespace YildizHaberPortali.Controllers
         private readonly ICategoryRepository _categoryRepository;
         private readonly ICommentRepository _commentRepository;
 
-        // 🚀 DÜZELTİLMİŞ CONSTRUCTOR (Virgül ve Parantez Hatası Giderildi)
         public HomeController(INewsRepository newsRepository,
                               ICategoryRepository categoryRepository,
                               ICommentRepository commentRepository)
@@ -55,23 +54,20 @@ namespace YildizHaberPortali.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            // Haberi tüm detaylarıyla çekiyoruz
             var news = await _newsRepository.GetByIdAsync(id);
 
             if (news == null)
             {
-                return View("NotFound"); // Senin o "Tünelin Sonu Karanlık" sayfan
+                return View("NotFound"); 
             }
 
-            // 🚀 YENİ VİEWMODEL YAPILANDIRMASI
             var viewModel = new NewsDetailViewModel
             {
                 News = news,
-                Comments = new List<Comment>(), // Varsa yorumları buradan çekebilirsin
+                Comments = new List<Comment>(), 
                 NewComment = new Comment()
             };
 
-            // Yan sütun için diğer haberleri ViewBag ile göndermeye devam edelim
             var allNews = await _newsRepository.GetAllAsync();
             ViewBag.RelatedNews = allNews.Where(x => x.IsPublished && x.Id != id).Take(5).ToList();
 

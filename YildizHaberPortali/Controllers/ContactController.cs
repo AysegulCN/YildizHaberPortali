@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace YildizHaberPortali.Controllers
 {
-    // 🛡️ Admin ve Yazar yetkisi olmayanlar sadece Index (Mesaj Gönderme) kısmına erişebilir
     public class ContactController : Controller
     {
         private readonly IGenericRepository<Contact> _contactRepo;
@@ -21,11 +20,9 @@ namespace YildizHaberPortali.Controllers
             _env = env;
         }
 
-        // 📝 KULLANICI TARAFI: İletişim Formunu Görüntüle
         [AllowAnonymous]
         public IActionResult Index() => View();
 
-        // 📩 KULLANICI TARAFI: Mesajı/İhbarı Gönder (POST)
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -33,7 +30,6 @@ namespace YildizHaberPortali.Controllers
         {
             if (ModelState.IsValid)
             {
-                // 📸 Fotoğraf varsa kaydetme işlemi
                 if (Photo != null)
                 {
                     string folder = "uploads/contact/";
@@ -56,16 +52,13 @@ namespace YildizHaberPortali.Controllers
             return View(model);
         }
 
-        // 📂 ADMIN TARAFI: Gelen Kutusu (Mesaj Listesi)
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Messages()
         {
             var messages = await _contactRepo.GetAllAsync();
-            // En yeni mesaj en üstte görünecek şekilde sıralıyoruz
             return View(messages.OrderByDescending(x => x.CreatedDate).ToList());
         }
 
-        // 🔍 ADMIN TARAFI: Mesaj Detayını Oku
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int id)
         {
@@ -74,7 +67,6 @@ namespace YildizHaberPortali.Controllers
             return View(message);
         }
 
-        // ❌ AJAX İLE SİLME (Ödev Tablosundaki AJAX Şartı İçin)
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)

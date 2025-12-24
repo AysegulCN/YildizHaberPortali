@@ -33,7 +33,6 @@
                                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-circle shadow-sm">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @* 🚀 AJAX SİLME BUTONU *@
                                 <button onclick="deleteMsg(@item.Id)" class="btn btn-sm btn-danger btn-circle shadow-sm ml-1">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -52,7 +51,7 @@
             if(confirm("Bu ihbar mesajını silmek istediğine emin misin?")) {
                 $.post("/Contact/Delete", { id: id }, function (res) {
                     if (res.success) {
-                        $("#msg-" + id).fadeOut(600); // AJAX ile satırı uçur
+                        $("#msg-" + id).fadeOut(600); 
                         toastr.error("Mesaj silindi.");
                     }
                 });

@@ -9,7 +9,6 @@
 <ul class="navbar-nav ml-auto align-items-center">
     @if (SignInManager.IsSignedIn(User))
     {
-        @* 🛡️ YÖNETİCİ PANELİ BUTONU (Sarı) *@
         @if (User.IsInRole("Admin") || User.IsInRole("Yazar"))
         {
             <li class="nav-item mr-3">
@@ -20,7 +19,6 @@
             </li>
         }
 
-        @* 👤 KULLANICI DROPDOWN (Sarı İsim ve Ok) *@
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="mr-2 text-warning font-weight-bold" style="font-size: 1.05rem;">@(currentUser?.FullName ?? User.Identity.Name)</span>
@@ -28,7 +26,6 @@
                      src="~/img/@(currentUser?.ProfilePicture ?? "undraw_profile.svg")"
                      style="width:35px; height:35px; object-fit: cover;">
             </a>
-            @* 🚀 Profil Menüsü *@
             <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--fade-in" aria-labelledby="userDropdown" style="border-radius: 15px; z-index: 10000;">
                 <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile">
                     <i class="fas fa-user fa-sm fa-fw mr-2 text-warning"></i> Profilim
@@ -44,7 +41,6 @@
     }
     else
     {
-        @* 🚀 GİRİŞ YAP & KAYIT OL (Siyah değil, Sarı Tasarım) *@
         <li class="nav-item">
             <a class="nav-link text-warning font-weight-bold px-3 d-flex align-items-center" asp-area="Identity" asp-page="/Account/Login">
                 <i class="fas fa-sign-in-alt mr-1"></i> Giriş Yap

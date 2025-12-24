@@ -1,5 +1,4 @@
-﻿// Repositories/NewsRepository.cs (Uyumlu ve Temiz Versiyon)
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using YildizHaberPortali.Contracts;
 using YildizHaberPortali.Data;
 using YildizHaberPortali.Models;
@@ -18,7 +17,6 @@ namespace YildizHaberPortali.Repositories
 
         public async Task<List<News>> GetAllWithCategoryAsync()
         {
-            // Veritabanından Haberleri + Kategorilerini (Include) alıp liste olarak dönüyoruz
             return await _context.News.Include(n => n.Category).ToListAsync();
         }
         public async Task<IEnumerable<News>> GetByCategoryIdAsync(int categoryId)
@@ -45,7 +43,6 @@ namespace YildizHaberPortali.Repositories
 
         public async Task<List<News>> GetAllWithCommentsAsync()
         {
-            // Include(x => x.Comments) diyerek haberleri yorumlarıyla paketliyoruz
             return await _context.News
                 .Include(x => x.Comments)
                 .ToListAsync();

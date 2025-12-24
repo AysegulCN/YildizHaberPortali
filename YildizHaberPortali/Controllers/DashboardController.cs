@@ -7,7 +7,7 @@ using YildizHaberPortali.Repositories;
 
 namespace YildizHaberPortali.Controllers
 {
-    [Authorize(Roles = "Admin,Yazar")] // Beyza'ya 'Yazar' rolüyle giriş izni verdik
+    [Authorize(Roles = "Admin,Yazar")] 
     public class DashboardController : Controller
     {
         private readonly INewsRepository _newsRepository;

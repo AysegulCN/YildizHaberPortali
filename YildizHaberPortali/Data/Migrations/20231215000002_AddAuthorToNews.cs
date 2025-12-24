@@ -6,7 +6,6 @@ namespace YildizHaberPortali.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Haber tablosuna Author sütununu ekle
             migrationBuilder.AddColumn<string>(
                 name: "Author",
                 table: "News",

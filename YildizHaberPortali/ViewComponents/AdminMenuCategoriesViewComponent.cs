@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using YildizHaberPortali.Contracts;
-using YildizHaberPortali.Repositories; // Repository namespace'ini kontrol et
+using YildizHaberPortali.Repositories; 
 
 namespace YildizHaberPortali.ViewComponents
 {
@@ -15,7 +15,6 @@ namespace YildizHaberPortali.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            // Tüm kategorileri çekip menüye gönderiyoruz
             var categories = await _categoryRepository.GetAllAsync();
             return View(categories);
         }

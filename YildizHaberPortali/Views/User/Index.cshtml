@@ -5,7 +5,6 @@
 }
 
 <style>
-    /* ✨ PREMIUM TASARIM SİSTEMİ */
     .premium-card {
         border-radius: 20px;
         border: none;
@@ -80,7 +79,6 @@
                     <tbody>
                         @foreach (var user in Model)
                         {
-                            @* 🚀 DÜZELTME 1: Satıra ID eklendi (Silme animasyonu için şart!) *@
                             <tr id="user_@user.UserId">
                                 <td class="font-weight-bold text-dark">
                                     <div class="d-flex align-items-center">
@@ -105,7 +103,6 @@
                                             <i class="fas fa-edit px-1"></i>
                                         </a>
 
-                                        @* 🚀 DÜZELTME 2: onclick bağlantısı confirmDeleteUser olarak kuruldu *@
                                         <button onclick="confirmDeleteUser('@user.UserId')" class="btn btn-danger btn-sm rounded-circle shadow-sm p-2" title="Sil">
                                             <i class="fas fa-trash px-1"></i>
                                         </button>
@@ -136,10 +133,8 @@
                 borderRadius: '20px'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    @* 🚀 DÜZELTME 3: URL, Controller'daki 'Delete' metoduyla eşleştirildi *@
                     $.post('/User/Delete/' + id, function (res) {
                         if (res.success) {
-                            // Satırı pürüzsüzce kaldır
                             $('#user_' + id).fadeOut(400, function() {
                                 $(this).remove();
                             });

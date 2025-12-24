@@ -76,26 +76,21 @@ namespace YildizHaberPortali.Controllers
 
         public async Task<IActionResult> CategoryNews(string slug)
         {
-            // 1. Veritabanından ismi 'slug' parametresine eşit olan kategoriyi bul
             var categories = await _categoryRepository.GetAllAsync();
             var category = categories.FirstOrDefault(c => c.Name.Replace(" ", "-").ToLower() == slug.ToLower());
 
             if (category != null)
             {
-                // 2. Eğer kategori bulunduysa, Home/Index'e ID ile gönder (Filtreleme çalışsın)
                 return RedirectToAction("Index", "Home", new { categoryId = category.Id });
             }
 
-            // 3. Bulunamazsa ana sayfaya dön
             return RedirectToAction("Index", "Home");
         }
 
-        // ✨ Yeni Haber Ekle (GET)
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             var categories = await _categoryRepository.GetAllAsync();
-            // 🚀 Kategorilerin dropdown'da görünmesi için tek satır:
             ViewBag.CategoryId = new SelectList(categories, "Id", "Name");
 
             var model = new NewsCreateViewModel
@@ -105,7 +100,6 @@ namespace YildizHaberPortali.Controllers
             return View(model);
         }
 
-        // ✨ Yeni Haber Ekle (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(NewsCreateViewModel model)
@@ -115,7 +109,6 @@ namespace YildizHaberPortali.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 string uniqueFileName = "no-image.png";
 
-                // 📸 Görsel Yükleme Mantığı
                 if (model.ImageFile != null)
                 {
                     uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageFile.FileName;
@@ -142,13 +135,11 @@ namespace YildizHaberPortali.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Hata varsa kategorileri tekrar doldur
             var categories = await _categoryRepository.GetAllAsync();
             ViewBag.CategoryId = new SelectList(categories, "Id", "Name", model.CategoryId);
             return View(model);
         }
 
-        // ✏️ Haber Düzenle (GET)
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -156,7 +147,6 @@ namespace YildizHaberPortali.Controllers
             if (news == null) return NotFound();
 
             var categories = await _categoryRepository.GetAllAsync();
-            // 🚀 Düzenle sayfasında kategori seçili gelsin diye:
             ViewBag.CategoryId = new SelectList(categories, "Id", "Name", news.CategoryId);
 
             var model = new NewsUpdateViewModel
@@ -173,7 +163,6 @@ namespace YildizHaberPortali.Controllers
             return View(model);
         }
 
-        // ✏️ Haber Düzenle (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(NewsUpdateViewModel model)
@@ -185,7 +174,6 @@ namespace YildizHaberPortali.Controllers
 
                 string uniqueFileName = model.ExistingImage;
 
-                // 📸 Yeni Görsel Yükleme
                 if (model.ImageFile != null)
                 {
                     uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageFile.FileName;
@@ -202,20 +190,17 @@ namespace YildizHaberPortali.Controllers
                 news.CategoryId = model.CategoryId;
                 news.IsPublished = model.IsPublished;
                 news.Image = uniqueFileName;
-                // Yazar adını koru veya güncelle
                 news.Author = model.Author ?? news.Author;
 
                 await _newsRepository.UpdateAsync(news);
                 return RedirectToAction(nameof(Index));
             }
 
-            // 🚀 Hata durumunda kategorileri tekrar doldur (Burası bozulmayı önler!)
             var categories = await _categoryRepository.GetAllAsync();
             ViewBag.CategoryId = new SelectList(categories, "Id", "Name", model.CategoryId);
             return View(model);
         }
 
-        // 🗑️ Haber Sil (Ajax)
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
@@ -233,13 +218,12 @@ namespace YildizHaberPortali.Controllers
             return Json(new { success = true });
         }
 
-        // 👁️ Haber Detay
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var news = await _context.News
                 .Include(x => x.Category)
-                .Include(x => x.Comments.Where(c => c.IsApproved == true)) // 🚀 Sadece onaylı yorumları getir
+                .Include(x => x.Comments.Where(c => c.IsApproved == true))
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (news == null) return NotFound();

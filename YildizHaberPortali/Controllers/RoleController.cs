@@ -1,6 +1,5 @@
-﻿// Controllers/RoleController.cs
-
-using Microsoft.AspNetCore.Authorization; // Yetkilendirme için
+﻿
+using Microsoft.AspNetCore.Authorization; 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
@@ -44,14 +43,12 @@ public class RoleController : Controller
         _roleManager = roleManager;
     }
 
-    // GET: /Role/Index (Rol Listesi)
     public IActionResult Index()
     {
         var roles = _roleManager.Roles.ToList();
         return View(roles);
     }
 
-    // GET: /Role/Create
     public IActionResult Create()
     {
         return View();
@@ -62,13 +59,11 @@ public class RoleController : Controller
     {
         if (ModelState.IsValid)
         {
-            // ... (Rol oluşturma kodların burada) ...
             var result = await _roleManager.CreateAsync(new IdentityRole(model.RoleName));
 
             if (result.Succeeded)
             {
-                // HATA BURADAYDI: Muhtemelen burada return View("Index") veya return View("Başarılı") yazıyordu.
-                // DOĞRUSU BU: İş bitince Listeye (Index sayfasına) yönlendir.
+               
                 return RedirectToAction("Index");
             }
 
@@ -78,7 +73,6 @@ public class RoleController : Controller
             }
         }
 
-        // Hata varsa sayfayı (ve modeli) tekrar göster ki kullanıcı düzeltsin
         return View(model);
     }
 
@@ -86,7 +80,6 @@ public class RoleController : Controller
     [HttpPost]
     public async Task<IActionResult> DeleteRole(string roleId)
     {
-        // 1. Rolü bul
         var role = await _roleManager.FindByIdAsync(roleId);
 
         if (role == null)
@@ -94,13 +87,11 @@ public class RoleController : Controller
             return Json(new { success = false, message = "Rol bulunamadı!" });
         }
 
-        // 🛡️ GÜVENLİK ÖNLEMİ: Admin rolü silinemez!
         if (role.Name == "Admin")
         {
             return Json(new { success = false, message = "Ana Yönetici (Admin) rolü silinemez!" });
         }
 
-        // 2. Rolü sil
         var result = await _roleManager.DeleteAsync(role);
 
         if (result.Succeeded)

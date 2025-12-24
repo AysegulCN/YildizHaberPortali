@@ -8,14 +8,12 @@ using YildizHaberPortali.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. VERİTABANI BAĞLANTISI
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Bağlantı cümlesi bulunamadı.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 🚀 IDENTITY KAYDI (SADECE BİR KEZ VE BU ŞEKİLDE OLMALI)
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -30,7 +28,6 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 
 builder.Services.AddSignalR();
 
-// REPOSITORY ENJEKSİYONLARI
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
@@ -41,7 +38,6 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// 2. SEED DATA (ROL / KATEGORİ / ADMIN)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -63,7 +59,7 @@ app.UseStatusCodePagesWithReExecute("/Home/ErrorPage", "?code={0}");
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication(); // 🚀 ÖNEMLİ: Authorization'dan önce gelmeli!
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapRazorPages();
@@ -79,9 +75,7 @@ app.Run();
 
 
 
-// ===================
-// SEED METODU
-// ===================
+
 async Task SeedData(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager, ApplicationDbContext context)
 {
     if (!context.Categories.Any())

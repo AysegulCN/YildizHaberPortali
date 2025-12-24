@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering; // 🚀 SelectListItem hatasını (CS0246) bu çözer
+using Microsoft.AspNetCore.Mvc.Rendering; 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace YildizHaberPortali.Models.ViewModels // 🚀 Namespace'in doğruluğundan emin ol
+namespace YildizHaberPortali.Models.ViewModels 
 {
     public class UserEditViewModel
     {

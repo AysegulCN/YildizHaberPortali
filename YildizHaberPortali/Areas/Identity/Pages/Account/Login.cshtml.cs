@@ -65,7 +65,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
 
-            // Mevcut harici girişleri temizle
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -81,7 +80,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                // Giriş denemesi yapılıyor
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
@@ -104,7 +102,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account
                 }
             }
 
-            // Hata varsa sayfayı tekrar göster
             return Page();
         }
     }

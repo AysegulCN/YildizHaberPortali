@@ -7,7 +7,6 @@
 @Html.AntiForgeryToken()
 
 <style>
-    /* Premium Kart ve Tablo Tasarımı */
     .category-card {
         border-radius: 20px;
         border: none;
@@ -36,7 +35,6 @@
             vertical-align: middle !important;
         }
 
-    /* Modal (Açılır Pencere) Tasarımı */
     .modal-content {
         border-radius: 20px;
         border: none;
@@ -49,7 +47,6 @@
         border-radius: 20px 20px 0 0;
     }
 
-    /* Geri Yükle Paneli */
     #undo-toast {
         position: fixed;
         bottom: 30px;
@@ -152,7 +149,6 @@
     <script>
         var countdownInterval, pendingDeleteId = null;
 
-        // --- KATEGORİ KAYDETME (AJAX) ---
         function saveCategory() {
             var name = $('#newCategoryName').val();
             if(!name) { Swal.fire('Hata', 'İsim boş olamaz!', 'error'); return; }
@@ -162,7 +158,6 @@
                     $('#addCategoryModal').modal('hide');
                     $('#newCategoryName').val('');
 
-                    // Tabloya yeni satırı ekliyoruz (Sayfa yenilemeden!)
                     var newRow = `<tr id="row_${res.id}" style="display:none;">
                         <td class="text-muted">#${res.id}</td>
                         <td><span class="badge badge-light p-2 text-primary shadow-sm">${res.name}</span></td>
@@ -180,7 +175,6 @@
             });
         }
 
-        // --- SİLME VE GERİ YÜKLEME (AJAX) ---
         function handleDelete(id) {
             if (pendingDeleteId !== null) finalizeDelete(pendingDeleteId);
             pendingDeleteId = id;

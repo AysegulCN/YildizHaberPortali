@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq; // Split işlemleri için gerekli
-using System.Security.Claims; // İsim güncelleme için gerekli
+using System.Linq; 
+using System.Security.Claims; 
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +56,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             var email = await _userManager.GetEmailAsync(user);
 
-            // Mevcut "FullName" bilgisini çekip Ad ve Soyad diye ayırıyoruz
             var claims = await _userManager.GetClaimsAsync(user);
             var fullNameClaim = claims.FirstOrDefault(c => c.Type == "FullName")?.Value;
 
@@ -68,7 +67,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account.Manage
                 var names = fullNameClaim.Split(' ');
                 if (names.Length > 1)
                 {
-                    // Son kelimeyi soyad, geri kalanını ad kabul et
                     lastName = names.Last();
                     firstName = string.Join(" ", names.Take(names.Length - 1));
                 }
@@ -109,21 +107,18 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            // --- TELEFON GÜNCELLEME ---
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
                 await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
             }
 
-            // --- E-POSTA GÜNCELLEME ---
             var email = await _userManager.GetEmailAsync(user);
             if (Input.Email != email)
             {
                 var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
                 if (setEmailResult.Succeeded)
                 {
-                    // Kullanıcı adını da e-posta ile aynı yapıyoruz
                     await _userManager.SetUserNameAsync(user, Input.Email);
                 }
                 else
@@ -133,8 +128,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account.Manage
                 }
             }
 
-            // --- AD SOYAD GÜNCELLEME ---
-            // Eski "FullName" claim'ini bulup silip yenisini ekliyoruz
             var claims = await _userManager.GetClaimsAsync(user);
             var oldClaim = claims.FirstOrDefault(c => c.Type == "FullName");
             var newFullName = $"{Input.FirstName} {Input.LastName}";
@@ -145,7 +138,6 @@ namespace YildizHaberPortali.Areas.Identity.Pages.Account.Manage
             }
             await _userManager.AddClaimAsync(user, new Claim("FullName", newFullName));
 
-            // Oturumu yenile (Değişikliklerin hemen görünmesi için)
             await _signInManager.RefreshSignInAsync(user);
 
             StatusMessage = "Profiliniz başarıyla güncellendi";

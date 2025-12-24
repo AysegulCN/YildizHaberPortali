@@ -5,20 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-// T: Herhangi bir sınıf tipi (Category, News, Comment vs.)
 namespace YildizHaberPortali.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly ApplicationDbContext _context;
 
-        // CS1729 hatasını çözmek için gerekli constructor:
         public GenericRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // Generic Repository'nin CRUD metotları (CS0535 hatalarının bir kısmını çözmeye yardımcı olur)
 
         public async Task AddAsync(T entity)
         {

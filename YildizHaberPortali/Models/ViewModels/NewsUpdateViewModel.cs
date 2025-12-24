@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel.DataAnnotations; // Bu satırı ekle
-
+using System.ComponentModel.DataAnnotations; 
 namespace YildizHaberPortali.Models.ViewModels
 {
     public class NewsUpdateViewModel
@@ -14,7 +13,7 @@ namespace YildizHaberPortali.Models.ViewModels
         [Required(ErrorMessage = "Haber içeriği boş olamaz")]
         public string Content { get; set; }
 
-        [Required(ErrorMessage = "Lütfen bir kategori seçiniz")] // FK hatasını bu önler
+        [Required(ErrorMessage = "Lütfen bir kategori seçiniz")] 
         public int CategoryId { get; set; }
 
         public string? Author { get; set; }

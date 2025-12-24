@@ -6,7 +6,6 @@ namespace YildizHaberPortali.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Kategoriler Tablosu
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
@@ -17,7 +16,6 @@ namespace YildizHaberPortali.Data.Migrations
                 },
                 constraints: table => { table.PrimaryKey("PK_Categories", x => x.Id); });
 
-            // Haberler Tablosu (News)
             migrationBuilder.CreateTable(
                 name: "News",
                 columns: table => new
@@ -37,7 +35,6 @@ namespace YildizHaberPortali.Data.Migrations
                     table.ForeignKey(name: "FK_News_Categories_CategoryId", column: x => x.CategoryId, principalTable: "Categories", principalColumn: "Id", onDelete: ReferentialAction.Cascade);
                 });
 
-            // Yorumlar Tablosu (Comments)
             migrationBuilder.CreateTable(
                 name: "Comments",
                 columns: table => new

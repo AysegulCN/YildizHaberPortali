@@ -1,11 +1,8 @@
-﻿/*
- * Genel Bağlantı ve Buton Stilleri
- */
+﻿
 a.navbar-brand {
     white-space: normal;
     text-align: center;
     word-break: break-all;
-    /* YENİ: Logo'dan sonra kategoriler için boşluk bırak */
     margin-right: 20px;
 }
 
@@ -25,9 +22,7 @@ a {
     border-color: #1861ac;
 }
 
-/*
- * Sınır ve Gölge Stilleri
- */
+
 .border-top {
     border-top: 1px solid #e5e5e5;
 }
@@ -45,12 +40,8 @@ button.accept-policy {
     line-height: inherit;
 }
 
-/*
- * KRİTİK DÜZELTME: Footer (Alt Bilgi)
- * position: absolute; kaldırıldı. Artık içerik genişlediğinde footer alta kayar.
- */
 .footer {
-    /* position: absolute; kaldırıldı */
+   
     bottom: 0;
     width: 100%;
     white-space: nowrap;

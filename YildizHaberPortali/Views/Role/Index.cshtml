@@ -6,7 +6,6 @@
 }
 
 <style>
-    /* Premium Tasarım Sistemi */
     .premium-card {
         border-radius: 20px;
         border: none;
@@ -104,7 +103,6 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // --- ROL KAYDETME (AJAX) ---
         function saveRole() {
             var name = $('#newRoleName').val();
             if(!name) { Swal.fire('Hata', 'Rol adı boş olamaz!', 'error'); return; }
@@ -131,7 +129,6 @@
             });
         }
 
-        // --- ROL SİLME (AJAX + SweetAlert2) ---
         function confirmDeleteRole(id) {
             Swal.fire({
                 title: 'Emin misiniz?',
