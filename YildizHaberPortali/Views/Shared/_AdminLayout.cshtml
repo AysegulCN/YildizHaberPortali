@@ -17,6 +17,8 @@
     <link href="~/admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="~/admin/css/sb-admin-2.min.css" rel="stylesheet">
+    @* Toastr CSS Üstte Olmalı *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <style>
         .premium-card {
@@ -51,6 +53,14 @@
                     transform: translateY(-3px);
                     box-shadow: 0 8px 20px rgba(78,115,223,0.1);
                 }
+
+        .sidebar-brand-icon {
+            transition: all 0.5s ease;
+        }
+
+        .sidebar-brand:hover .sidebar-brand-icon {
+            transform: rotate(375deg) scale(1.2);
+        }
     </style>
 
     @RenderSection("Styles", required: false)
@@ -61,7 +71,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-controller="Dashboard" asp-action="Index">
-                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-star text-warning"></i></div>
+                <div class="sidebar-brand-icon"><i class="fas fa-star text-warning"></i></div>
                 <div class="sidebar-brand-text mx-3">YILDIZ HABER <sup>Admin</sup></div>
             </a>
 
@@ -105,8 +115,15 @@
 
             <li class="nav-item">
                 <a class="nav-link" asp-controller="Comment" asp-action="Index">
-                    <i class="fas fa-fw fa-comments"></i>
-                    <span>Yorumlar</span>
+                    <i class="fas fa-fw fa-comments"></i><span>Yorumlar</span>
+                </a>
+            </li>
+
+            @* 🚀 YENİ: GELEN İHBARLAR (Messages) *@
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Contact" asp-action="Messages">
+                    <i class="fas fa-fw fa-envelope-open-text text-warning"></i>
+                    <span>Gelen İhbarlar</span>
                 </a>
             </li>
 
@@ -116,11 +133,10 @@
                 <div class="sidebar-heading">SİSTEM AYARLARI</div>
 
                 <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser" aria-expanded="true" aria-controls="collapseUser">
-                        <i class="fas fa-fw fa-users-cog"></i>
-                        <span>Yetkilendirme</span>
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser">
+                        <i class="fas fa-fw fa-users-cog"></i><span>Yetkilendirme</span>
                     </a>
-                    <div id="collapseUser" class="collapse" aria-labelledby="headingUser" data-parent="#accordionSidebar">
+                    <div id="collapseUser" class="collapse" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <a class="collapse-item" asp-controller="User" asp-action="Index">Kullanıcı Listesi</a>
                             <a class="collapse-item" asp-controller="Role" asp-action="Index">Rol Yönetimi</a>
@@ -147,7 +163,7 @@
                             <li class="nav-item dropdown no-arrow">
                                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
                                     <span class="mr-2 d-none d-lg-inline text-gray-600 font-weight-bold">
-                                        <i class="fas fa-sparkles text-warning mr-1"></i> Hoş Geldin, @(currentUser?.FullName ?? "Kullanıcı")!
+                                        <i class="fas fa-sparkles text-warning mr-1"></i> Hoş Geldin, @(currentUser?.FullName ?? User.Identity.Name)!
                                     </span>
                                     <img id="header-profile-img" class="img-profile rounded-circle border shadow-sm"
                                          src="~/img/@(currentUser?.ProfilePicture ?? "undraw_profile.svg")"
@@ -178,13 +194,35 @@
     <script src="~/admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/admin/js/sb-admin-2.min.js"></script>
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
-        var connection = new signalR.HubConnectionBuilder().withUrl("/newsHub").build();
+        // 🚀 GÜÇLÜ SİGNALR BAĞLANTISI
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/newsHub")
+            .withAutomaticReconnect()
+            .build();
+
         connection.on("ReceiveNotification", function (user, message) {
-            alert("📢 Yeni Bildirim!\n" + user + ": " + message);
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "6000"
+            };
+
+            // 📢 Profesyonel Bildirim
+            toastr.info(message, user + " Yeni Yorum Yaptı!");
+
+            // Dinamik Başlık
+            var oldTitle = document.title;
+            document.title = "🔔 Yeni Bildirim!";
+            setTimeout(function() { document.title = oldTitle; }, 3000);
         });
-        connection.start().catch(function (err) { return console.error(err.toString()); });
+
+        connection.start().catch(function (err) {
+            return console.error("SignalR Hatası: " + err.toString());
+        });
     </script>
 
     @RenderSection("Scripts", required: false)

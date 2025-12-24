@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YildizHaberPortali.Contracts;
+using YildizHaberPortali.Data;
 using YildizHaberPortali.Models;
 using YildizHaberPortali.Models.ViewModels;
 
@@ -23,22 +24,24 @@ namespace YildizHaberPortali.Controllers
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly UserManager<AppUser> _userManager;
         private readonly ICommentRepository _commentRepository;
+        private readonly ApplicationDbContext _context; 
 
         public NewsController(INewsRepository newsRepository,
                               ICategoryRepository categoryRepository,
                               IWebHostEnvironment hostEnvironment,
                               UserManager<AppUser> userManager,
-                              ICommentRepository commentRepository)
+                              ICommentRepository commentRepository,
+                              ApplicationDbContext context) 
         {
             _newsRepository = newsRepository;
             _categoryRepository = categoryRepository;
             _hostEnvironment = hostEnvironment;
             _userManager = userManager;
             _commentRepository = commentRepository;
+            _context = context; 
         }
 
-        // 📰 Haber Listesi (Index)
-        public async Task<IActionResult> Index(int? categoryId, bool? isPublished) // 👈 Buraya isPublished eklendi!
+        public async Task<IActionResult> Index(int? categoryId, bool? isPublished) 
         {
             var user = await _userManager.GetUserAsync(User);
             var roles = await _userManager.GetRolesAsync(user);
@@ -49,7 +52,6 @@ namespace YildizHaberPortali.Controllers
 
             var news = await _newsRepository.GetAllWithCategoryAsync();
 
-            // 🎯 Dashborad'dan gelen filtreleme burada çalışacak
             if (isPublished.HasValue)
             {
                 news = news.Where(x => x.IsPublished == isPublished.Value).ToList();
@@ -72,7 +74,6 @@ namespace YildizHaberPortali.Controllers
             return View(new List<News>());
         }
 
-        // 🚀 KATEGORİ 404 HATASINI ÇÖZEN METOD
         public async Task<IActionResult> CategoryNews(string slug)
         {
             // 1. Veritabanından ismi 'slug' parametresine eşit olan kategoriyi bul
@@ -236,15 +237,13 @@ namespace YildizHaberPortali.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var news = await _newsRepository.GetByIdAsync(id);
+            var news = await _context.News
+                .Include(x => x.Category)
+                .Include(x => x.Comments.Where(c => c.IsApproved == true)) // 🚀 Sadece onaylı yorumları getir
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (news == null) return NotFound();
 
-            var comments = (await _commentRepository.GetAllAsync())
-                .Where(x => x.NewsId == id)
-                .OrderByDescending(x => x.CreatedDate)
-                .ToList();
-
-            ViewBag.Comments = comments;
             return View(news);
         }
     }

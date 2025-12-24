@@ -1,7 +1,37 @@
-﻿namespace YildizHaberPortali.Views.Home
-{
-    public class Contact
-    {  
-        İletişim Formu Gelecek
-    }
+﻿@model YildizHaberPortali.Models.Contact
+@{
+    ViewData["Title"] = "Bize Ulaşın";
 }
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0" style="border-radius: 25px;">
+            <div class="card-body p-5">
+                <h2 class="font-weight-bold text-dark mb-4 text-center">Bize Ulaşın / İhbar Hattı</h2>
+                <form asp-action="Index" asp-controller="Contact" method="post" enctype="multipart/form-data">
+                    <div class="form-group mb-3">
+                        <label class="small font-weight-bold">ADINIZ SOYADINIZ</label>
+                        <input asp-for="Name" class="form-control rounded-pill px-4" placeholder="Ad Soyad">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="small font-weight-bold">E-POSTA</label>
+                        <input asp-for="Email" class="form-control rounded-pill px-4" placeholder="Email Adresi">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="small font-weight-bold">KONU</label>
+                        <input asp-for="Subject" class="form-control rounded-pill px-4" placeholder="Örn: Haber İhbarı">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="small font-weight-bold">MESAJINIZ</label>
+                        <textarea asp-for="Message" rows="4" class="form-control px-4" style="border-radius: 20px;" placeholder="Mesajınızı buraya yazın..."></textarea>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="small font-weight-bold">FOTOĞRAF EKLE (VARSA)</label>
+                        <input type="file" name="Photo" class="form-control-file">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg rounded-pill shadow font-weight-bold">Hemen Gönder</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

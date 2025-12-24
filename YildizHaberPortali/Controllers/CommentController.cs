@@ -70,27 +70,22 @@ namespace YildizHaberPortali.Controllers
 
             return Json(new { success = true, message = "Yorumunuz yayınlandı." });
         }
-
-        // ✅ AJAX İLE ONAYLAMA
+        // CommentController.cs içindeki metot isimlerini kontrol et:
         [HttpPost]
-        public async Task<IActionResult> Approve(int id)
+        public async Task<IActionResult> Approve(int id) // 'ApproveComment' değil, sadece 'Approve'
         {
             var comment = await _commentRepository.GetByIdAsync(id);
-            if (comment != null)
-            {
-                comment.IsApproved = true;
-                await _commentRepository.UpdateAsync(comment);
-                return Json(new { success = true });
-            }
-            return Json(new { success = false });
+            if (comment == null) return Json(new { success = false });
+
+            comment.IsApproved = true;
+            await _commentRepository.UpdateAsync(comment);
+            return Json(new { success = true });
         }
 
-        // ❌ AJAX İLE SİLME
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id) // 'DeleteComment' değil, sadece 'Delete'
         {
-            // Repository'de DeleteAsync(int id) metodun varsa direkt çalışır
-            await _commentRepository.DeleteAsync(id);
+            await _commentRepository.DeleteAsync(id); // Repository'de bu metodun ID aldığından emin ol
             return Json(new { success = true });
         }
     }

@@ -1,10 +1,15 @@
 ﻿@model IEnumerable<YildizHaberPortali.Models.Comment>
+@{
+    ViewData["Title"] = "Canlı Yorum Denetimi";
+    // 🚀 Sitenin (Public) gözükmemesi için Layout'u Admin şablonuna çeviriyoruz
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
 
 <div class="card shadow mb-4" style="border-radius: 20px; border:none;">
-    <div class="card-header py-3 bg-primary" style="border-radius: 20px 20px 0 0;">
-        <h6 class="m-0 font-weight-bold text-white">Canlı Yorum Denetimi</h6>
+    <div class="card-header py-3 bg-primary text-white" style="border-radius: 20px 20px 0 0;">
+        <h6 class="m-0 font-weight-bold"><i class="fas fa-comments mr-2"></i> Canlı Yorum Denetimi</h6>
     </div>
-    <div class="card-body">
+    <div class="card-body bg-white">
         <div class="table-responsive">
             <table class="table table-hover" id="commentTable">
                 <thead class="text-primary">
@@ -31,11 +36,17 @@
                                 </span>
                             </td>
                             <td>
+                                @* 🚀 ONAY BUTONU *@
                                 @if (!item.IsApproved)
                                 {
-                                    <button onclick="approveComment(@item.Id)" class="btn btn-success btn-circle btn-sm shadow-sm"><i class="fas fa-check"></i></button>
+                                    <button onclick="approveComment(@item.Id)" class="btn btn-success btn-sm btn-circle shadow-sm" title="Onayla">
+                                        <i class="fas fa-check"></i>
+                                    </button>
                                 }
-                                <button onclick="deleteComment(@item.Id)" class="btn btn-danger btn-circle btn-sm shadow-sm ml-1"><i class="fas fa-trash"></i></button>
+                                @* 🚀 SİL BUTONU *@
+                                <button onclick="deleteComment(@item.Id)" class="btn btn-danger btn-sm btn-circle shadow-sm ml-1" title="Sil">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -46,24 +57,32 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     <script>
-        // 🚀 AJAX ONAYLAMA FONKSİYONU
+        // ✅ ONAYLAMA İŞLEMİ (AJAX)
         function approveComment(id) {
-            $.post("/Comment/ApproveComment", { id: id }, function (data) {
+            $.post("/Comment/Approve", { id: id }, function (data) {
                 if (data.success) {
                     $("#status-" + id).removeClass("badge-warning").addClass("badge-success").text("Yayında");
-                    toastr.success("Yorum onaylandı ve yayına alındı!");
+                    $("#row-" + id + " .btn-success").fadeOut(); // Onay butonunu gizle
+                    toastr.success("Yorum başarıyla onaylandı!");
+                } else {
+                    toastr.error("Bir hata oluştu.");
                 }
             });
         }
 
-        // 🚀 AJAX SİLME FONKSİYONU
+        // ❌ SİLME İŞLEMİ (AJAX)
         function deleteComment(id) {
-            if(confirm("Bu yorumu silmek istediğine emin misin?")) {
-                $.post("/Comment/DeleteComment", { id: id }, function (data) {
+            if(confirm("Bu yorumu tamamen silmek istediğine emin misin?")) {
+                $.post("/Comment/Delete", { id: id }, function (data) {
                     if (data.success) {
-                        $("#row-" + id).fadeOut(500); // Satırı yavaşça yok et
-                        toastr.error("Yorum başarıyla silindi.");
+                        $("#row-" + id).fadeOut(500, function() { $(this).remove(); });
+                        toastr.warning("Yorum sistemden silindi.");
+                    } else {
+                        toastr.error("Yorum silinemedi.");
                     }
                 });
             }

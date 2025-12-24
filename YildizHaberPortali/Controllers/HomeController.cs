@@ -55,19 +55,25 @@ namespace YildizHaberPortali.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
+            // Haberi tüm detaylarıyla çekiyoruz
             var news = await _newsRepository.GetByIdAsync(id);
-            if (news == null) return View("NotFound");
 
-            // Habere ait yorumları veritabanından süzüyoruz
-            var comments = await _commentRepository.GetAllAsync();
-            var newsComments = comments.Where(x => x.NewsId == id && x.IsApproved).ToList();
+            if (news == null)
+            {
+                return View("NotFound"); // Senin o "Tünelin Sonu Karanlık" sayfan
+            }
 
+            // 🚀 YENİ VİEWMODEL YAPILANDIRMASI
             var viewModel = new NewsDetailViewModel
             {
                 News = news,
-                Comments = newsComments,
+                Comments = new List<Comment>(), // Varsa yorumları buradan çekebilirsin
                 NewComment = new Comment()
             };
+
+            // Yan sütun için diğer haberleri ViewBag ile göndermeye devam edelim
+            var allNews = await _newsRepository.GetAllAsync();
+            ViewBag.RelatedNews = allNews.Where(x => x.IsPublished && x.Id != id).Take(5).ToList();
 
             return View(viewModel);
         }

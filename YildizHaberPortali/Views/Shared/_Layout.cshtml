@@ -1,126 +1,79 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<AppUser> SignInManager
-@inject UserManager<AppUser> UserManager
-
-@{
-    var currentUser = User.Identity.IsAuthenticated ? await UserManager.GetUserAsync(User) : null;
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>YILDIZ HABER | @ViewData["Title"]</title>
-
-    <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/css/site.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @* 🚀 Bootstrap CDN: Stil dosyasının her zaman yüklenmesini sağlar *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-
     <style>
-        .weather-btn {
-            transition: all 0.3s ease;
-            border: none;
-            font-weight: bold;
+        .nav-link {
+            font-weight: 600;
+            color: #333 !important;
         }
 
-            .weather-btn:hover {
-                transform: scale(1.05);
+            .nav-link:hover {
+                color: #ffc107 !important;
             }
 
-        .weather-card {
-            width: 260px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-            color: white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border: none;
+        .dropdown-toggle::after {
+            color: #ffc107;
         }
+        /* Ok işaretini sarı yap */
     </style>
 </head>
 
 <body id="page-top">
-    <div id="content-wrapper" class="d-flex flex-column">
-        <div id="content">
-            <nav class="navbar navbar-expand-lg navbar-light bg-white topbar mb-4 shadow">
-                <div class="container">
-                    <a class="navbar-brand text-nowrap font-weight-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                        <i class="fas fa-star text-warning mr-1"></i>YILDIZ HABER
-                    </a>
-                    <div class="collapse navbar-collapse" id="mainNav">
-                        @await Component.InvokeAsync("CategoryMenu")
-                        <ul class="navbar-nav flex-grow-1">
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Contact">İletişime Geç</a>
-                            </li>
-                        </ul>
-                        <partial name="_LoginPartial" />
-                    </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm mb-4 py-2">
+        <div class="container">
+            @* 🌟 Logo Kırılma Fix *@
+            <a class="navbar-brand font-weight-bold d-flex align-items-center text-nowrap" asp-controller="Home" asp-action="Index">
+                <span class="text-warning mr-2"><i class="fas fa-star"></i></span> YILDIZ HABER
+            </a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav mx-auto align-items-center">
+                    @* 🚀 KATEGORİLER (Stray '}' ve ']' temizlendi) *@
+                    @await Component.InvokeAsync("CategoryMenu")
+                    @* 🚀 İLETİŞİM: Tam hizada! *@
+                    <li class="nav-item">
+                        <a class="nav-link font-weight-bold" asp-controller="Contact" asp-action="Index">İletişim</a>
+                    </li>
+                </ul>
+
+                <div class="ml-auto">
+                    <partial name="_LoginPartial" />
                 </div>
-            </nav>
-
-            <div class="container position-relative">
-                <div style="position: absolute; right: 15px; top: -15px; z-index: 100;">
-                    <button class="btn btn-info weather-btn rounded-pill shadow-sm py-2 px-4" type="button" data-toggle="collapse" data-target="#weatherBox">
-                        <i class="fas fa-cloud-sun mr-2"></i> Antalya <span id="btnTemp">...</span>°C
-                    </button>
-
-                    <div class="collapse mt-2" id="weatherBox">
-                        <div class="card weather-card shadow-lg">
-                            <div class="card-body text-center p-4">
-                                <h6 class="text-uppercase small font-weight-bold opacity-75">Antalya Hava Durumu</h6>
-                                <img id="wIcon" src="" style="width: 70px; display:none;">
-                                <h2 class="display-3 font-weight-bold mb-0" id="wTemp">...°C</h2>
-                                <p class="text-capitalize font-weight-light" id="wDesc">Yükleniyor...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                @RenderBody()
             </div>
         </div>
+    </nav>
+
+    <div class="container">
+        <main role="main" class="pb-5">
+            @RenderBody()
+        </main>
     </div>
 
-    <script src="~/vendor/jquery/jquery.min.js"></script>
-    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    @* 🚀 SCRİPT SIRALAMASI: Menülerin açılması için KRİTİK sıra *@
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
 
     <script>
-        // 🛠️ TOASTR MESAJLARI
         toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-top-right", "timeOut": "5000" };
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-                <text>toastr.success('@TempData["SuccessMessage"]', 'Başarılı!');</text>
-        }
-        @if (TempData["ErrorMessage"] != null)
-        {
-                <text>toastr.error('@TempData["ErrorMessage"]', 'Hata!');</text>
-        }
-
-        // 🌤️ HAVA DURUMU API (Antalya)
-        $(document).ready(function () {
-            const apiKey = "6f874284566d8601c363989066669931";
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=Antalya&units=metric&lang=tr&appid=${apiKey}`;
-
-            $.getJSON(url, function (data) {
-                const temp = Math.round(data.main.temp);
-                const desc = data.weather[0].description;
-                const icon = data.weather[0].icon;
-
-                $("#wTemp, #btnTemp").html(temp);
-                $("#wDesc").html(desc);
-                // 🚀 DÜZELTME: @@ sembolü eklenerek RZ1005 hatası çözüldü
-                $("#wIcon").attr("src", `https://openweathermap.org/img/wn/${icon}@@2x.png`).show();
-            }).fail(function() {
-                $("#wDesc").html("Bilgi alınamadı");
-            });
-        });
+        var connection = new signalR.HubConnectionBuilder().withUrl("/newsHub").build();
+        connection.on("ReceiveNotification", function (u, m) { toastr.warning(u + ": " + m, "Yeni Bildirim!"); });
+        connection.start().catch(err => console.error(err.toString()));
     </script>
-
-    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -47,30 +47,41 @@
 
             <hr class="my-5" style="border-top: 2px dashed #eee;">
 
-            <div class="comments-section">
-                <h3 class="font-weight-bold mb-4"><i class="fas fa-quote-left text-primary mr-3"></i>Okuyucu Sözü</h3>
+            @* 📢 Yorumlar Bölümü *@
+            <div class="comments-section mt-5 p-4 bg-white shadow-sm" style="border-radius: 20px;">
+                <h4 class="font-weight-bold mb-4">
+                    <i class="fas fa-comments text-primary mr-2"></i> Yorumlar (@Model.Comments.Count)
+                </h4>
 
-                <div id="comments-list" class="mb-5">
-                    @foreach (var comment in (List<Comment>)ViewBag.Comments)
+                @if (Model.Comments.Any())
+                {
+                    @foreach (var comment in Model.Comments.OrderByDescending(x => x.CreatedDate))
                     {
-                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 25px; background: #fff; border-left: 6px solid #4e73df !important;">
-                            <div class="card-body p-4">
-                                <div class="media align-items-center">
-                                    <img src="~/img/@(comment.User?.ProfilePicture ?? "undraw_profile.svg")"
-                                         class="mr-4 rounded-circle border shadow-sm"
-                                         style="width: 55px; height: 55px; object-fit: cover;">
-                                    <div class="media-body">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <h6 class="mb-0 font-weight-bold text-primary">@(comment.User?.FullName ?? "Okuyucu")</h6>
-                                            <small class="text-muted">@comment.CreatedDate.ToString("dd.MM.yyyy")</small>
-                                        </div>
-                                        <p class="text-dark mb-0" style="line-height: 1.5;">@comment.Text</p>
-                                    </div>
+                        <div class="comment-item d-flex mb-4 p-3 border-bottom">
+                            @* 👤 Kullanıcı Avatar *@
+                            <div class="mr-3">
+                                <img src="~/img/undraw_profile.svg" class="rounded-circle shadow-sm" style="width: 50px; height: 50px; border: 2px solid #ffc107;">
+                            </div>
+
+                            @* 📝 Yorum İçeriği *@
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="font-weight-bold mb-0 text-dark">@comment.UserName</h6>
+                                    <small class="text-muted"><i class="far fa-clock mr-1"></i> @comment.CreatedDate.ToString("dd MMMM yyyy")</small>
                                 </div>
+                                <p class="text-secondary mb-0">@comment.Text</p>
                             </div>
                         </div>
                     }
-                </div>
+                }
+                else
+                {
+                    <div class="alert alert-light text-center py-4" style="border: 2px dashed #eee; border-radius: 15px;">
+                        <i class="fas fa-comment-slash fa-2x text-muted mb-2"></i>
+                        <p class="mb-0 text-muted">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>
+                    </div>
+                }
+            </div>
 
                 <div class="card border-0 shadow-lg" style="border-radius: 25px; overflow: hidden;">
                     <div class="card-header bg-primary text-white py-3 px-4 border-0">

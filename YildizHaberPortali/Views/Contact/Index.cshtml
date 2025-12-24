@@ -1,0 +1,59 @@
+﻿@model YildizHaberPortali.Models.Contact
+@{
+    ViewData["Title"] = "İletişim & İhbar Hattı";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0" style="border-radius: 30px; border-top: 8px solid #ffc107 !important;">
+                <div class="card-body p-5">
+                    <h2 class="text-center font-weight-bold text-dark mb-4">
+                        <span class="text-warning"><i class="fas fa-bullhorn mr-2"></i></span> Bize Ulaşın / İhbar Hattı
+                    </h2>
+                    <p class="text-center text-muted mb-5">Haber değeri taşıdığını düşündüğünüz olayları fotoğrafıyla birlikte iletebilirsiniz.</p>
+
+                    <form asp-action="Index" asp-controller="Contact" method="post" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold small text-dark">ADINIZ SOYADINIZ</label>
+                                <input asp-for="Name" class="form-control rounded-pill px-4 border-light shadow-sm" placeholder="Ad Soyad">
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold small text-dark">E-POSTA ADRESİNİZ</label>
+                                <input asp-for="Email" class="form-control rounded-pill px-4 border-light shadow-sm" placeholder="E-posta">
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="font-weight-bold small text-dark">KONU / BAŞLIK</label>
+                            <input asp-for="Subject" class="form-control rounded-pill px-4 border-light shadow-sm" placeholder="Örn: Haber İhbarı">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="font-weight-bold small text-dark">MESAJINIZ / İHBAR DETAYI</label>
+                            <textarea asp-for="Message" rows="5" class="form-control border-light shadow-sm" style="border-radius: 20px;" placeholder="Mesajınız..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="font-weight-bold small text-dark">FOTOĞRAF EKLE (VARSA)</label>
+                            <input type="file" name="Photo" class="form-control-file">
+                        </div>
+
+                        @* 🚀 %100 SARI BUTON (Maviyle alaka kesildi) *@
+                        <button type="submit" class="btn btn-warning btn-lg btn-block rounded-pill font-weight-bold shadow-lg py-3 text-white">
+                            <i class="fas fa-paper-plane mr-2"></i> HEMEN GÖNDER
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

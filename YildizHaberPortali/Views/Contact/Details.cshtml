@@ -1,0 +1,36 @@
+﻿@model YildizHaberPortali.Models.Contact
+@{
+    ViewData["Title"] = "İhbar Detayı";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow border-0" style="border-radius: 25px;">
+    <div class="card-header bg-white py-4 d-flex justify-content-between">
+        <div>
+            <h4 class="font-weight-bold text-warning mb-0">@Model.Subject</h4>
+            <small class="text-muted">@Model.CreatedDate.ToString("F")</small>
+        </div>
+        <a asp-action="Messages" class="btn btn-light rounded-pill px-4">Geri Dön</a>
+    </div>
+    <div class="card-body p-4">
+        <div class="row mb-4">
+            <div class="col-md-6 border-right">
+                <p class="small font-weight-bold text-muted mb-1">GÖNDEREN</p>
+                <h5>@Model.Name</h5>
+                <p class="text-primary small">@Model.Email</p>
+            </div>
+            <div class="col-md-6 pl-4">
+                <p class="small font-weight-bold text-muted mb-1">MESAJ İÇERİĞİ</p>
+                <div class="p-3 bg-light rounded shadow-sm">@Model.Message</div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.PhotoPath))
+        {
+            <div class="text-center mt-4">
+                <p class="small font-weight-bold text-muted">EKLENEN İHBAR FOTOĞRAFI</p>
+                <img src="@Model.PhotoPath" class="img-fluid rounded shadow-lg" style="max-height: 450px; border: 8px solid #fff;">
+            </div>
+        }
+    </div>
+</div>
