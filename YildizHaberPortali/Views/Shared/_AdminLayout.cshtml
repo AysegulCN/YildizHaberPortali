@@ -17,7 +17,6 @@
     <link href="~/admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="~/admin/css/sb-admin-2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 
     <style>
@@ -194,6 +193,7 @@
     <script src="~/admin/js/sb-admin-2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
     <script>
         var connection = new signalR.HubConnectionBuilder()
             .withUrl("/newsHub")
@@ -201,34 +201,18 @@
             .build();
 
         connection.on("ReceiveNotification", function (user, message) {
-            console.log("Sinyal Alındı: " + message);
-
-            toastr.options = {
+            toastr.info(message, "🔔 " + user + " Yorum Yaptı!", {
                 "closeButton": true,
                 "progressBar": true,
                 "positionClass": "toast-top-right",
-                "timeOut": "8000", 
-            };
-
-            toastr.info(message, "📢 " + user + " Yorum Yaptı!");
-
-            var audio = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
-            audio.play().catch(e => console.log("Ses çalınamadı (Tarayıcı engeli)"));
+                "timeOut": "8000"
+            });
         });
 
-        connection.start().then(function () {
-            toastr.success("Anlık bildirim sistemi aktif.", "Bağlantı Başarılı");
-        }).catch(function (err) {
-            console.error(err.toString());
-            toastr.error("Bağlantı kurulamadı.", "Hata");
+        
+        connection.start().catch(function (err) {
+            console.error("SignalR Bağlantı Hatası:", err.toString());
         });
-
-        toastr.options = {
-            "closeButton": true,       
-            "progressBar": true,       
-            "positionClass": "toast-top-right",
-            "timeOut": "5000",        
-        };
     </script>
 
     @RenderSection("Scripts", required: false)
